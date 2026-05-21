@@ -95,8 +95,22 @@ deltas: lossy=6, additive=1
 ### Point at any MCP server
 
 ```bash
-mcp-mirror --server npx -y @some/mcp-server
-mcp-mirror --server python -m my_company.mcp_server
+mcp-mirror --server npx -y @some/mcp-server         # any stdio MCP server
+mcp-mirror --server python -m my_company.mcp_server # in-house Python server
+mcp-mirror --http https://example.com/mcp           # any streamable-HTTP server
+mcp-mirror --arcade                                 # your Arcade gateway (OAuth)
+```
+
+#### Arcade gateway
+
+`mcp-mirror --arcade` connects to the Arcade MCP gateway named by `ARCADE_GATEWAY_URL` and authenticates via Arcade's OAuth2 flow (PKCE + loopback callback). On first run, a browser tab opens to `cloud.arcade.dev/oauth2/authorize`; after authorizing, the token is cached at `~/.cache/mcp-mirror/` and subsequent runs skip the browser.
+
+```bash
+# .env (resolved by `op run` or read directly)
+ARCADE_GATEWAY_URL=https://api.arcade.dev/mcp/gw_...
+
+op run --env-file=.env -- mcp-mirror --arcade
+op run --env-file=.env -- mcp-mirror --arcade --re-auth   # force re-auth
 ```
 
 ### Filter by framework or tool
