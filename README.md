@@ -22,6 +22,36 @@ python3.13 -m venv .venv
 .venv/bin/mcp-mirror
 ```
 
+## Credentials
+
+Two paths, both work. **Recommended: 1Password CLI with `op run`.**
+
+### 1Password (recommended)
+
+```bash
+cp .env.example .env
+# Edit .env to match your 1Password vault paths.
+# Values stay as op:// references — never raw secrets.
+
+op run --env-file=.env -- mcp-mirror --server <arcade or other source>
+```
+
+`op run` resolves the references at runtime and clears them when the process exits. The `.env` file is safe to commit because it contains only references.
+
+### Raw .env (fallback)
+
+If you don't use 1Password, you can put raw values in a local `.env` (gitignored):
+
+```bash
+# .env
+OPENAI_API_KEY=sk-...
+ARCADE_API_KEY=...
+
+mcp-mirror
+```
+
+mcp-mirror's CLI ships with a zero-dep `.env` loader that picks these up before any framework capture runs.
+
 Default output (against the bundled reference MCP server, with all five frameworks installed):
 
 ```
