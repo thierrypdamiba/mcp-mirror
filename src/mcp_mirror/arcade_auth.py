@@ -1,18 +1,17 @@
-"""OAuth2 (PKCE + loopback) authentication for the Arcade MCP gateway.
+"""Spec-correct OAuth 2.1 authentication for Arcade MCP gateways.
 
-Real users authenticate to Arcade Cloud via OAuth2 in a browser. mcp-mirror does
-the same so its captures reflect the production code path — not a shortcut.
+Follows the MCP 2025-06-18 authorization spec: discover the protected-resource
+metadata from the WWW-Authenticate header, fetch the authorization server
+metadata, dynamically register as a public OAuth client (DCR), then run a
+PKCE-protected authorization code flow with the gateway URL as the
+RFC 8707 resource indicator.
 
-Flow:
-  1. Generate PKCE code_verifier + code_challenge.
-  2. Open a browser to https://cloud.arcade.dev/oauth2/authorize with the
-     `mcp` scope and the gateway URL as the `resource`.
-  3. Start a one-shot HTTP server on 127.0.0.1 listening for the redirect.
-  4. Exchange the returned code at https://cloud.arcade.dev/oauth2/token.
-  5. Cache the access token at ~/.cache/mcp-mirror/<gateway-hash>.json so
-     subsequent runs skip the browser step.
+No hardcoded client_id, no impersonation of other apps, no shortcuts. mcp-mirror
+identifies itself to Arcade as `mcp-mirror` and gets its own client record.
 
-The cached token is keyed by gateway URL so multiple gateways can coexist.
+Tokens, registered client metadata, and discovered endpoints are all cached
+under `~/.cache/mcp-mirror/<gateway-hash>/` so subsequent runs are fast and
+silent.
 """
 
 from __future__ import annotations
@@ -22,28 +21,75 @@ import hashlib
 import http.server
 import json
 import os
+import re
 import secrets
 import socket
+import sys
 import threading
 import time
 import urllib.parse
 import webbrowser
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
 import httpx
 
-# These match the OAuth client used by the productivity-app/switchboard project.
-# For a public release of mcp-mirror, a dedicated client should be registered
-# with Arcade. For now we reuse this client on a developer machine, which is
-# safe because the token comes back to our own loopback server.
-ARCADE_OAUTH_AUTHORIZE = "https://cloud.arcade.dev/oauth2/authorize"
-ARCADE_OAUTH_TOKEN = "https://cloud.arcade.dev/oauth2/token"
-DEFAULT_CLIENT_ID = "790f9539-f397-4ee7-b94e-3d3b1e812dc6"
-DEFAULT_REDIRECT_PATH = "/api/auth/arcade/callback"
 DEFAULT_REDIRECT_PORT = 8765
-DEFAULT_SCOPE = "mcp"
+DEFAULT_REDIRECT_PATH = "/callback"
+HTTP_TIMEOUT = 30.0
+
+
+# ---- cache layout -----------------------------------------------------------
+
+
+def _cache_dir(gateway_url: str) -> Path:
+    base = Path(os.environ.get("XDG_CACHE_HOME") or (Path.home() / ".cache"))
+    h = hashlib.sha256(gateway_url.encode()).hexdigest()[:16]
+    d = base / "mcp-mirror" / h
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _read_json(p: Path) -> dict | None:
+    if not p.is_file():
+        return None
+    try:
+        return json.loads(p.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _write_json(p: Path, data: dict) -> None:
+    p.write_text(json.dumps(data, indent=2))
+    os.chmod(p, 0o600)
+
+
+# ---- types ------------------------------------------------------------------
+
+
+@dataclass
+class Discovery:
+    resource: str
+    authorization_servers: list[str]
+    scopes_supported: list[str]
+    issuer: str
+    authorization_endpoint: str
+    token_endpoint: str
+    registration_endpoint: str | None
+    code_challenge_methods_supported: list[str]
+
+    @property
+    def supports_pkce_s256(self) -> bool:
+        return "S256" in self.code_challenge_methods_supported
+
+
+@dataclass
+class RegisteredClient:
+    client_id: str
+    redirect_uri: str
+    registration_endpoint: str
+    raw: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -56,65 +102,151 @@ class CachedToken:
 
     @property
     def is_expired(self) -> bool:
-        # Refresh 60 seconds before the official expiry to avoid edge races.
         return time.time() >= self.expires_at - 60
 
 
-def _cache_dir() -> Path:
-    base = Path(os.environ.get("XDG_CACHE_HOME") or (Path.home() / ".cache"))
-    d = base / "mcp-mirror"
-    d.mkdir(parents=True, exist_ok=True)
-    return d
+# ---- discovery (RFC 9728 + RFC 8414) ----------------------------------------
 
 
-def _cache_path(gateway_url: str) -> Path:
-    h = hashlib.sha256(gateway_url.encode()).hexdigest()[:16]
-    return _cache_dir() / f"arcade-{h}.json"
+def _discover_resource_metadata_url(gateway_url: str) -> str:
+    """Probe the gateway, parse WWW-Authenticate, return the resource_metadata URL.
 
-
-def _load_cached(gateway_url: str) -> Optional[CachedToken]:
-    p = _cache_path(gateway_url)
-    if not p.is_file():
-        return None
-    try:
-        data = json.loads(p.read_text())
-        return CachedToken(
-            access_token=data["access_token"],
-            token_type=data.get("token_type", "Bearer"),
-            expires_at=data["expires_at"],
-            refresh_token=data.get("refresh_token"),
-            gateway_url=data["gateway_url"],
+    Per RFC 9728, an unauthenticated request returns 401 with a Bearer challenge
+    pointing at the protected-resource metadata document.
+    """
+    with httpx.Client(timeout=HTTP_TIMEOUT) as client:
+        response = client.post(
+            gateway_url,
+            headers={"Accept": "application/json, text/event-stream"},
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": "2025-06-18",
+                    "capabilities": {},
+                    "clientInfo": {"name": "mcp-mirror", "version": "0.1.0"},
+                },
+            },
         )
-    except (json.JSONDecodeError, KeyError, OSError):
-        return None
+    challenge = response.headers.get("www-authenticate", "")
+    match = re.search(r'resource_metadata="([^"]+)"', challenge)
+    if not match:
+        # Fall back to the standard well-known location.
+        parsed = urllib.parse.urlparse(gateway_url)
+        return f"{parsed.scheme}://{parsed.netloc}/.well-known/oauth-protected-resource{parsed.path}"
+    return match.group(1)
 
 
-def _save_cached(token: CachedToken) -> None:
-    p = _cache_path(token.gateway_url)
-    p.write_text(
-        json.dumps(
-            {
-                "access_token": token.access_token,
-                "token_type": token.token_type,
-                "expires_at": token.expires_at,
-                "refresh_token": token.refresh_token,
-                "gateway_url": token.gateway_url,
-            }
+def discover(gateway_url: str) -> Discovery:
+    """Discover the OAuth endpoints that protect a given MCP gateway URL."""
+    cache = _cache_dir(gateway_url) / "discovery.json"
+    cached = _read_json(cache)
+    if cached:
+        return Discovery(**cached)
+
+    resource_metadata_url = _discover_resource_metadata_url(gateway_url)
+    with httpx.Client(timeout=HTTP_TIMEOUT) as client:
+        rm = client.get(resource_metadata_url).raise_for_status().json()
+    auth_servers = rm.get("authorization_servers") or []
+    if not auth_servers:
+        raise RuntimeError(
+            f"No authorization_servers advertised at {resource_metadata_url}"
         )
+    issuer = auth_servers[0]
+    # Per RFC 8414, the metadata path interleaves /.well-known/ between host and path.
+    issuer_parts = urllib.parse.urlparse(issuer)
+    metadata_url = (
+        f"{issuer_parts.scheme}://{issuer_parts.netloc}"
+        f"/.well-known/oauth-authorization-server"
+        f"{issuer_parts.path}"
     )
-    os.chmod(p, 0o600)
+    with httpx.Client(timeout=HTTP_TIMEOUT) as client:
+        asm = client.get(metadata_url).raise_for_status().json()
+
+    discovery = Discovery(
+        resource=rm.get("resource", gateway_url),
+        authorization_servers=auth_servers,
+        scopes_supported=rm.get("scopes_supported") or ["mcp"],
+        issuer=asm["issuer"],
+        authorization_endpoint=asm["authorization_endpoint"],
+        token_endpoint=asm["token_endpoint"],
+        registration_endpoint=asm.get("registration_endpoint"),
+        code_challenge_methods_supported=asm.get("code_challenge_methods_supported", []),
+    )
+    _write_json(cache, discovery.__dict__)
+    return discovery
+
+
+# ---- dynamic client registration (RFC 7591) ---------------------------------
+
+
+def register_client(
+    discovery: Discovery,
+    gateway_url: str,
+    redirect_uri: str,
+) -> RegisteredClient:
+    """Register mcp-mirror as a public OAuth client. Cached per gateway."""
+    cache = _cache_dir(gateway_url) / "client.json"
+    cached = _read_json(cache)
+    if cached and cached.get("redirect_uri") == redirect_uri:
+        return RegisteredClient(
+            client_id=cached["client_id"],
+            redirect_uri=cached["redirect_uri"],
+            registration_endpoint=cached["registration_endpoint"],
+            raw=cached.get("raw", {}),
+        )
+    if not discovery.registration_endpoint:
+        raise RuntimeError(
+            "Authorization server does not advertise a registration_endpoint; "
+            "Dynamic Client Registration is required for mcp-mirror."
+        )
+    payload = {
+        "client_name": "mcp-mirror",
+        "redirect_uris": [redirect_uri],
+        "grant_types": ["authorization_code", "refresh_token"],
+        "response_types": ["code"],
+        "scope": " ".join(discovery.scopes_supported),
+        "token_endpoint_auth_method": "none",
+        "application_type": "native",
+    }
+    with httpx.Client(timeout=HTTP_TIMEOUT) as client:
+        response = client.post(
+            discovery.registration_endpoint,
+            json=payload,
+            headers={"Content-Type": "application/json"},
+        )
+        response.raise_for_status()
+        body = response.json()
+    registered = RegisteredClient(
+        client_id=body["client_id"],
+        redirect_uri=redirect_uri,
+        registration_endpoint=discovery.registration_endpoint,
+        raw=body,
+    )
+    _write_json(
+        cache,
+        {
+            "client_id": registered.client_id,
+            "redirect_uri": registered.redirect_uri,
+            "registration_endpoint": registered.registration_endpoint,
+            "raw": registered.raw,
+        },
+    )
+    return registered
+
+
+# ---- PKCE flow ---------------------------------------------------------------
 
 
 def _pkce_pair() -> tuple[str, str]:
-    """Return (code_verifier, code_challenge) per RFC 7636 with S256."""
     verifier = base64.urlsafe_b64encode(secrets.token_bytes(64)).rstrip(b"=").decode()
     digest = hashlib.sha256(verifier.encode()).digest()
     challenge = base64.urlsafe_b64encode(digest).rstrip(b"=").decode()
     return verifier, challenge
 
 
-def _free_port(preferred: int) -> int:
-    """Return the preferred port if available, otherwise an OS-assigned one."""
+def _bind_port(preferred: int) -> int:
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind(("127.0.0.1", preferred))
@@ -125,27 +257,33 @@ def _free_port(preferred: int) -> int:
             return s.getsockname()[1]
 
 
-def _run_loopback(port: int, redirect_path: str, state: str) -> str:
-    """Block until the OAuth provider redirects to our loopback. Return `code`."""
+def _await_callback(port: int, redirect_path: str, state: str, timeout_s: float = 300) -> str:
     received: dict[str, str] = {}
 
     class Handler(http.server.BaseHTTPRequestHandler):
-        def log_message(self, *_args, **_kwargs):  # noqa: ARG002 — silence stderr
+        def log_message(self, *_args, **_kwargs):  # noqa: ARG002
             return
 
-        def do_GET(self):  # noqa: N802 — http.server convention
+        def do_GET(self):  # noqa: N802
             parsed = urllib.parse.urlparse(self.path)
             if parsed.path != redirect_path:
                 self.send_response(404)
                 self.end_headers()
                 return
             qs = urllib.parse.parse_qs(parsed.query)
-            received_state = (qs.get("state") or [""])[0]
-            if received_state != state:
+            if (qs.get("state") or [""])[0] != state:
                 self.send_response(400)
                 self.send_header("Content-Type", "text/plain")
                 self.end_headers()
                 self.wfile.write(b"state mismatch")
+                return
+            if "error" in qs:
+                received["error"] = (qs.get("error") or [""])[0]
+                received["error_description"] = (qs.get("error_description") or [""])[0]
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain")
+                self.end_headers()
+                self.wfile.write(f"OAuth error: {received['error']}".encode())
                 return
             code = (qs.get("code") or [""])[0]
             if not code:
@@ -162,53 +300,54 @@ def _run_loopback(port: int, redirect_path: str, state: str) -> str:
                 b"<!doctype html><meta charset=utf-8><title>mcp-mirror</title>"
                 b"<body style='font-family:system-ui;max-width:520px;margin:80px auto'>"
                 b"<h1>Authorized.</h1>"
-                b"<p>You can close this tab and return to mcp-mirror.</p>"
+                b"<p>You can close this tab and return to mcp-mirror.</p></body>"
             )
 
     server = http.server.HTTPServer(("127.0.0.1", port), Handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
-        # Wait up to 5 minutes for the user to authorize.
-        deadline = time.time() + 300
+        deadline = time.time() + timeout_s
         while time.time() < deadline:
             if "code" in received:
                 return received["code"]
+            if "error" in received:
+                raise RuntimeError(
+                    f"OAuth error: {received['error']} ({received.get('error_description','')})"
+                )
             time.sleep(0.1)
-        raise RuntimeError("Timed out waiting for OAuth callback (5 min).")
+        raise RuntimeError(f"Timed out after {int(timeout_s)}s waiting for OAuth callback.")
     finally:
         server.shutdown()
 
 
-def authenticate(
-    gateway_url: str,
-    *,
-    client_id: str = DEFAULT_CLIENT_ID,
-    redirect_path: str = DEFAULT_REDIRECT_PATH,
-    redirect_port: int = DEFAULT_REDIRECT_PORT,
-    scope: str = DEFAULT_SCOPE,
-    open_browser: bool = True,
-) -> CachedToken:
-    """Run the full PKCE + loopback flow and return a fresh CachedToken.
+# ---- public entry point ------------------------------------------------------
 
-    Caches the result for future runs. Side effect: opens a browser tab (unless
-    open_browser=False, in which case the URL is printed).
-    """
-    port = _free_port(redirect_port)
-    redirect_uri = f"http://127.0.0.1:{port}{redirect_path}"
+
+def authenticate(gateway_url: str, *, open_browser: bool = True) -> CachedToken:
+    """Full discovery + DCR + PKCE flow. Caches everything for next time."""
+    discovery = discover(gateway_url)
+    if not discovery.supports_pkce_s256:
+        raise RuntimeError(
+            f"Authorization server {discovery.issuer} does not advertise S256 PKCE."
+        )
+
+    port = _bind_port(DEFAULT_REDIRECT_PORT)
+    redirect_uri = f"http://127.0.0.1:{port}{DEFAULT_REDIRECT_PATH}"
+    client = register_client(discovery, gateway_url, redirect_uri)
+
     verifier, challenge = _pkce_pair()
     state = secrets.token_urlsafe(16)
-
     auth_url = (
-        f"{ARCADE_OAUTH_AUTHORIZE}?"
+        f"{discovery.authorization_endpoint}?"
         + urllib.parse.urlencode(
             {
                 "response_type": "code",
-                "client_id": client_id,
+                "client_id": client.client_id,
                 "code_challenge": challenge,
                 "code_challenge_method": "S256",
                 "redirect_uri": redirect_uri,
-                "scope": scope,
+                "scope": " ".join(discovery.scopes_supported),
                 "resource": gateway_url,
                 "state": state,
             }
@@ -217,27 +356,36 @@ def authenticate(
 
     print(
         f"mcp-mirror: opening browser to authenticate with Arcade.\n"
-        f"  If a browser does not open, visit this URL manually:\n  {auth_url}",
+        f"  authorization server: {discovery.issuer}\n"
+        f"  client_id (DCR):      {client.client_id}\n"
+        f"  resource (gateway):   {gateway_url}\n"
+        f"\n"
+        f"  If a browser does not open, visit:\n"
+        f"  {auth_url}\n",
+        flush=True,
     )
     if open_browser:
         webbrowser.open(auth_url)
 
-    code = _run_loopback(port, redirect_path, state)
+    code = _await_callback(port, DEFAULT_REDIRECT_PATH, state)
 
-    with httpx.Client(timeout=30.0) as client:
-        response = client.post(
-            ARCADE_OAUTH_TOKEN,
+    with httpx.Client(timeout=HTTP_TIMEOUT) as http_client:
+        response = http_client.post(
+            discovery.token_endpoint,
             data={
                 "grant_type": "authorization_code",
                 "code": code,
                 "redirect_uri": redirect_uri,
-                "client_id": client_id,
+                "client_id": client.client_id,
                 "code_verifier": verifier,
                 "resource": gateway_url,
             },
             headers={"Accept": "application/json"},
         )
-        response.raise_for_status()
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Token exchange failed ({response.status_code}): {response.text}"
+            )
         payload = response.json()
 
     expires_in = float(payload.get("expires_in", 3600))
@@ -248,60 +396,93 @@ def authenticate(
         refresh_token=payload.get("refresh_token"),
         gateway_url=gateway_url,
     )
-    _save_cached(token)
+    _write_json(
+        _cache_dir(gateway_url) / "token.json",
+        {
+            "access_token": token.access_token,
+            "token_type": token.token_type,
+            "expires_at": token.expires_at,
+            "refresh_token": token.refresh_token,
+            "gateway_url": token.gateway_url,
+        },
+    )
     return token
 
 
-def _refresh(token: CachedToken, client_id: str) -> Optional[CachedToken]:
+def _load_token(gateway_url: str) -> CachedToken | None:
+    data = _read_json(_cache_dir(gateway_url) / "token.json")
+    if not data:
+        return None
+    return CachedToken(
+        access_token=data["access_token"],
+        token_type=data.get("token_type", "Bearer"),
+        expires_at=data["expires_at"],
+        refresh_token=data.get("refresh_token"),
+        gateway_url=data["gateway_url"],
+    )
+
+
+def _refresh(token: CachedToken, gateway_url: str) -> CachedToken | None:
     if not token.refresh_token:
         return None
-    with httpx.Client(timeout=30.0) as client:
-        response = client.post(
-            ARCADE_OAUTH_TOKEN,
+    discovery = discover(gateway_url)
+    client_meta = _read_json(_cache_dir(gateway_url) / "client.json")
+    if not client_meta:
+        return None
+    with httpx.Client(timeout=HTTP_TIMEOUT) as http_client:
+        response = http_client.post(
+            discovery.token_endpoint,
             data={
                 "grant_type": "refresh_token",
                 "refresh_token": token.refresh_token,
-                "client_id": client_id,
+                "client_id": client_meta["client_id"],
+                "resource": gateway_url,
             },
             headers={"Accept": "application/json"},
         )
-        if response.status_code != 200:
-            return None
-        payload = response.json()
+    if response.status_code != 200:
+        return None
+    payload = response.json()
     expires_in = float(payload.get("expires_in", 3600))
     refreshed = CachedToken(
         access_token=payload["access_token"],
         token_type=payload.get("token_type", "Bearer"),
         expires_at=time.time() + expires_in,
         refresh_token=payload.get("refresh_token", token.refresh_token),
-        gateway_url=token.gateway_url,
+        gateway_url=gateway_url,
     )
-    _save_cached(refreshed)
+    _write_json(
+        _cache_dir(gateway_url) / "token.json",
+        {
+            "access_token": refreshed.access_token,
+            "token_type": refreshed.token_type,
+            "expires_at": refreshed.expires_at,
+            "refresh_token": refreshed.refresh_token,
+            "gateway_url": refreshed.gateway_url,
+        },
+    )
     return refreshed
 
 
-def get_access_token(
-    gateway_url: str,
-    *,
-    client_id: str = DEFAULT_CLIENT_ID,
-    force_reauth: bool = False,
-) -> str:
-    """Get a valid access token for `gateway_url`. Re-auths via browser if needed."""
+def get_access_token(gateway_url: str, *, force_reauth: bool = False) -> str:
     if not force_reauth:
-        cached = _load_cached(gateway_url)
+        cached = _load_token(gateway_url)
         if cached and not cached.is_expired:
             return cached.access_token
         if cached and cached.is_expired:
-            refreshed = _refresh(cached, client_id)
+            refreshed = _refresh(cached, gateway_url)
             if refreshed:
                 return refreshed.access_token
-    token = authenticate(gateway_url, client_id=client_id)
+    token = authenticate(gateway_url)
     return token.access_token
 
 
 def clear_cached(gateway_url: str) -> bool:
-    p = _cache_path(gateway_url)
-    if p.is_file():
-        p.unlink()
-        return True
-    return False
+    d = _cache_dir(gateway_url)
+    cleared = False
+    for name in ("token.json", "client.json", "discovery.json"):
+        p = d / name
+        if p.is_file():
+            p.unlink()
+            cleared = True
+    return cleared

@@ -76,6 +76,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
     _load_dotenv()
+    _suppress_mcp_session_noise()
 
     try:
         spec = _resolve_spec(args)
@@ -132,13 +133,18 @@ def _resolve_spec(args) -> ServerSpec:
     return ServerSpec.stdio(sys.executable, ["-m", "mcp_mirror.server"])
 
 
+def _canonical(name: str) -> str:
+    """Frameworks rename tools (CrewAI: CamelCase -> snake_case). Match loosely."""
+    return name.lower().replace("_", "").replace("-", "").replace(".", "")
+
+
 async def _run(
     spec: ServerSpec,
     frameworks: list[str],
     tool_filter: list[str] | None,
 ) -> list[ToolDiff]:
     server_result = await capture_server_announcement(spec)
-    server_views = {v.name: v for v in server_result.views}
+    server_by_canon = {_canonical(v.name): v for v in server_result.views}
 
     diffs: list[ToolDiff] = []
     for fw in frameworks:
@@ -152,10 +158,10 @@ async def _run(
             )
             continue
         for view in result.views:
-            if tool_filter and view.name not in set(tool_filter):
-                continue
-            server_view = server_views.get(view.name)
+            server_view = server_by_canon.get(_canonical(view.name))
             if server_view is None:
+                continue
+            if tool_filter and server_view.name not in set(tool_filter):
                 continue
             diffs.append(diff_views(server_view, view, result.framework))
     return diffs
@@ -189,6 +195,22 @@ def _truncate(value: object, limit: int = 200) -> object:
     if isinstance(value, str) and len(value) > limit:
         return value[:limit] + "..."
     return value
+
+
+def _suppress_mcp_session_noise() -> None:
+    """The MCP SDK prints `Session termination failed: 202` on streamable-HTTP
+    cleanup — harmless (the server returns 202 Accepted on session DELETE), but
+    visually distracting in the scorecard output. Redirect those specific lines.
+    """
+    import logging
+
+    class _DropNoisyMessages(logging.Filter):
+        def filter(self, record: logging.LogRecord) -> bool:
+            msg = record.getMessage()
+            return "Session termination failed" not in msg
+
+    for name in ("mcp", "mcp.client.streamable_http", "httpx"):
+        logging.getLogger(name).addFilter(_DropNoisyMessages())
 
 
 def _load_dotenv() -> None:

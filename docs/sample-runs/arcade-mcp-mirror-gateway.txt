@@ -1,0 +1,105 @@
+tool                                    ag2           crewai        langchain     llamaindex    pydantic-ai 
+------------------------------------------------------------------------------------------------------------
+Github_AssignPullRequestUser            -4 +1         -2 ~4 +12     -1 +1         -2 ~3 +10     +1          
+Github_CheckPullRequestMergeStatus      -4 +1         -2 ~3 +10     -1 +1         -2 ~2 +8      +1          
+Github_CountStargazers                  -4 +1         -1 ~3 +6      -1 +1         -1 ~2 +4      +1          
+Github_CreateBranch                     -4 +1         -2 ~4 +10     -1 +1         -2 ~3 +8      +1          
+Github_CreateFile                       -4 +1         -3 ~7 +13     -1 +1         -3 ~6 +11     +1          
+Github_CreateIssue                      -4 +1         -11 ~1 +28    -1 +1         -11 +26       +1          
+Github_CreateIssueComment               -4 +1         -1 ~5 +8      -1 +1         -1 ~4 +6      +1          
+Github_CreatePullRequest                -4 +1         -9 ~6 +27     -1 +1         -9 ~5 +25     +1          
+Github_CreateReplyForReviewComment      -4 +1         -3 ~6 +15     -1 +1         -3 ~5 +13     +1          
+Github_CreateReviewComment              -4 +1         -9 ~6 +27     -1 +1         -9 ~5 +25     +1          
+Github_GetFileContents                  -4 +1         -4 ~3 +16     -1 +1         -4 ~2 +14     +1          
+Github_GetIssue                         -4 +1         -1 ~4 +7      -1 +1         -1 ~3 +5      +1          
+Github_GetNotificationSummary           -3 +1         -1 ~1 +4      -1 +1         -1 +2         +1          
+Github_GetPullRequest                   -4 +1         -2 ~3 +10     -1 +1         -2 ~2 +8      +1          
+Github_GetRepository                    -4 +1         -1 ~1 +6      -1 +1         -1 +4         +1          
+Github_GetReviewWorkload                -3 +1         -1 ~1 +4      -1 +1         -1 +2         +1          
+Github_GetUserOpenItems                 -3 +1         -2 ~1 +7      -1 +1         -2 +5         +1          
+Github_GetUserRecentActivity            -3 +1         -3 ~1 +10     -1 +1         -3 +8         +1          
+Github_ListIssues                       -4 +1         -12 ~1 +30    -1 +1         -12 +28       +1          
+Github_ListNotifications                -3 +1         -9 ~1 +22     -1 +1         -9 +20        +1          
+Github_ListOrgRepositories              -4 +1         -9 ~1 +20     -1 +1         -9 +18        +1          
+Github_ListProjectFields                -4 +1         -2 ~5 +11     -1 +1         -2 ~4 +9      +1          
+Github_ListProjectItems                 -4 +1         -10 ~5 +32    -1 +1         -10 ~4 +30    +1          
+Github_ListProjects                     -4 +1         -8 ~3 +25     -1 +1         -8 ~2 +23     +1          
+Github_ListPullRequestCommits           -4 +1         -3 ~3 +13     -1 +1         -3 ~2 +11     +1          
+Github_ListPullRequests                 -4 +1         -12 ~1 +30    -1 +1         -12 +28       +1          
+Github_ListRepositoryActivities         -4 +1         -12 ~1 +30    -1 +1         -12 +28       +1          
+Github_ListRepositoryCollaborators      -4 +1         -10 ~1 +24    -1 +1         -10 +22       +1          
+Github_ListRepositoryLabels             -4 +1         -3 ~1 +12     -1 +1         -3 +10        +1          
+Github_ListReviewCommentsInARepository  -4 +1         -8 ~1 +21     -1 +1         -8 +19        +1          
+Github_ListReviewCommentsOnPullRequest  -4 +1         -9 ~3 +25     -1 +1         -9 ~2 +23     +1          
+Github_ListStargazers                   -4 +1         -3 ~1 +12     -1 +1         -3 +10        +1          
+Github_ManageLabels                     -4 +1         -6 ~5 +17     -1 +1         -6 ~4 +15     +1          
+Github_ManagePullRequestReviewers       -4 +1         -9 ~3 +19     -1 +1         -9 ~2 +17     +1          
+Github_MergePullRequest                 -4 +1         -7 ~3 +22     -1 +1         -7 ~2 +20     +1          
+Github_ResolveReviewThread              -4 +1         -2 ~1 +10     -1 +1         -2 +8         +1          
+Github_SearchMyRepos                    -4 +1         -6 ~1 +17     -1 +1         -6 +15        +1          
+Github_SearchProjectItem                -4 +1         -2 ~7 +13     -1 +1         -2 ~6 +11     +1          
+Github_SetStarred                       -4 +1         -2 ~3 +9      -1 +1         -2 ~2 +7      +1          
+Github_SubmitPullRequestReview          -4 +1         -2 ~4 +11     -1 +1         -2 ~3 +9      +1          
+Github_UpdateFileLines                  -4 +1         -5 ~7 +19     -1 +1         -5 ~6 +17     +1          
+Github_UpdateIssue                      -4 +1         -10 ~4 +25    -1 +1         -10 ~3 +23    +1          
+Github_UpdatePullRequest                -4 +1         -7 ~3 +22     -1 +1         -7 ~2 +20     +1          
+Github_WhoAmI                           -3 +1         -1 ~1 +4      -1 +1         -1 +2         +1          
+Gmail_ChangeEmailLabels                 -4 +1         -1 ~1 +7      -1 +1         -1 +5         +1          
+Gmail_CreateLabel                       -4 +1         -1 ~1 +5      -1 +1         -1 +3         +1          
+Gmail_DeleteDraftEmail                  -4 +1         -1 ~1 +5      -1 +1         -1 +3         +1          
+Gmail_GetThread                         -4 +1         -1 ~1 +5      -1 +1         -1 +3         +1          
+Gmail_ListDraftEmails                   -3 +1         -2 ~1 +7      -1 +1         -2 +5         +1          
+Gmail_ListEmails                        -3 +1         -3 ~1 +10     -1 +1         -3 +8         +1          
+Gmail_ListEmailsByHeader                -3 +1         -10 ~1 +28    -1 +1         -10 +26       +1          
+Gmail_ListLabels                        -3 +1         -1 ~1 +4      -1 +1         -1 +2         +1          
+Gmail_ListThreads                       -3 +1         -5 ~1 +16     -1 +1         -5 +14        +1          
+Gmail_ReplyToEmail                      -4 +1         -9 ~1 +18     -1 +1         -9 +16        +1          
+Gmail_SearchThreads                     -3 +1         -13 ~1 +34    -1 +1         -13 +32       +1          
+Gmail_SendDraftEmail                    -4 +1         -1 ~1 +5      -1 +1         -1 +3         +1          
+Gmail_SendEmail                         -4 +1         -7 ~4 +16     -1 +1         -7 ~3 +14     +1          
+Gmail_TrashEmail                        -4 +1         -1 ~1 +5      -1 +1         -1 +3         +1          
+Gmail_UpdateDraftEmail                  -4 +1         -8 ~1 +20     -1 +1         -8 +18        +1          
+Gmail_WhoAmI                            -3 +1         -1 ~1 +4      -1 +1         -1 +2         +1          
+Gmail_WriteDraftEmail                   -4 +1         -7 ~4 +16     -1 +1         -7 ~3 +14     +1          
+Gmail_WriteDraftReplyEmail              -4 +1         -9 ~1 +18     -1 +1         -9 +16        +1          
+Linear_AddComment                       -4 +1         -1 ~3 +6      -1 +1         -1 ~2 +4      +1          
+Linear_AddProjectComment                -4 +1         -3 ~3 +12     -1 +1         -3 ~2 +10     +1          
+Linear_AddProjectToInitiative           -4 +1         -2 ~1 +9      -1 +1         -2 +7         +1          
+Linear_ArchiveInitiative                -4 +1         -2 ~1 +8      -1 +1         -2 +6         +1          
+Linear_ArchiveIssue                     -4 +1         -1 ~1 +5      -1 +1         -1 +3         +1          
+Linear_ArchiveProject                   -4 +1         -2 ~1 +8      -1 +1         -2 +6         +1          
+Linear_CreateInitiative                 -4 +1         -5 ~1 +14     -1 +1         -5 +12        +1          
+Linear_CreateIssue                      -4 +1         -16 ~1 +45    -1 +1         -16 +43       +1          
+Linear_CreateIssueRelation              -4 +1         -1 ~1 +7      -1 +1         -1 +5         +1          
+Linear_CreateProject                    -4 +1         -9 ~1 +27     -1 +1         -9 +25        +1          
+Linear_CreateProjectUpdate              -4 +1         -3 ~3 +9      -1 +1         -3 ~2 +7      +1          
+Linear_GetCycle                         -4 +1         -1 ~1 +5      -1 +1         -1 +3         +1          
+Linear_GetInitiative                    -4 +1         -5 ~1 +14     -1 +1         -5 +12        +1          
+Linear_GetInitiativeDescription         -4 +1         -3 ~1 +11     -1 +1         -3 +9         +1          
+Linear_GetIssue                         -4 +1         -5 ~1 +17     -1 +1         -5 +15        +1          
+Linear_GetMilestone                     -4 +1         -2 ~1 +9      -1 +1         -2 +7         +1          
+Linear_GetNotifications                 -3 +1         -4 ~1 +13     -1 +1         -4 +11        +1          
+Linear_GetProject                       -4 +1         -6 ~1 +17     -1 +1         -6 +15        +1          
+Linear_GetProjectDescription            -4 +1         -3 ~1 +11     -1 +1         -3 +9         +1          
+Linear_GetRecentActivity                -3 +1         -3 ~1 +10     -1 +1         -3 +8         +1          
+Linear_GetTeam                          -4 +1         -4 ~1 +11     -1 +1         -4 +9         +1          
+Linear_LinkGithubToIssue                -4 +1         -2 ~3 +9      -1 +1         -2 ~2 +7      +1          
+Linear_ListComments                     -4 +1         -3 ~1 +11     -1 +1         -3 +9         +1          
+Linear_ListCycles                       -3 +1         -6 ~1 +19     -1 +1         -6 +17        +1          
+Linear_ListInitiatives                  -3 +1         -6 ~1 +16     -1 +1         -6 +14        +1          
+Linear_ListIssues                       -3 +1         -12 ~1 +34    -1 +1         -12 +32       +1          
+Linear_ListLabels                       -3 +1         -2 ~1 +7      -1 +1         -2 +5         +1          
+Linear_ListMilestones                   -4 +1         -4 ~1 +14     -1 +1         -4 +12        +1          
+Linear_ListProjectComments              -4 +1         -7 ~1 +20     -1 +1         -7 +18        +1          
+Linear_ListProjects                     -3 +1         -7 ~1 +22     -1 +1         -7 +20        +1          
+Linear_ListTeams                        -3 +1         -6 ~1 +19     -1 +1         -6 +17        +1          
+Linear_ListWorkflowStates               -3 +1         -5 ~1 +13     -1 +1         -5 +11        +1          
+Linear_ManageIssueSubscription          -4 +1         -1 ~1 +6      -1 +1         -1 +4         +1          
+Linear_ReplyToComment                   -4 +1         -1 ~4 +7      -1 +1         -1 ~3 +5      +1          
+Linear_ReplyToProjectComment            -4 +1         -2 ~3 +10     -1 +1         -2 ~2 +8      +1          
+Linear_TransitionIssueState             -4 +1         -2 ~1 +9      -1 +1         -2 +7         +1          
+Linear_UpdateComment                    -4 +1         -1 ~3 +6      -1 +1         -1 ~2 +4      +1          
+Linear_UpdateInitiative                 -4 +1         -6 ~1 +17     -1 +1         -6 +15        +1          
+legend:  = faithful   + additive   - lossy   ~ transformative
+         counts are field-level deltas vs. the server announcement
+
