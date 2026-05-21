@@ -216,6 +216,16 @@
 </header>
 
 <section>
+  <h2>How to read the scorecard</h2>
+  <p>Every cell is a count of field-level deltas between what the MCP server announced and what the framework's adapter hands to the LLM:</p>
+  <table style="margin: 16px 0; border-collapse: collapse; font-family: var(--mono); font-size: 14px;">
+    <tr><td style="padding: 6px 14px; color: var(--lossy); font-weight: 600;">-N</td><td style="padding: 6px 14px; color: var(--muted);"><strong style="color: var(--ink)">lossy.</strong> The framework dropped N fields the server announced. The LLM never sees them.</td></tr>
+    <tr><td style="padding: 6px 14px; color: var(--additive); font-weight: 600;">+N</td><td style="padding: 6px 14px; color: var(--muted);"><strong style="color: var(--ink)">additive.</strong> The framework added N fields. They consume LLM context.</td></tr>
+    <tr><td style="padding: 6px 14px; color: var(--transformative); font-weight: 600;">~N</td><td style="padding: 6px 14px; color: var(--muted);"><strong style="color: var(--ink)">transformative.</strong> N fields whose value changed without appearing or disappearing (e.g., a tool name rewritten from <code>Github_CreateIssue</code> → <code>github_create_issue</code>).</td></tr>
+    <tr><td style="padding: 6px 14px; color: var(--faithful); font-weight: 600;">=</td><td style="padding: 6px 14px; color: var(--muted);"><strong style="color: var(--ink)">faithful.</strong> No deltas. Server view equals LLM view.</td></tr>
+  </table>
+  <p style="color: var(--muted)">The cell's color tracks the worst category present (lossy &gt; transformative &gt; additive &gt; faithful). Every <code style="color: var(--lossy)">-</code> means the LLM is operating with less information than your server announced; every <code style="color: var(--additive)">+</code> means it's burning context on noise; every <code style="color: var(--transformative)">~</code> means the meaning has shifted in transit.</p>
+
   <h2>The numbers, live</h2>
   <p>Same MCP server, same 100 tools, captured at the layer each framework hands to the LLM. The Arcade gateway being read is real, tagged <code>mcp-mirror</code>, holding GitHub / Gmail / Linear / Notion / Slack toolkits.</p>
 
