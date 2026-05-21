@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>mcp-mirror — what your MCP server looks like after every framework gets done with it</title>
+  <meta name="description" content="Cross-framework diff tool for MCP. Real captures, real frameworks, real diffs.">
+  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='28'>🪞</text></svg>">
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --panel: #121620;
+      --ink: #e6e6e6;
+      --muted: #8a93a3;
+      --rule: #1f2531;
+      --accent: #6dd3ff;
+      --faithful: #6dd3ff;
+      --additive: #57c785;
+      --lossy: #f7768e;
+      --transformative: #e0af68;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    main { max-width: 1180px; margin: 0 auto; padding: 64px 32px 96px; }
+    header.hero { padding: 80px 0 56px; border-bottom: 1px solid var(--rule); }
+    header.hero .eyebrow {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0 0 16px;
+    }
+    h1 {
+      font-size: clamp(36px, 5vw, 64px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin: 0 0 24px;
+      font-weight: 700;
+    }
+    h2 {
+      font-size: clamp(22px, 2.5vw, 32px);
+      letter-spacing: -0.015em;
+      margin: 64px 0 16px;
+    }
+    h3 {
+      font-size: 18px;
+      margin: 24px 0 8px;
+      color: var(--ink);
+    }
+    p { color: var(--ink); max-width: 72ch; }
+    .lede { font-size: 20px; color: var(--muted); max-width: 72ch; }
+    code { font-family: var(--mono); color: var(--accent); background: var(--panel); padding: 1px 6px; border-radius: 4px; font-size: 0.92em; }
+    pre {
+      font-family: var(--mono);
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 16px 20px;
+      overflow-x: auto;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .pill {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      padding: 4px 10px;
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 40px 0;
+    }
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .stat .n { font-family: var(--mono); font-size: 28px; color: var(--accent); }
+    .stat .label { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+    /* Scorecard */
+    .scorecard-wrap {
+      margin: 24px 0 8px;
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .scorecard-controls {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; border-bottom: 1px solid var(--rule);
+      font-size: 13px; color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .scorecard-controls input[type="search"] {
+      background: var(--bg); color: var(--ink);
+      border: 1px solid var(--rule); border-radius: 6px;
+      padding: 6px 10px; font-family: var(--mono); font-size: 13px;
+      min-width: 220px;
+    }
+    .scorecard-controls .legend { margin-left: auto; display: flex; gap: 14px; font-family: var(--mono); }
+    .scorecard-controls .legend span { display: inline-flex; gap: 6px; align-items: center; }
+    .scorecard-controls .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+    .scorecard {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+    .scorecard th, .scorecard td { padding: 8px 12px; text-align: right; }
+    .scorecard th { color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--rule); position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; }
+    .scorecard th.tool-name, .scorecard td.tool-name { text-align: left; color: var(--ink); }
+    .scorecard tr:not(:last-child) td { border-bottom: 1px solid var(--rule); }
+    .scorecard tbody tr:hover { background: rgba(109, 211, 255, 0.05); }
+    .scorecard td.cell { color: var(--ink); }
+    .scorecard td.cell.faithful { color: var(--faithful); }
+    .scorecard td.cell.additive { color: var(--additive); }
+    .scorecard td.cell.transformative { color: var(--transformative); }
+    .scorecard td.cell.lossy { color: var(--lossy); }
+    .scorecard td.cell .glyph-add { color: var(--additive); }
+    .scorecard td.cell .glyph-tx { color: var(--transformative); }
+    .scorecard td.cell .glyph-lossy { color: var(--lossy); }
+    .scorecard td.cell .total {
+      display: inline-block;
+      min-width: 28px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+    .scorecard tfoot td {
+      color: var(--muted);
+      padding: 14px 16px;
+      border-top: 1px solid var(--rule);
+      font-size: 12px;
+    }
+
+    .findings {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .finding {
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .finding .fw { color: var(--muted); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .finding h3 { margin: 6px 0 8px; font-size: 16px; font-family: var(--mono); }
+    .finding p { color: var(--muted); font-size: 14px; margin: 0; }
+
+    .step-list { counter-reset: step; padding: 0; }
+    .step-list .step {
+      counter-increment: step;
+      padding: 16px 0;
+      border-top: 1px solid var(--rule);
+    }
+    .step-list .step:first-child { border-top: 0; }
+    .step-list .step::before {
+      content: counter(step);
+      font-family: var(--mono);
+      color: var(--accent);
+      margin-right: 12px;
+    }
+
+    footer { margin-top: 96px; padding-top: 32px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 14px; }
+
+    @media (max-width: 720px) {
+      main { padding: 32px 18px; }
+      header.hero { padding: 32px 0 28px; }
+      h1 { font-size: 34px; }
+      .scorecard { font-size: 11.5px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="eyebrow">mcp-mirror</p>
+  <h1>Your MCP server's tool is not the tool the LLM sees.</h1>
+  <p class="lede">
+    Between your MCP server and the model sits a layer you didn't write: your agent framework's adapter. mcp-mirror runs your real MCP server through five real framework adapters at once and shows you, side by side, exactly what each one hands to the LLM.
+  </p>
+  <p style="margin-top: 28px;">
+    <span class="pill">5 real frameworks</span>
+    <span class="pill">100 real Arcade tools</span>
+    <span class="pill">Real OAuth 2.1 + DCR + PKCE</span>
+    <span class="pill">No simulators</span>
+  </p>
+</header>
+
+<section>
+  <h2>The numbers, live</h2>
+  <p>Same MCP server, same 100 tools, captured at the layer each framework hands to the LLM. The Arcade gateway being read is real, tagged <code>mcp-mirror</code>, holding GitHub / Gmail / Linear / Notion / Slack toolkits.</p>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="scorecard-wrap">
+    <div class="scorecard-controls">
+      <label>filter: <input id="filter" type="search" placeholder="e.g. Linear_CreateIssue" autocomplete="off"></label>
+      <span style="color: var(--muted)">click a column to sort by deltas in that framework</span>
+      <span class="legend">
+        <span><span class="swatch" style="background: var(--faithful)"></span>faithful</span>
+        <span><span class="swatch" style="background: var(--additive)"></span>additive</span>
+        <span><span class="swatch" style="background: var(--lossy)"></span>lossy</span>
+        <span><span class="swatch" style="background: var(--transformative)"></span>transformative</span>
+      </span>
+    </div>
+    <table class="scorecard" id="scorecard">
+      <thead><tr id="head"></tr></thead>
+      <tbody id="body"></tbody>
+      <tfoot id="foot"></tfoot>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Patterns across all 100 tools</h2>
+  <div class="findings">
+    <div class="finding">
+      <div class="fw">Pydantic AI</div>
+      <h3>+1 everywhere</h3>
+      <p>Returns the raw <code>mcp.types.Tool</code>. Adds only an internal class-name marker. The most faithful adapter we measured — by a long way.</p>
+    </div>
+    <div class="finding">
+      <div class="fw">LangChain</div>
+      <h3>-1 +1 everywhere</h3>
+      <p>Drops the protocol-level <code>_meta</code>, adds an LC tool-class marker. Eerily consistent. Input schema preserved byte-for-byte.</p>
+    </div>
+    <div class="finding">
+      <div class="fw">AG2</div>
+      <h3>-3 to -4 +1</h3>
+      <p>Like LangChain but drops <code>outputSchema</code>, <code>icons</code>, <code>annotations</code> on top of <code>_meta</code>.</p>
+    </div>
+    <div class="finding">
+      <div class="fw">LlamaIndex</div>
+      <h3>Highly variable</h3>
+      <p>Converts JSON Schema → Pydantic → JSON Schema. Simple tools drift mildly. Complex tools restructure heavily — <code>$defs</code> blocks, reorganized properties, dozens of new fields.</p>
+    </div>
+    <div class="finding">
+      <div class="fw">CrewAI</div>
+      <h3>Most invasive</h3>
+      <p>Extends descriptions 5–6× with usage-guidance text, restructures schemas through <code>mcpadapt</code> + CrewAI Pydantic generation. <strong>62 deltas on Linear_CreateIssue alone.</strong></p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>How mcp-mirror gets these numbers</h2>
+  <ol class="step-list">
+    <li class="step">
+      <strong>Real MCP server.</strong> Either the bundled reference server (rich-schema fixtures, runs via stdio) or a real Arcade gateway (streamable-HTTP, OAuth-protected). No mock servers, ever.
+    </li>
+    <li class="step">
+      <strong>Spec-correct authentication.</strong> For Arcade gateways, mcp-mirror discovers the OAuth metadata from the <code>WWW-Authenticate</code> challenge, registers itself via Dynamic Client Registration, runs PKCE with the gateway URL as the RFC 8707 <code>resource</code> indicator, and caches the token. Real MCP-spec auth, exactly how a production agent would do it.
+    </li>
+    <li class="step">
+      <strong>Five real framework adapters.</strong> Each capture loads the same MCP server through the framework's actual published integration — <code>langchain-mcp-adapters</code>, <code>llama-index-tools-mcp</code>, <code>crewai-tools</code>, <code>pydantic_ai.mcp</code>, <code>autogen.mcp</code>. No re-implementation, no simulation.
+    </li>
+    <li class="step">
+      <strong>Introspect at the adapter's output.</strong> mcp-mirror reads what each framework exposes to <em>its</em> agent: <code>tool.args_schema</code> for LangChain, <code>tool.metadata.fn_schema</code> for LlamaIndex, <code>tool.inputSchema</code> for Pydantic AI, etc. That's the same shape the LLM eventually sees.
+    </li>
+    <li class="step">
+      <strong>Structural diff against the server announcement.</strong> A recursive JSON-Schema diff classifies every field-level delta as <code>faithful</code>, <code>additive</code>, <code>lossy</code>, or <code>transformative</code>. The overall category for a tool is the worst delta it contains.
+    </li>
+  </ol>
+</section>
+
+<section>
+  <h2>Reproducing this locally</h2>
+  <pre><code>git clone https://github.com/thierrypdamiba/mcp-mirror
+cd mcp-mirror
+python3.13 -m venv .venv
+.venv/bin/pip install -e '.[all]'
+
+# .env (1Password references resolved at runtime by `op run`)
+cat &gt; .env &lt;&lt;'EOF'
+OPENAI_API_KEY=op://Engineering - Shared/Engine Local Dev/AI/OPENAI_API_KEY
+ARCADE_API_KEY=op://Private/td arcade/credential
+ARCADE_USER_ID=thierry@arcade.dev
+ARCADE_GATEWAY_URL=https://api.arcade.dev/mcp/mcp-mirror
+EOF
+
+# First run: opens a browser once, caches the token under ~/.cache/mcp-mirror/
+op run --env-file=.env -- mcp-mirror --arcade
+</code></pre>
+  <p>Default scorecard, then drill in:</p>
+  <pre><code>mcp-mirror                                  # bundled reference server (stdio)
+mcp-mirror --arcade                         # real Arcade gateway via OAuth
+mcp-mirror --arcade --tool Linear_CreateIssue --detail
+mcp-mirror --arcade --framework pydantic-ai --json | jq</code></pre>
+</section>
+
+<section>
+  <h2>What this means for tool authors</h2>
+  <p>The diff isn't about which framework is "right" — every framework's transformation is internally coherent for its own runtime. The diff is about <strong>what your tool actually looks like when the LLM picks it up</strong>, which is the only thing that matters for tool-selection accuracy.</p>
+  <p>Three implications worth carrying back to your team:</p>
+  <ul>
+    <li><strong>Test your tool across frameworks, not just one.</strong> A schema that's faithful in Pydantic AI may be unrecognizable to a CrewAI agent — same tool, different downstream behavior.</li>
+    <li><strong>Defensive design patterns.</strong> Keep tool descriptions tight enough that 5× growth still fits in context. Keep schemas simple enough that <code>$defs</code> regeneration stays sane.</li>
+    <li><strong>This is a measurable layer.</strong> Run mcp-mirror in CI against the framework versions you ship, and you'll catch breakage at the adapter layer before your users do.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>mcp-mirror — <a href="https://github.com/thierrypdamiba/mcp-mirror">github.com/thierrypdamiba/mcp-mirror</a>. Built by Thierry Damiba @ Arcade.dev.</p>
+</footer>
+
+</main>
+
+<script>
+(async function () {
+  const FRAMEWORKS = ['ag2', 'crewai', 'langchain', 'llamaindex', 'pydantic-ai'];
+  let data;
+  try {
+    const resp = await fetch('data.json');
+    data = await resp.json();
+  } catch (e) {
+    console.error('Failed to load data.json', e);
+    document.getElementById('scorecard').innerHTML = '<tr><td>Failed to load scorecard data.</td></tr>';
+    return;
+  }
+
+  // ---- stats
+  const stats = document.getElementById('stats');
+  const totalDiffs = data.cells.length;
+  const totalTools = data.tools.length;
+  const totalFrameworks = data.frameworks.length;
+  const totalDeltas = data.cells.reduce((acc, c) => acc + c.total, 0);
+  const faithfulCells = data.cells.filter(c => c.overall === 'faithful').length;
+  stats.innerHTML = `
+    <div class="stat"><div class="n">${totalTools}</div><div class="label">production Arcade tools</div></div>
+    <div class="stat"><div class="n">${totalFrameworks}</div><div class="label">real frameworks</div></div>
+    <div class="stat"><div class="n">${totalDiffs.toLocaleString()}</div><div class="label">tool × framework cells</div></div>
+    <div class="stat"><div class="n">${totalDeltas.toLocaleString()}</div><div class="label">total field-level deltas</div></div>
+  `;
+
+  // ---- table
+  const head = document.getElementById('head');
+  head.innerHTML = '<th class="tool-name">tool</th>' + FRAMEWORKS.map(f => `<th data-fw="${f}">${f}</th>`).join('');
+
+  const byTool = {};
+  for (const c of data.cells) {
+    if (!byTool[c.tool]) byTool[c.tool] = {};
+    byTool[c.tool][c.framework] = c;
+  }
+
+  let sortFw = null;
+  let sortDir = -1;  // -1 = desc
+
+  function renderBody(filterText) {
+    const body = document.getElementById('body');
+    let tools = data.tools;
+    if (filterText) {
+      const f = filterText.toLowerCase();
+      tools = tools.filter(t => t.toLowerCase().includes(f));
+    }
+    if (sortFw) {
+      tools = [...tools].sort((a, b) => {
+        const av = byTool[a]?.[sortFw]?.total ?? 0;
+        const bv = byTool[b]?.[sortFw]?.total ?? 0;
+        return (av - bv) * sortDir;
+      });
+    }
+
+    body.innerHTML = tools.map(tool => {
+      const cells = FRAMEWORKS.map(fw => {
+        const cell = byTool[tool]?.[fw];
+        if (!cell) return '<td class="cell">·</td>';
+        const parts = [];
+        const c = cell.counts;
+        if (c.lossy) parts.push(`<span class="glyph-lossy">-${c.lossy}</span>`);
+        if (c.transformative) parts.push(`<span class="glyph-tx">~${c.transformative}</span>`);
+        if (c.additive) parts.push(`<span class="glyph-add">+${c.additive}</span>`);
+        if (parts.length === 0) parts.push('=');
+        return `<td class="cell ${cell.overall}" title="${tool} @ ${fw}: ${JSON.stringify(c)}">${parts.join(' ')}</td>`;
+      }).join('');
+      return `<tr><td class="tool-name">${tool}</td>${cells}</tr>`;
+    }).join('');
+  }
+
+  document.querySelectorAll('#head th[data-fw]').forEach(th => {
+    th.addEventListener('click', () => {
+      const fw = th.dataset.fw;
+      if (sortFw === fw) {
+        sortDir = -sortDir;
+      } else {
+        sortFw = fw;
+        sortDir = -1;
+      }
+      document.querySelectorAll('#head th').forEach(x => x.style.color = '');
+      th.style.color = 'var(--accent)';
+      renderBody(document.getElementById('filter').value);
+    });
+  });
+
+  document.getElementById('filter').addEventListener('input', (e) => {
+    renderBody(e.target.value);
+  });
+
+  document.getElementById('foot').innerHTML = `
+    <tr><td colspan="${FRAMEWORKS.length + 1}">Captured live against <code>https://api.arcade.dev/mcp/mcp-mirror</code>. 5 framework versions resolved at runtime via <code>importlib.metadata</code>. Data is the verbatim output of <code>mcp-mirror --arcade --json</code>.</td></tr>
+  `;
+
+  renderBody('');
+})();
+</script>
+
+</body>
+</html>
