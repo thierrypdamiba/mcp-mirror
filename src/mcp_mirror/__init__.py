@@ -3,5 +3,5 @@
 from mcp_mirror.types import Category, FieldDiff, ToolDiff, ToolView
 from mcp_mirror.diff import diff_views
 
-__all__ = ["Category", "FieldDiff", "ToolDiff", "ToolView", "diff_views"]
 __version__ = "0.1.0"
+__all__ = ["Category", "FieldDiff", "ToolDiff", "ToolView", "diff_views", "__version__"]

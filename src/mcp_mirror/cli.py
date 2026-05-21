@@ -25,7 +25,7 @@ from typing import Sequence
 
 from mcp import StdioServerParameters
 
-from mcp_mirror import diff_views
+from mcp_mirror import __version__, diff_views
 from mcp_mirror.capture import (
     ALL_CAPTURES,
     capture_server_announcement,
@@ -44,6 +44,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             "framework's adapter hands to the LLM. Real captures, real frameworks, "
             "real MCP plumbing — no simulators."
         ),
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"mcp-mirror {__version__}",
     )
     parser.add_argument(
         "--server",
@@ -86,6 +91,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             command=sys.executable,
             args=["-m", "mcp_mirror.server"],
         )
+
+    _load_dotenv()
 
     frameworks = args.framework or list(FRAMEWORK_CAPTURES.keys())
     try:
@@ -165,6 +172,34 @@ def _truncate(value: object, limit: int = 200) -> object:
     if isinstance(value, str) and len(value) > limit:
         return value[:limit] + "..."
     return value
+
+
+def _load_dotenv() -> None:
+    """Best-effort .env loader so users can drop OPENAI_API_KEY / ARCADE_API_KEY locally.
+
+    Reads `./.env` and adds any KEY=VALUE pairs to os.environ if not already set.
+    Skips comments and blank lines. No third-party dep required.
+    """
+    import os
+    from pathlib import Path
+
+    env_path = Path.cwd() / ".env"
+    if not env_path.is_file():
+        return
+    try:
+        for raw_line in env_path.read_text().splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip("'").strip('"')
+            if key and key not in os.environ:
+                os.environ[key] = value
+    except OSError:
+        pass
 
 
 if __name__ == "__main__":
