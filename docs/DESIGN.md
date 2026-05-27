@@ -63,22 +63,30 @@ class Category(str, Enum):
 
 ### Component 3: Behavioral eval (Layer 2, planned)
 
-**What**: Run a prompt battery through a real model against each framework view; score selection + argument accuracy vs. a server-view control.
-**Where**: `src/mcp_mirror/llm_eval.py` (planned)
+**What**: Run the same eval cases against each framework's transformed tool view and compare selection + argument scores. Built on Arcade's existing `arcade_evals` library — not a bespoke harness.
+**Where**: `src/mcp_mirror/llm_eval.py` (planned, thin wrapper over `arcade_evals`)
 **Interface**:
 
 ```python
-async def eval_tool(server: ToolView, framework: ToolView, prompts: list[Prompt],
-                    model: str) -> BehavioralDelta: ...
+from arcade_evals import (
+    EvalSuite, EvalRubric, ExpectedMCPToolCall,
+    BinaryCritic, SimilarityCritic, NumericCritic, tool_eval,
+)
 
-@dataclass
-class BehavioralDelta:
-    selection_accuracy: float   # vs. server-view control
-    argument_validity: float    # validated against the SERVER schema, not the framework's
+# arcade_evals already provides the engine. mcp-mirror's job is to feed it
+# each framework's transformed tool definition and compare results:
+#   - suite.add_tool_definitions(views)  → inject a specific framework's view
+#   - suite.add_comparative_case(...)    → first-class comparison across views
+#   - critics score each argument field against the SERVER's expected value
+async def eval_framework_views(
+    server_view: ToolView,
+    framework_views: dict[str, ToolView],   # framework name -> its transformed view
+    cases: list[EvalCase],
+) -> dict[str, EvalResult]: ...  # per-framework pass/warn/fail vs. server control
 ```
 
-**Dependencies**: OpenAI SDK, a generated+golden prompt battery.
-**Tests**: golden-set prompts with fixed expected selections.
+**Dependencies**: `arcade_evals` (+ `pytz`, `scipy`), a model provider key. Reuses the team's eval engine and critics rather than reinventing scoring.
+**Tests**: a golden suite of cases for high-traffic tools; assert framework pass-rate deltas vs. the server-view control.
 
 ### Component 4: Arcade auth
 
@@ -150,3 +158,4 @@ def get_access_token(gateway_url: str, *, force_reauth: bool = False) -> str: ..
 
 - MCP authorization: RFC 9728 (protected-resource metadata), RFC 7591 (DCR), RFC 8707 (resource indicators), RFC 7636 (PKCE).
 - Live reference dataset: `sample-runs/arcade-mcp-mirror-gateway.json`.
+- Behavioral layer builds on Arcade's `arcade_evals` library (`EvalSuite`, critics, `add_tool_definitions`, `add_comparative_case`, `add_arcade_gateway`). Layer 2 wraps it rather than reimplementing tool-call scoring.
