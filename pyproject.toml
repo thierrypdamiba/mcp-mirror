@@ -22,7 +22,15 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-test = ["pytest>=7.0"]
+test = ["pytest>=7.0", "pytest-asyncio>=0.23"]
+# Layer 2 behavioral eval — wraps Arcade's eval engine.
+eval = [
+    "arcade-ai",      # provides arcade_evals (EvalSuite, critics, tracks)
+    "openai",
+    "pytz",           # arcade_evals datetime critics
+    "scipy",          # arcade_evals optimal tool-call matching
+    "scikit-learn",   # arcade_evals SimilarityCritic (TF-IDF cosine)
+]
 
 [project.scripts]
 mcp-mirror = "mcp_mirror.cli:main"

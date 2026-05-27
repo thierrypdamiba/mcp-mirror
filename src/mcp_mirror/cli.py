@@ -73,6 +73,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--detail", action="store_true", help="Per-field breakdown.")
     parser.add_argument("--json", action="store_true", help="Machine-readable output.")
+    parser.add_argument(
+        "--eval",
+        action="store_true",
+        help=(
+            "Layer 2: run behavioral eval (golden cases) through a real model "
+            "against each framework's tool view and compare. Needs OPENAI_API_KEY."
+        ),
+    )
+    parser.add_argument(
+        "--model",
+        default="gpt-4o",
+        help="Model for --eval (default: gpt-4o).",
+    )
 
     args = parser.parse_args(argv)
     _load_dotenv()
@@ -87,6 +100,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
 
     frameworks = args.framework or list(FRAMEWORK_CAPTURES.keys())
+
+    if args.eval:
+        try:
+            return _run_eval(spec, frameworks, args.model, args.json)
+        except Exception as exc:
+            print(f"mcp-mirror eval error: {type(exc).__name__}: {exc}", file=sys.stderr)
+            return 1
+
     try:
         diffs = asyncio.run(_run(spec, frameworks, args.tool))
     except Exception as exc:
@@ -165,6 +186,39 @@ async def _run(
                 continue
             diffs.append(diff_views(server_view, view, result.framework))
     return diffs
+
+
+def _run_eval(spec: ServerSpec, frameworks: list[str], model: str, as_json: bool) -> int:
+    """Layer 2: behavioral comparison across frameworks via arcade_evals."""
+    from mcp_mirror.eval_cases import golden_cases
+    from mcp_mirror.llm_eval import eval_across_frameworks, summarize
+
+    results = asyncio.run(
+        eval_across_frameworks(spec, frameworks, golden_cases(), model=model)
+    )
+    summary = summarize(results)
+
+    if as_json:
+        print(json.dumps(summary, indent=2))
+        return 0
+
+    print(f"LAYER 2 — behavioral eval ({len(golden_cases())} golden cases, model={model})")
+    print("-" * 64)
+    print("track            result")
+    print("-" * 64)
+    for track, s in summary.items():
+        if s.get("rejected"):
+            print(f"{track:16} REJECTED by provider — schema not accepted (e.g. oneOf)")
+        elif s.get("errored"):
+            print(f"{track:16} ERRORED — {s['reason'][:44]}")
+        else:
+            print(
+                f"{track:16} passed={s['passed']}  warned={s['warned']}  failed={s['failed']}"
+            )
+    print("-" * 64)
+    print("A REJECTED track means the model could never be offered the tool at all.")
+    print("Compare against the `server` control to see if a transform helped or hurt.")
+    return 0
 
 
 def _to_json(diffs: list[ToolDiff]) -> dict:
