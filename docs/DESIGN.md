@@ -1,189 +1,152 @@
-# mcp-mirror — Design Document
+# Design: mcp-mirror
 
-**Author:** Thierry Damiba (thierry@arcade.dev)
-**Status:** Draft
-**Last updated:** 2026-05-26
+**Author**: Thierry Damiba (thierry@arcade.dev)
+**Status**: Draft
 
----
+**Related**: README: `../README.md` | Build log: `build-log/` | Sample data: `sample-runs/`
 
-## Summary
+## Architecture
 
-`mcp-mirror` is a diagnostic tool that reveals how different AI agent frameworks transform a tool definition before an LLM sees it. It connects one MCP server to several real frameworks simultaneously, captures the tool representation each framework produces, and reports the differences — both structurally (what changed in the schema) and behaviorally (whether the change alters how the model uses the tool). The goal is to make a normally invisible translation layer measurable, so developers can understand why the same tool behaves differently across frameworks.
+mcp-mirror connects one MCP server to several real agent frameworks at once and reports how each framework transforms a tool before the LLM sees it. A single source (stdio or streamable-HTTP) feeds N framework adapters; each adapter's real integration code produces a normalized `ToolView`; a diff engine compares each view to the server's announcement and a behavioral layer measures whether the differences change model behavior.
 
-## Background
+The design rests on one principle: a structural diff tells you *what* changed, but only running prompts through a model tells you *whether the change matters*. The tool therefore has two layers — a cheap deterministic diff (built) and an expensive behavioral eval (planned) — that compose.
 
-### Model Context Protocol (MCP)
-
-MCP is an open protocol that standardizes how AI applications connect to external tools and data. An **MCP server** exposes a set of **tools**. Each tool definition includes a name, a natural-language description, a JSON Schema for its inputs, an optional schema for its outputs, and optional metadata. When an AI application wants to use a tool, it reads these definitions and passes them to a language model so the model can decide which tool to call and with what arguments.
-
-### Agent frameworks
-
-Most production AI agents are not written directly against a model API. They are built on **agent frameworks** — libraries such as LangChain, LlamaIndex, CrewAI, Pydantic AI, and AG2 (formerly AutoGen) — that handle orchestration, memory, and tool integration. Each of these frameworks ships an MCP integration: code that connects to an MCP server, reads its tool definitions, and converts them into the framework's own internal tool representation. That internal representation is what eventually becomes the function-calling payload sent to the language model.
-
-### The gap
-
-The conversion from "what the MCP server announced" to "what the language model receives" is performed entirely inside the framework's adapter. These adapters make independent, undocumented decisions:
-
-- Some preserve the input schema exactly; others convert it through an intermediate type system that reorganizes or expands it.
-- Some carry the output schema and metadata forward; others discard them.
-- Some rewrite the tool's name or extend its description.
-
-The result is that the *same* MCP server produces *different* tool definitions in the model's context depending on which framework loaded it. This is rarely visible to the developer. When an agent selects the wrong tool or supplies bad arguments, the natural instinct is to blame the model or the server — not the adapter sitting between them. There is no standard way to inspect this layer, no shared vocabulary for the kinds of changes it makes, and no way to compare frameworks against one another.
-
-## Problem statement
-
-Developers building agents on top of MCP have no way to answer two questions:
-
-1. **What does each framework actually hand to the model for a given tool?**
-2. **Do those differences change the agent's behavior — and if so, how badly?**
-
-`mcp-mirror` answers both.
-
-## Goals
-
-- For any MCP server, capture what each major agent framework hands to the model — from the framework's real integration code, not a reimplementation or simulation.
-- Quantify the difference between the server's tool definition and each framework's version, at the level of individual schema fields.
-- Determine whether those differences change the model's tool-selection and argument-construction behavior, not merely whether the schema shape changed.
-- Be reproducible: anyone pointing the tool at the same server gets the same result.
-- Support running as a continuous-integration check, so that a framework upgrade that silently changes tool handling is caught as a regression.
-
-## Non-goals
-
-- This is not a framework ranking. Every framework's transformation is coherent for its own runtime. The tool measures fidelity to the server definition and impact on model behavior; it does not declare a winner.
-- This is not a general agent-evaluation platform. Several mature products already evaluate agent quality broadly. `mcp-mirror` measures one narrow thing: what the adapter layer does to a tool and whether it matters.
-- This does not modify the frameworks. It uses their published integration code unchanged.
-
-## Approach
-
-`mcp-mirror` measures the adapter layer in two distinct layers, because a single measurement cannot answer both questions in the problem statement.
-
-### Layer 1 — Structural diff
-
-A deterministic, fast comparison that requires no language model. For each tool and each framework, it walks the framework's tool representation against the server's original announcement and classifies every field-level difference into one of four categories:
-
-- **faithful** — no difference.
-- **lossy** — a field the server provided that the framework dropped. The model never sees it.
-- **additive** — a field the framework introduced that the server did not provide. It consumes space in the model's context.
-- **transformative** — a field whose value changed without being added or removed (for example, a tool name rewritten from one casing convention to another).
-
-This layer answers *what changed*. It is fast enough to run across hundreds of tools and is the right tool for pointing at where differences exist. It is necessary but not sufficient, for the reason described in the next section.
-
-### Layer 2 — Behavioral evaluation
-
-A measurement that uses a real language model. For each tool and framework, it runs a set of test prompts and observes whether the model, given that framework's version of the tool:
-
-- selects the tool when it should and avoids it when it shouldn't (**selection accuracy**), and
-- constructs arguments that are valid against the *server's* original schema (**argument accuracy**).
-
-It then compares these results against a control run that uses the server's own tool definition. The difference between the two is the **behavioral delta**: the degree to which the framework's transformation changed how the model uses the tool.
-
-This layer answers *whether the change matters*.
-
-## Why two layers are necessary
-
-The central design decision is that structural counts cannot, by themselves, tell you whether a transformation is harmful. A count measures the quantity of change, not its consequence. Consider two differences that both register as "one dropped field":
-
-| Difference | Consequence for the model |
-|---|---|
-| The framework drops a cosmetic `title` field. | None. The model never used it. |
-| The framework drops the list of allowed values (`enum`) on a status argument. | Severe. The model now produces values the real tool rejects. |
-
-Both score identically in Layer 1. To distinguish them, you must observe the model's actual behavior, which requires running prompts through it. This is why Layer 2 exists, and why it cannot be replaced by a more clever structural metric.
-
-The two layers compose. Layer 1 ranks tools by how much they change and is cheap to run everywhere. Layer 2 confirms which of those changes actually degrade behavior and is expensive, so it is run selectively. A tool with a large structural delta but no behavioral delta is cosmetic noise. A tool with a small structural delta but a real behavioral delta is a hidden hazard. Both are useful findings, and only the combination surfaces both.
-
-## Detailed design
-
-### System overview
+**Diagram:**
 
 ```
-                    MCP server (real)
-                  ┌────────────────────┐
-                  │ bundled fixtures    │  (local, stdio transport)
-                  │ or Arcade gateway   │  (remote, HTTP transport, OAuth)
-                  └─────────┬───────────┘
-                            │ MCP protocol
-     ┌───────────┬──────────┼──────────┬───────────┐
-     ▼           ▼          ▼          ▼           ▼
- LangChain  LlamaIndex   CrewAI   Pydantic AI    AG2     (real framework adapters)
-     │           │          │          │           │
-     ▼           ▼          ▼          ▼           ▼
-  the tool representation each framework hands to the model
-     └───────────┴──────────┼──────────┴───────────┘
-                  ┌──────────┴───────────┐
-                  ▼                      ▼
-          Layer 1: structural    Layer 2: behavioral
-          diff (deterministic)   eval (prompts + model)
-                  └──────────┬───────────┘
-                             ▼
-                     scorecard / report
+source (stdio | HTTP+OAuth) → [5 framework adapters] → ToolView ×5
+                                                          ├→ Layer 1: structural diff   (built)
+                                                          └→ Layer 2: behavioral eval   (planned)
 ```
 
-### Source abstraction
+## Components
 
-The MCP server under test can be either a local process (stdio transport) or a remote service (HTTP transport). A single source abstraction represents both, so every capture works identically regardless of where the server runs. The tool ships with a bundled reference server exposing deliberately rich tool schemas, so it produces meaningful results with no external dependencies.
+### Component 1: Capture
 
-### Capture
+**What**: Load a server's tools through one framework's real MCP integration and normalize what it exposes to the LLM.
+**Where**: `src/mcp_mirror/capture.py`
+**Interface**:
 
-For each framework, a dedicated capture routine connects to the server through that framework's real MCP integration and reads back the tool representation the framework would expose to its agent. The captured representation is normalized into a common shape so the diff engine can compare them uniformly. Crucially, no framework behavior is simulated — each capture exercises the framework's actual published code path, so the results reflect real behavior and stay accurate as frameworks evolve.
+```python
+async def capture_langchain(spec: ServerSpec) -> CaptureResult: ...
+# one per framework: langchain, llamaindex, crewai, pydantic_ai, ag2
+# all transport-agnostic via the _session(spec) context manager
 
-### Structural diff
+@dataclass
+class CaptureResult:
+    framework: str
+    framework_version: str | None   # from importlib.metadata, recorded per run
+    views: list[ToolView]
+```
 
-The diff engine recursively compares two normalized tool representations and emits a list of categorized field-level differences. The overall category for a tool is the most severe difference it contains, ordered lossy > transformative > additive > faithful.
+**Dependencies**: the five framework packages (optional extras), `mcp` SDK, `ServerSpec`.
+**Tests**: `tests/test_capture.py` — asserts each adapter's known behavior against the bundled server.
 
-### Behavioral evaluation
+### Component 2: Diff engine (Layer 1)
 
-Behavioral evaluation needs test prompts for each tool. Hand-authoring prompts for every tool does not scale, so prompts come from three tiers:
+**What**: Recursively compare a framework `ToolView` to the server's and categorize every field-level delta.
+**Where**: `src/mcp_mirror/diff.py`, `src/mcp_mirror/types.py`
+**Interface**:
 
-1. **Generated** — for each tool, a generator model synthesizes positive prompts (a user who wants exactly this tool) and hard-negative prompts (a user who wants a similar but different tool), derived from the tool's own description. These are cached.
-2. **Golden** — a small, hand-written set for the highest-traffic tools, used to anchor and validate the generated prompts.
-3. **Replay** — optionally, real anonymized prompts from production usage (future work).
+```python
+def diff_views(server: ToolView, framework: ToolView, framework_name: str) -> ToolDiff: ...
 
-For each test, the tool under evaluation is presented to the model alongside a fixed set of distractor tools, so that selecting it is a genuine decision rather than the only option. The model's response is scored for selection correctness and for argument validity against the server's schema. The same prompt is run against the server's own tool definition as a control, and the difference is reported.
+class Category(str, Enum):
+    FAITHFUL = "faithful"   # no change
+    LOSSY = "lossy"         # server field dropped
+    ADDITIVE = "additive"   # framework field added
+    TRANSFORMATIVE = "transformative"  # value changed in place
+```
 
-Argument validity is deliberately checked against the **server's** schema, never the framework's. The most important failure this tool hunts for is the case where a framework relaxes or drops a constraint, the model then produces a value the framework accepts but the real tool rejects, and the failure surfaces only at execution time. Scoring against the server schema catches this directly.
+**Dependencies**: none beyond stdlib.
+**Tests**: `tests/test_diff.py` — synthetic views with known deltas; overall = worst category.
 
-### Self-correctness check
+### Component 3: Behavioral eval (Layer 2, planned)
 
-Independently of measuring the frameworks, the tool verifies its own introspection. During a real model call, it intercepts the outgoing request to the model provider and compares the tool definitions actually on the wire against the representation the capture step reported. If they diverge, the tool's own introspection is wrong and its structural numbers cannot be trusted. This guards against the tool silently measuring the wrong thing.
+**What**: Run a prompt battery through a real model against each framework view; score selection + argument accuracy vs. a server-view control.
+**Where**: `src/mcp_mirror/llm_eval.py` (planned)
+**Interface**:
 
-## Security and credentials
+```python
+async def eval_tool(server: ToolView, framework: ToolView, prompts: list[Prompt],
+                    model: str) -> BehavioralDelta: ...
 
-- All secrets are supplied through environment variables and are never stored on disk in plaintext. The recommended workflow resolves secret references from a secrets manager at runtime, so configuration files contain references rather than secrets.
-- Connecting to a remote MCP gateway uses the standard authorization flow that any compliant MCP client would use: the tool discovers the gateway's authorization server from its metadata, registers itself dynamically as a client, and completes a browser-based authorization with proof-key protection. Tokens are cached locally per gateway and refreshed automatically. No static API key is used as a bearer credential against the gateway.
-- The model-provider key used for behavioral evaluation is read from the environment only when needed and is never logged.
+@dataclass
+class BehavioralDelta:
+    selection_accuracy: float   # vs. server-view control
+    argument_validity: float    # validated against the SERVER schema, not the framework's
+```
 
-## Testing and reproducibility
+**Dependencies**: OpenAI SDK, a generated+golden prompt battery.
+**Tests**: golden-set prompts with fixed expected selections.
 
-- Framework versions are detected at runtime and recorded with every result, so a result can always be tied to the exact framework versions that produced it.
-- Reference runs are stored as canonical snapshots, so changes in output over time can be attributed either to a framework change or to a tool change.
-- A continuous-integration mode compares the current scorecard against a pinned baseline and fails the build if a new lossy or transformative difference appears, converting "a dependency changed our tool handling" from a production surprise into a caught regression.
+### Component 4: Arcade auth
 
-## Alternatives considered
+**What**: Authenticate to an Arcade MCP gateway exactly as a production client would.
+**Where**: `src/mcp_mirror/arcade_auth.py`
+**Interface**:
 
-- **Static analysis of each framework's adapter source.** Rejected: encodes assumptions about framework behavior that drift out of date as frameworks change, and cannot observe runtime behavior. Running the real code is the only reliable source of truth.
-- **Structural diff only.** Rejected as incomplete: as argued above, a structural count cannot distinguish a harmless change from a harmful one. The behavioral layer is required to answer the question that actually matters.
-- **A full agent-evaluation harness.** Rejected as out of scope: mature products already evaluate agent quality broadly. This tool deliberately measures one narrow, currently-unmeasured thing.
+```python
+def get_access_token(gateway_url: str, *, force_reauth: bool = False) -> str: ...
+# discovery (RFC 9728) → dynamic client registration (RFC 7591) → PKCE → token cache
+```
 
-## Open questions
+**Dependencies**: `httpx`, stdlib `http.server` (loopback), 1Password-resolved env.
+**Tests**: discovery + DCR against the live gateway (manual; interactive auth).
 
-1. **Distractor set for behavioral evaluation.** How many and which distractor tools should accompany the tool under test? Too few makes selection trivial; too many measures tool-overload rather than adapter fidelity. Current proposal: a fixed, representative set held constant across all tests.
-2. **Model choice.** Behavior is model-specific. Should results be reported per model, or against one canonical model? Current proposal: default to one fast model, allow an override, and always record which model produced a result.
-3. **Trust in generated prompts.** Generated prompts are themselves model output and may be wrong. How much hand-validation does the golden set need before the generated battery is trustworthy?
-4. **Non-determinism.** Model responses vary between runs. Current proposal: run each prompt several times at temperature zero and report a rate rather than a single outcome.
+## User Flow
 
-## Status
+1. Developer writes `.env` with `ARCADE_GATEWAY_URL` + secret references, runs `op run --env-file=.env -- mcp-mirror --arcade`.
+2. First run opens a browser once for OAuth; the token caches under `~/.cache/mcp-mirror/`.
+3. System captures all five frameworks against the gateway, diffs each against the server announcement, and prints a scorecard (one row per tool, one column per framework).
+4. Developer reads a cell like `-11 ~1 +28`, then drills in: `mcp-mirror --arcade --tool Linear_CreateIssue --detail` to see each dropped/added/changed field.
 
-Built:
+## Key Decisions
 
-- Structural diff across five real frameworks, over both local and remote transports.
-- Remote gateway connection using the standard authorization flow.
-- A live reference dataset of one hundred production tools across five frameworks.
-- A presentation site rendering the live results.
+### Decision 1: Real captures, never simulators
 
-Planned:
+**What**: Each capture exercises the framework's published MCP integration, not a model of its behavior.
+**Why**: An early simulator encoded assumptions that the live run disproved (e.g., LangChain was assumed to collapse `oneOf`; it actually preserves the full input schema). Framework behavior drifts faster than docs.
+**Trade-off**: Requires installing five framework dependency trees; captures are slower than static analysis.
 
-- The self-correctness wire-level check.
-- The behavioral evaluation layer.
-- The continuous-integration regression mode.
-- A public package release.
+### Decision 2: Two layers — structural and behavioral
+
+**What**: A deterministic diff plus a prompt-based behavioral eval.
+**Why**: A field count can't distinguish a dropped `title` (harmless) from a dropped `enum` (the model now emits invalid values). Both score `-1 lossy`. Only observed model behavior separates them.
+**Trade-off**: Layer 2 needs a model, a prompt battery, and cost controls; it runs selectively on high-delta tools, not everywhere.
+
+### Decision 3: Validate arguments against the server schema
+
+**What**: In Layer 2, generated arguments are checked against the *server's* schema, not the framework's.
+**Why**: The target failure is a framework relaxing a constraint, the model emitting a value the framework accepts but the real tool rejects — caught only by scoring against ground truth.
+**Trade-off**: Requires keeping the server schema around through the eval; more bookkeeping.
+
+### Decision 4: Spec-correct OAuth via Dynamic Client Registration
+
+**What**: Discover the auth server from the gateway's `WWW-Authenticate`, register a client via DCR, run PKCE with the gateway as the RFC 8707 `resource`.
+**Why**: A raw API key as a Bearer is rejected (401) by the gateway; this is the flow a real MCP client uses, so captures reflect production.
+**Trade-off**: A browser step on first auth; one client record registered per machine.
+
+## Implementation Notes
+
+**Constraints**:
+- Python 3.10+ (3.13 dev). Core diff has no third-party dependencies.
+- Each framework is an optional extra so the tool runs with any subset installed.
+
+**Error Handling**:
+- A framework whose capture raises is skipped with a stderr warning, not fatal — the scorecard degrades gracefully.
+- Framework tool-name rewrites (CrewAI → snake_case) are matched by a canonical key, then surfaced as a `transformative` delta on `name`.
+
+**Gotchas**:
+- The MCP SDK logs `Session termination failed: 202` on HTTP cleanup; harmless, suppressed via a scoped log filter.
+- LlamaIndex routes schemas through Pydantic regeneration, producing large `$defs`-driven additive deltas that are structural, not semantic — exactly why Layer 2 matters.
+
+**Open Questions**:
+- [ ] Distractor-tool set size for Layer 2 selection tests (too few = trivial, too many = measures overload).
+- [ ] Per-model vs. single canonical model for behavioral results.
+- [ ] Ephemeral DCR per machine vs. one registered mcp-mirror client for release.
+
+## References
+
+- MCP authorization: RFC 9728 (protected-resource metadata), RFC 7591 (DCR), RFC 8707 (resource indicators), RFC 7636 (PKCE).
+- Live reference dataset: `sample-runs/arcade-mcp-mirror-gateway.json`.
