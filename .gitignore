@@ -18,3 +18,6 @@ venv/
 *.swo
 .coverage
 htmlcov/
+
+# secrets
+.env
