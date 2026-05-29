@@ -17,15 +17,19 @@ The adapter layer between an MCP server and the LLM is real, and every framework
 
 ## What you see
 
-```
-tool                  ag2        crewai       langchain   llamaindex   pydantic-ai
-send_message          -10 +1     -11 ~1 +12   -6 +1       -12 +9       +1
-   legend:  + additive   - lossy   ~ transformative   (field-level deltas vs. server)
+Layer 1 — `send_message` across the five frameworks (field-level deltas vs. what the server announced):
 
-Layer 2:  langchain {pass 3, warn 1}   ag2 {rejected: "oneOf is not permitted"}
-```
+| Framework | Delta | Overall |
+| --------- | ----- | ------- |
+| Pydantic AI | `+1` | near-faithful |
+| LangChain | `−6 +1` | lossy |
+| AG2 | `−10 +1` | lossy |
+| CrewAI | `−11 ~1 +12` | lossy |
+| LlamaIndex | `−12 +9` | lossy |
 
-The `rejected` track is the point: Layer 1 says AG2 is *mostly faithful*; Layer 2 reveals the model **never sees the tool**. Neither layer alone tells you that.
+`−` dropped a server field · `~` changed one in place · `+` added a framework field.
+
+Structure alone doesn't predict behavior. A framework that *faithfully* preserves a `oneOf` gets the schema rejected by OpenAI outright — so the most structurally faithful adapter can be the one where the model **never receives the tool**. That inversion is exactly what Layer 2 catches and Layer 1 cannot. *(Behavioral run illustrative; not yet committed.)*
 
 ## Key decisions
 
@@ -37,7 +41,7 @@ The `rejected` track is the point: Layer 1 says AG2 is *mostly faithful*; Layer 
 
 ## Where it sits / why now
 
-Every benchmark in this space holds the framework constant and varies the model (BFCL, τ-bench, MCP-Bench) or grades the server (Arcade ToolBench). **mcp-mirror does the opposite — holds the server constant, varies the framework, measures the adapter.** That axis is empty. The AAMAS 2026 fidelity paper proves information degrades through MCP *in theory*; mcp-mirror measures *where*, empirically, per framework. MCP is becoming the default protocol across frameworks, which will shrink the divergence over time — the argument for mapping it **now**, while it's large, and tracking the convergence.
+Every benchmark in this space holds the framework constant and varies the model (BFCL, τ-bench, MCP-Bench) or grades the server (Arcade ToolBench). **mcp-mirror does the opposite — holds the server constant, varies the framework, measures the adapter.** That axis is unmeasured. Even the closest formal work — Fan et al.'s martingale analysis of MCP (AAMAS 2026) — targets error accumulation across *sequential* tool calls, a different (dynamic, multi-step) question. MCP is becoming the default protocol across frameworks, which should shrink per-framework divergence over time — the argument for mapping it **now**, while it's large, and tracking the convergence.
 
 ## Status & ownership
 
