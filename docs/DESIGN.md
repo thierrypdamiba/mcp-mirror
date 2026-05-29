@@ -25,11 +25,11 @@ Today the only way to know which transformation your framework is doing is to in
 
 ### Key Insight
 
-A structural diff tells you *what* changed, but only running prompts through a model tells you *whether the change matters*. Build both. Compose them. Same MCP server, every framework, side by side.
+The adapter diff tells you *what changed and where*; the model eval tells you *whether it matters*. Build both. Compose them. Same MCP server, every framework, side by side.
 
 mcp-mirror captures one MCP server through each framework's *actual* published MCP integration — no simulators, no recorded fixtures. Each capture produces a normalized `ToolView`. Two layers consume those views:
 
-- **Layer 1: Structural diff.** Recursively compare each framework's `ToolView` to the server's announcement; categorize every field-level delta as `faithful`, `lossy`, `additive`, or `transformative`. Microseconds per tool. Pure stdlib.
+- **Layer 1: Adapter diff.** Recursively compare each framework's `ToolView` to the server's announcement; record every dropped, added, and rewritten field. Microseconds per tool. Pure stdlib. This is a deterministic regression detector and localizer, not a severity classifier.
 - **Layer 2: Behavioral eval.** Run the same eval cases against each framework's transformed view via `arcade_evals` and score selection + argument accuracy against per-case ground truth. Per-track `EvalSuite` so a representation OpenAI refuses outright (e.g., `oneOf` in function parameters) is recorded as `rejected=True` for that track, not a fatal error for all.
 
 Both layers ship today.
@@ -64,9 +64,11 @@ class CaptureResult:
 
 `capture_server_announcement` is the ground-truth view (the server's `tools/list` response via the official MCP Python SDK). Every framework view is diffed against it.
 
-### 2. Diff engine (Layer 1)
+### 2. Adapter diff engine (Layer 1)
 
 `src/mcp_mirror/diff.py` — recursive JSON-Schema walker. The per-tool overall category is the *worst* category across all field diffs (severity: `faithful` < `additive` < `transformative` < `lossy`), so one dropped `enum` makes the whole tool `lossy` even if every other field is preserved.
+
+That overall category is notation, not the finding. On the live Arcade gateway, four of five frameworks are `lossy` on every tool, so the verdict alone saturates. The useful signal is the exact path and pattern: LangChain drops the same `metadata.arcade` block on all 100 tools (`-1 +1`), while CrewAI and LlamaIndex rewrite complex schemas heavily (for `Linear_CreateIssue`, `-16 ~1 +45` and `-16 +43`). Layer 1 is the map and regression signal; Layer 2 supplies impact.
 
 ```python
 def diff_views(server: ToolView, framework: ToolView, framework_name: str) -> ToolDiff: ...
@@ -112,37 +114,44 @@ Token cached at `~/.cache/mcp-mirror/`. One browser step on first run; silent th
 
 ## Output
 
-What the user actually sees, today, against the bundled reference server with all five frameworks installed:
+What the user actually sees, today, against the live Arcade gateway:
 
-### Scorecard
+### Scorecard excerpt
 
 ```
-tool                  ag2           crewai        langchain     llamaindex    pydantic-ai
-------------------------------------------------------------------------------------------
-send_message          -10 +1        -11 ~1 +12    -6 +1         -12 +9        +1
-search_records        -9 +1         -14 ~2 +12    -6 +1         -13 +9        +1
+tool                ag2       crewai        langchain  llamaindex  pydantic-ai
+----------------------------------------------------------------------------
+Linear_CreateIssue  -4 +1     -16 ~1 +45    -1 +1      -16 +43     +1
 legend:  = faithful   + additive   - lossy   ~ transformative
          counts are field-level deltas vs. the server announcement
 ```
 
+The full committed sample run covers 100 Arcade gateway tools across five frameworks. The aggregate pattern is the real finding: Pydantic AI adds one metadata field and drops nothing; LangChain always drops only `metadata.arcade` and adds one LangChain class marker; AG2 does a mild, uniform schema simplification; CrewAI and LlamaIndex perform large schema rewrites that worsen on complex tools.
+
 ### Drill-down (`--detail`)
 
 ```
-=== send_message @ langchain ===
+=== Linear_CreateIssue @ crewai ===
 overall: lossy
-deltas: lossy=6, additive=1
+deltas: lossy=16, transformative=1, additive=45
 
-  - response.type
-      Framework dropped `type`.
-  - response.properties
-      Framework dropped `properties`.
+  ~ name
+      Tool name was rewritten by the framework.
+  + description
+      Description extended by framework (312 -> 3136 chars).
   - parameters.properties.priority.enum
-      Framework dropped `enum`.       # <-- the kind of finding Layer 2 promotes
-  + metadata.__lc_tool_class
-      Framework added `__lc_tool_class` not present on server.
+      Framework dropped `enum`.
+  - parameters.properties.labels_to_add.items
+      Framework dropped `items`.
+  - parameters.properties.estimate.type
+      Framework dropped `type`.
+  + parameters.properties.priority.anyOf
+      Framework added `anyOf` not present on server.
+  + metadata.__crewai_tool_class
+      Framework added metadata `__crewai_tool_class`.
 ```
 
-### Layer 2 summary
+### Layer 2 summary (bundled fixture)
 
 ```json
 {
@@ -155,7 +164,7 @@ deltas: lossy=6, additive=1
 }
 ```
 
-The `rejected` track is the interesting one: the structural diff says AG2 is *mostly faithful*, but the model never sees the tool because OpenAI refuses the schema. Layer 1 cannot tell you that; Layer 2 surfaces it explicitly.
+The `rejected` track is the interesting one: a representation can look structurally close and still be unusable if the provider refuses the schema. Layer 1 cannot tell you that; Layer 2 surfaces it explicitly. The live gateway Layer 2 run is Phase 2 because it needs golden cases for real Arcade tools rather than the bundled fixtures.
 
 ## Project layout
 
@@ -164,7 +173,7 @@ src/mcp_mirror/
   arcade_auth.py     # RFC 9728/7591/7636/8707 OAuth client
   capture.py         # 6 captures (server + 5 frameworks) + ALL_CAPTURES registry
   cli.py             # `mcp-mirror` entrypoint + zero-dep .env loader
-  diff.py            # Layer 1 — recursive ToolView diff
+  diff.py            # Layer 1 — recursive adapter diff
   eval_cases.py      # Golden behavioral cases for the bundled fixtures
   fixtures.py        # Reference tool surfaces (send_message, search_records)
   llm_eval.py        # Layer 2 — per-track arcade_evals suites + summarize()
@@ -190,7 +199,7 @@ tests/
 | Decision | Choice | Rationale | Alternatives considered |
 | -------- | ------ | --------- | ----------------------- |
 | **Real captures, never simulators** | Each capture exercises the framework's published MCP integration | An early simulator encoded assumptions the live run disproved (LangChain was *assumed* to collapse `oneOf`; it actually preserves the full input schema) — framework behavior drifts faster than docs. | Static schema analysis (rejected: misses runtime adapter transforms); recorded fixtures (rejected: rot the moment the adapter updates). |
-| **Two layers — structural and behavioral** | A deterministic diff plus a prompt-based behavioral eval | A field count can't distinguish a dropped `title` (harmless) from a dropped `enum` (the model now emits invalid values) — both score `-1 lossy`; only observed behavior separates them. | Structural-only (rejected: false equivalence between harmless and breaking deltas); behavioral-only (rejected: too slow and expensive to run across every tool). |
+| **Two layers — deterministic and behavioral** | A complete adapter diff plus a prompt-based behavioral eval | The diff is deterministic and localizes changes across every tool; the eval is partial and slower but supplies impact. Neither answer substitutes for the other. | Diff-only (rejected: false equivalence between harmless and breaking deltas); behavioral-only (rejected: too slow and expensive to run across every tool, and weak at root cause). |
 | **Score against per-case ground truth, not the framework's schema** | Layer 2 critics check generated arguments against `expected_args` written for each case | The target failure is a framework relaxing a constraint and the model emitting a value the framework accepts but the real tool rejects — caught only by scoring against ground truth. | Validate against framework schema (rejected: hides the exact bug we're looking for); validate against the server's JSON Schema only (rejected: structural-only, misses semantic correctness). |
 | **Per-track suite, not a single comparative suite** | Each framework's view runs in its own `EvalSuite`; results are aggregated after | A provider that refuses one framework's schema (e.g., OpenAI rejecting `oneOf`) would sink a single comparative suite; per-track isolation turns that refusal into `rejected=True` for one track instead of an error for all. | `add_comparative_case` across one suite (rejected: schema rejections are suite-fatal, not local). |
 | **MCP surface of `arcade_evals`, not the catalog surface** | Use `MCPToolDefinition` + `ExpectedMCPToolCall` instead of `@tool_eval` + `ExpectedToolCall` | mcp-mirror's input is raw MCP tool definitions, not registered Arcade tools — the catalog surface needs a `ToolCatalog` populated from Python modules we don't have. | `ToolCatalog` + `@tool_eval` (rejected: would require wrapping every captured view in a fake catalog entry just to satisfy the decorator). |
@@ -198,26 +207,26 @@ tests/
 
 ## Benefits
 
-1. **Cross-framework parity in seconds.** Capture + diff a 50-tool gateway across 5 frameworks in under 30 seconds end-to-end (I/O-bound; the diff itself is microseconds).
-2. **Behavior, not just structure.** Field-level critics score every generated argument against the server's contract — catches framework-relaxed constraints the structural diff cannot.
-3. **Provider rejection is a finding, not an error.** When OpenAI refuses a representation's schema, that's `rejected=True` for that track, not a crash for the whole run.
-4. **No bespoke harness.** Reuses `arcade_evals` (engine, critics, rubrics) and Arcade's gateway OAuth — mcp-mirror adds the framework loop, not the eval engine.
-5. **Vocabulary teams can share.** `faithful` / `lossy` / `additive` / `transformative` — a four-word categorical lexicon that fits in a Slack message.
-6. **No silent failures.** Every capture produces either a `ToolView` or a structured failure record; every Layer 2 track produces either pass/warn/fail counts or an explicit `rejected=True` / `errored=True` with reason.
+1. **Adapter regression signal in seconds.** Capture + diff a gateway across five frameworks and see exactly which fields changed since the last run.
+2. **Complete structural coverage.** Layer 1 covers every announced tool without golden cases; on the live gateway that is 100 tools x 5 frameworks.
+3. **Behavior, not just structure.** Field-level critics score generated arguments against the server's contract — catches framework-relaxed constraints the deterministic diff cannot rank by impact.
+4. **Root cause for behavioral failures.** Layer 2 says "the model omitted `priority`"; Layer 1 says "the adapter dropped `priority.enum` and rewrote the field shape."
+5. **Provider rejection is a finding, not an error.** When OpenAI refuses a representation's schema, that's `rejected=True` for that track, not a crash for the whole run.
+6. **No bespoke harness.** Reuses `arcade_evals` (engine, critics, rubrics) and Arcade's gateway OAuth — mcp-mirror adds the framework loop, not the eval engine.
 7. **Public artifact, runnable today.** Open-source repo (`github.com/thierrypdamiba/mcp-mirror`), sample run against the live Arcade gateway committed at `docs/sample-runs/`.
 
 ## Migration Path
 
 ### Phase 1 — both layers built (today)
 - 5 framework captures + server ground-truth, transport-agnostic.
-- Layer 1 diff + categorical scorecard + drill-down.
+- Layer 1 adapter diff + scorecard + drill-down.
 - Layer 2 on `arcade_evals` with per-track isolation and `SafeNumericCritic`.
 - Golden case set for the bundled reference tools (`send_message`, `search_records`).
 - Sample run against the live Arcade gateway committed at `docs/sample-runs/arcade-mcp-mirror-gateway.json`.
 - RFC 9728/7591/7636/8707 OAuth against the production gateway.
 
 ### Phase 2 — real-tool eval coverage
-- Golden cases for high-traffic Arcade toolkits (`Github_*`, `Linear_*`, `Gmail_*`, `Slack_*`). One case per tool that probes a schema feature the structural diff flags as risky (`enum`, `required`, `oneOf`, numeric bounds).
+- Golden cases for high-traffic Arcade toolkits (`Github_*`, `Linear_*`, `Gmail_*`, `Slack_*`). One case per tool that probes a schema feature the adapter diff flags as risky (`enum`, `required`, `oneOf`, numeric bounds).
 - Stretch: per-toolkit summary view in the scorecard ("LangChain is lossy on 11/52 Linear tools, faithful on Gmail").
 
 ### Phase 3 — distractor + per-model studies
@@ -227,6 +236,18 @@ tests/
 ### Phase 4 — scorecard service (optional)
 - CI hook + JSON scorecard format so framework maintainers can run mcp-mirror on PR and surface regressions.
 - Conditional on whether the manual run pattern proves insufficient — defer until there is real demand from a framework maintainer.
+
+## Related Work
+
+mcp-mirror's axis is adapter fidelity: hold one MCP server constant, vary the framework adapter, and inspect the tool representation that reaches the model.
+
+| Work | What it measures | Why mcp-mirror is different |
+| ---- | ---------------- | --------------------------- |
+| **Arcade ToolBench** | MCP server quality: definition quality, protocol compliance, security, supportability | Grades the server before any framework consumes it; mcp-mirror measures what adapters do after consumption. |
+| **MCP conformance suites** | Whether clients, servers, and SDKs implement the MCP specification correctly | Protocol conformance can pass while a framework still rewrites the model-facing tool schema. |
+| **BFCL / tau-bench** | Model or agent tool-use ability | Vary the model/agent; mcp-mirror varies the adapter over a fixed server. |
+| **MCP-Bench / MCP-Atlas / MCPVerse** | Tool-use competency over real MCP servers and larger tool spaces | Benchmark end-task success; mcp-mirror diagnoses adapter transformation before task execution. |
+| **Fan et al., information-fidelity martingale analysis** | Theoretical error accumulation across sequential MCP tool calls | Useful background for fidelity as a reliability concern; not an empirical cross-framework adapter study. |
 
 ## Ownership
 
@@ -256,3 +277,4 @@ If Arcade ever needs to publish a framework-compatibility statement — "the Arc
 - MCP authorization: RFC 9728 (protected-resource metadata), RFC 7591 (DCR), RFC 8707 (resource indicators), RFC 7636 (PKCE).
 - Live reference dataset: `docs/sample-runs/arcade-mcp-mirror-gateway.json` (committed; safe — provider metadata + secret *key names* only, no values).
 - Behavioral layer built on Arcade's `arcade_evals` library (`EvalSuite`, critics, `add_tool_definitions`, `add_case`).
+- Related-work anchors: Arcade ToolBench (`https://www.arcade.dev/blog/introducing-toolbench-quality-benchmark-mcp-servers/`), MCP conformance (`https://github.com/modelcontextprotocol/conformance`), BFCL (`https://www2.eecs.berkeley.edu/Pubs/TechRpts/2025/EECS-2025-184.html`), MCP-Bench (`https://openreview.net/pdf?id=fe8mzHwMxN`), MCP-Atlas (`https://arxiv.org/abs/2602.00933`), MCPVerse (`https://arxiv.org/abs/2508.16260`), Fan et al. information fidelity (`https://arxiv.org/abs/2602.13320`).
