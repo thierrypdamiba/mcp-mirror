@@ -1,0 +1,66 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "tool-name",
+  "title": "`name`",
+  "description": "The identifier the model emits in order to invoke the tool.",
+  "question": "Is the tool name unchanged in the model input?",
+  "spec": "https://modelcontextprotocol.io/specification",
+  "status": "stable",
+  "categories": [
+    "Identity and text"
+  ],
+  "keywords": "name,tool name,namespace,prefix,identifier",
+  "stats": {
+    "crewai": {
+      "1.14.7": "y"
+    },
+    "langchain": {
+      "0.3.0": "y"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "1.107.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "a #1"
+    }
+  },
+  "notes": "Four frameworks pass the tool name through untouched. One namespaces it with the server key.",
+  "notes_by_num": {
+    "1": "Mastra: tools are namespaced as `<serverKey>_<toolName>`, so `delete_account` is presented to the model as `src_delete_account`."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "Unchanged in four frameworks, namespaced in one.",
+    "detail": "Prefixing is a transformation rather than a loss, but it changes the exact string the model must produce."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool-names",
+      "title": "MCP Docs"
+    },
+    {
+      "url": "https://platform.openai.com/docs/guides/function-calling",
+      "title": "OpenAI function calling, tool schema"
+    }
+  ],
+  "known_issues": [
+    "A prefixed name changes between server configurations, so a hard coded allowlist can silently stop matching."
+  ],
+  "why": "Name based routing, allowlists, and eval fixtures that match exact tool names break under prefixing.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J1",
+  "measured": {
+    "run_date": "2026-09-04",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2025-11-25",
+  "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool-names",
+  "docs_label": "MCP Docs"
+}

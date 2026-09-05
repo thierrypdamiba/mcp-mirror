@@ -1,0 +1,63 @@
+[project]
+name = "mcp-mirror"
+version = "0.1.0"
+description = "Capture what an LLM actually receives from an MCP server after tool definitions pass through different agent frameworks, and score each transform as faithful, lossy, additive, or transformative."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "mcp-mirror contributors" }]
+keywords = ["mcp", "llm", "agents", "tools", "diff", "authorization", "langchain", "pydantic-ai", "crewai"]
+dependencies = [
+    "mcp>=1.2",
+    "pydantic>=2.6",
+    "typer>=0.12",
+    "rich>=13.7",
+    "anyio>=4.3",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+langchain = [
+    "langchain-mcp-adapters>=0.1.0",
+    "langchain-core>=0.3.0",
+]
+pydantic-ai = [
+    "pydantic-ai-slim[mcp]>=0.0.30",
+]
+crewai = [
+    "crewai-tools[mcp]>=0.25.0",
+]
+openai-agents = [
+    "openai-agents>=0.2.0",
+]
+# NOTE: Mastra is a TypeScript framework with no Python package. Its renderer drives
+# the real @mastra/mcp client via a Node worker; enable it with:
+#   cd src/mcp_mirror/renderers/mastra_node && npm install   (requires Node on PATH)
+all = [
+    "langchain-mcp-adapters>=0.1.0",
+    "langchain-core>=0.3.0",
+    "pydantic-ai-slim[mcp]>=0.0.30",
+    "crewai-tools[mcp]>=0.25.0",
+    "openai-agents>=0.2.0",
+]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+mcp-mirror = "mcp_mirror.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/mcp-mirror/mcp-mirror"
+Documentation = "https://github.com/mcp-mirror/mcp-mirror/blob/main/DESIGN.md"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_mirror"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

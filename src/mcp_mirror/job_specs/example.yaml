@@ -1,0 +1,20 @@
+# Job-spec template. Copy to <provider>.yaml and edit against a real server's tools.
+#
+# A job declares what it NEEDS; mcp-mirror checks whether each framework's rendering
+# still exposes that. A job PASSES even if the framework dropped unrelated fields
+# (change is not degradation). It DEGRADES when a constraint or a required annotation
+# is weakened, and FAILS when a needed tool or param never reaches the model.
+#
+# Tip (the capability-stress pattern): require an annotation or a constraint that a
+# weaker MCP client tends to drop, so a non-compliant framework fails the job measurably.
+provider: example
+jobs:
+  - id: example-task
+    title: "When <situation>, the agent can <do the task>, so <outcome>."
+    requires:
+      - tool: SomeTool            # source tool name (as the server publishes it)
+        params: [arg1, arg2]      # params that must reach the model
+        required_params: [arg1]   # params that must stay in the 'required' set
+        constraints:              # JSON-Schema keys that must survive on a param
+          arg2: [enum]
+        annotations: [destructiveHint]  # annotations that must be SURFACED to the model

@@ -1,0 +1,10 @@
+{
+  "name": "mcp-mirror-mastra-worker",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Node worker that drives Mastra's real MCP client so mcp-mirror can capture what Mastra sends the model. Run `npm install` here to enable the Mastra renderer.",
+  "dependencies": {
+    "@mastra/mcp": "^1.17.3"
+  }
+}

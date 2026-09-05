@@ -1,0 +1,640 @@
+{
+  "schema": "mcp-mirror/data@1.0",
+  "updated": "2026-09-04",
+  "mcp_spec": "2025-11-25",
+  "repo": "https://github.com/thierrypdamiba/mcp-mirror",
+  "eras": {
+    "e-3": "3 release(s) before current",
+    "e-2": "2 release(s) before current",
+    "e-1": "1 release(s) before current",
+    "e0": "current release",
+    "e1": "1 release(s) after current",
+    "e2": "2 release(s) after current"
+  },
+  "agents": {
+    "crewai": {
+      "name": "CrewAI",
+      "abbr": "Crew",
+      "type": "python",
+      "package": "crewai-tools",
+      "registry": "pypi",
+      "adapter": "crewai_tools.MCPServerAdapter",
+      "renderer": "src/mcp_mirror/renderers/crewai_renderer.py",
+      "current_version": "1.14.7",
+      "stable_version": "1.15.1",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "1.14.4",
+          "release_date": "2026-04-30T19:12:43Z",
+          "era": -3,
+          "release_date_unix": 1777576363
+        },
+        {
+          "version": "1.14.5",
+          "release_date": "2026-05-18T19:20:51Z",
+          "era": -2,
+          "release_date_unix": 1779132051
+        },
+        {
+          "version": "1.14.6",
+          "release_date": "2026-05-28T17:05:44Z",
+          "era": -1,
+          "release_date_unix": 1779987944
+        },
+        {
+          "version": "1.14.7",
+          "release_date": "2026-06-11T17:14:49Z",
+          "era": 0,
+          "release_date_unix": 1781198089
+        },
+        {
+          "version": "1.15.0",
+          "release_date": "2026-06-25T23:18:37Z",
+          "era": 1,
+          "release_date_unix": 1782429517
+        },
+        {
+          "version": "1.15.1",
+          "release_date": "2026-06-27T06:51:32Z",
+          "era": 2,
+          "release_date_unix": 1782543092
+        }
+      ]
+    },
+    "langchain": {
+      "name": "LangChain",
+      "abbr": "LC",
+      "type": "python",
+      "package": "langchain-mcp-adapters",
+      "registry": "pypi",
+      "adapter": "langchain_mcp_adapters with convert_to_openai_tool",
+      "renderer": "src/mcp_mirror/renderers/langchain_renderer.py",
+      "current_version": "0.3.0",
+      "stable_version": "0.3.2",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "0.2.0",
+          "release_date": "2025-12-09T12:57:55Z",
+          "era": -3,
+          "release_date_unix": 1765285075
+        },
+        {
+          "version": "0.2.1",
+          "release_date": "2025-12-09T16:28:37Z",
+          "era": -2,
+          "release_date_unix": 1765297717
+        },
+        {
+          "version": "0.2.2",
+          "release_date": "2026-03-16T17:13:29Z",
+          "era": -1,
+          "release_date_unix": 1773681209
+        },
+        {
+          "version": "0.3.0",
+          "release_date": "2026-06-10T01:10:27Z",
+          "era": 0,
+          "release_date_unix": 1781053827
+        },
+        {
+          "version": "0.3.1",
+          "release_date": "2026-07-27T18:36:44Z",
+          "era": 1,
+          "release_date_unix": 1785177404
+        },
+        {
+          "version": "0.3.2",
+          "release_date": "2026-08-06T06:15:02Z",
+          "era": 2,
+          "release_date_unix": 1785996902
+        }
+      ]
+    },
+    "openai-agents": {
+      "name": "OpenAI Agents SDK",
+      "abbr": "OAI",
+      "type": "python",
+      "package": "openai-agents",
+      "registry": "pypi",
+      "adapter": "agents.mcp.util.MCPUtil.to_function_tool",
+      "renderer": "src/mcp_mirror/renderers/openai_agents_renderer.py",
+      "current_version": "0.22.0",
+      "stable_version": "0.22.0",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "0.20.0",
+          "release_date": "2026-08-11T03:12:47Z",
+          "era": -3,
+          "release_date_unix": 1786417967
+        },
+        {
+          "version": "0.21.0",
+          "release_date": "2026-08-15T02:50:08Z",
+          "era": -2,
+          "release_date_unix": 1786762208
+        },
+        {
+          "version": "0.21.1",
+          "release_date": "2026-08-16T22:29:33Z",
+          "era": -1,
+          "release_date_unix": 1786919373
+        },
+        {
+          "version": "0.22.0",
+          "release_date": "2026-08-19T13:45:19Z",
+          "era": 0,
+          "release_date_unix": 1787147119
+        }
+      ]
+    },
+    "pydantic-ai": {
+      "name": "Pydantic AI",
+      "abbr": "PAI",
+      "type": "python",
+      "package": "pydantic-ai-slim",
+      "registry": "pypi",
+      "adapter": "pydantic_ai.mcp toolset ToolDefinition",
+      "renderer": "src/mcp_mirror/renderers/pydantic_ai_renderer.py",
+      "current_version": "1.107.0",
+      "stable_version": "2.1.0",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "1.104.0",
+          "release_date": "2026-05-29T04:52:27Z",
+          "era": -3,
+          "release_date_unix": 1780030347
+        },
+        {
+          "version": "1.105.0",
+          "release_date": "2026-06-02T06:19:52Z",
+          "era": -2,
+          "release_date_unix": 1780381192
+        },
+        {
+          "version": "1.106.0",
+          "release_date": "2026-06-05T01:28:59Z",
+          "era": -1,
+          "release_date_unix": 1780622939
+        },
+        {
+          "version": "1.107.0",
+          "release_date": "2026-06-10T14:53:03Z",
+          "era": 0,
+          "release_date_unix": 1781103183
+        },
+        {
+          "version": "2.0.0",
+          "release_date": "2026-06-23T15:48:51Z",
+          "era": 1,
+          "release_date_unix": 1782229731
+        },
+        {
+          "version": "2.1.0",
+          "release_date": "2026-06-29T09:51:11Z",
+          "era": 2,
+          "release_date_unix": 1782726671
+        }
+      ]
+    },
+    "mastra": {
+      "name": "Mastra",
+      "abbr": "Mas",
+      "type": "typescript",
+      "package": "@mastra/mcp",
+      "registry": "npm",
+      "adapter": "@mastra/mcp MCPClient.listTools",
+      "renderer": "src/mcp_mirror/renderers/mastra_renderer.py",
+      "current_version": "1.17.3",
+      "stable_version": "1.17.3",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "1.17.0",
+          "release_date": "2026-08-19T04:09:11Z",
+          "era": -3,
+          "release_date_unix": 1787112551
+        },
+        {
+          "version": "1.17.1",
+          "release_date": "2026-08-21T01:17:44Z",
+          "era": -2,
+          "release_date_unix": 1787275064
+        },
+        {
+          "version": "1.17.2",
+          "release_date": "2026-08-26T10:55:03Z",
+          "era": -1,
+          "release_date_unix": 1787741703
+        },
+        {
+          "version": "1.17.3",
+          "release_date": "2026-09-03T04:14:30Z",
+          "era": 0,
+          "release_date_unix": 1788408870
+        }
+      ]
+    }
+  },
+  "statuses": {
+    "stable": {
+      "short": "MCP 2025-11-25",
+      "label": "Defined in the released MCP specification"
+    },
+    "draft": {
+      "short": "MCP draft",
+      "label": "Defined only in a draft revision of the MCP specification"
+    },
+    "proposed": {
+      "short": "proposed",
+      "label": "Proposed, not yet in any published specification"
+    }
+  },
+  "support_codes": {
+    "y": "present in the model input",
+    "a": "kept by the framework, not surfaced to the model",
+    "n": "dropped",
+    "u": "not yet measured"
+  },
+  "defaults": {
+    "inclusion_rule": "A framework is listed if it ships a first-party or officially documented MCP adapter. Nothing is excluded on quality grounds.",
+    "order_rule": "Alphabetical within language group. No ranking is implied or computed.",
+    "version_policy": "Era 0 is the release actually measured. Surrounding releases come from the package registry (PyPI, npm) and are shown as not yet measured until a scan covers them.",
+    "green_rule": "A cell is 'y' only if the value is present in the tool specification the model receives. Nothing else counts.",
+    "partial_rule": "'a' means the framework still holds the value where your own code can read it, but it is absent from what the model sees.",
+    "note_rule": "Every 'a' and 'n' cell must carry a #n note reference naming the exact mechanism, so a status can be checked rather than trusted.",
+    "usage_rule": "No adoption weighting is published. We have no defensible source yet, and an invented percentage would be the least trustworthy number on the page."
+  },
+  "popularity": {
+    "schema": "mcp-mirror/popularity@1",
+    "mode": "mock",
+    "generated_at": "2026-09-04T00:00:00Z",
+    "windows": [
+      "hour",
+      "day",
+      "week",
+      "month",
+      "quarter",
+      "year",
+      "all_time"
+    ],
+    "entries": [
+      {
+        "capability_id": "tool-name",
+        "counts": {
+          "hour": [
+            12,
+            11
+          ],
+          "day": [
+            100,
+            90
+          ],
+          "week": [
+            800,
+            700
+          ],
+          "month": [
+            3300,
+            3000
+          ],
+          "quarter": [
+            9800,
+            9000
+          ],
+          "year": [
+            39000,
+            35000
+          ],
+          "all_time": [
+            82000,
+            76000
+          ]
+        }
+      },
+      {
+        "capability_id": "required",
+        "counts": {
+          "hour": [
+            40,
+            20
+          ],
+          "day": [
+            50,
+            100
+          ],
+          "week": [
+            650,
+            500
+          ],
+          "month": [
+            2900,
+            2700
+          ],
+          "quarter": [
+            8700,
+            8200
+          ],
+          "year": [
+            35000,
+            33000
+          ],
+          "all_time": [
+            76000,
+            71000
+          ]
+        }
+      },
+      {
+        "capability_id": "nested-objects",
+        "counts": {
+          "hour": [
+            18,
+            30
+          ],
+          "day": [
+            140,
+            70
+          ],
+          "week": [
+            560,
+            600
+          ],
+          "month": [
+            3100,
+            2400
+          ],
+          "quarter": [
+            7400,
+            7900
+          ],
+          "year": [
+            32000,
+            28000
+          ],
+          "all_time": [
+            69000,
+            65000
+          ]
+        }
+      },
+      {
+        "capability_id": "description-fidelity",
+        "counts": {
+          "hour": [
+            22,
+            21
+          ],
+          "day": [
+            90,
+            120
+          ],
+          "week": [
+            900,
+            450
+          ],
+          "month": [
+            2500,
+            2600
+          ],
+          "quarter": [
+            9100,
+            7000
+          ],
+          "year": [
+            30000,
+            31000
+          ],
+          "all_time": [
+            64000,
+            60000
+          ]
+        }
+      },
+      {
+        "capability_id": "arrays-of-objects",
+        "counts": {
+          "hour": [
+            30,
+            10
+          ],
+          "day": [
+            80,
+            70
+          ],
+          "week": [
+            400,
+            300
+          ],
+          "month": [
+            3500,
+            1800
+          ],
+          "quarter": [
+            6900,
+            6200
+          ],
+          "year": [
+            28000,
+            23000
+          ],
+          "all_time": [
+            59000,
+            54000
+          ]
+        }
+      },
+      {
+        "capability_id": "enum",
+        "counts": {
+          "hour": [
+            15,
+            12
+          ],
+          "day": [
+            160,
+            80
+          ],
+          "week": [
+            500,
+            480
+          ],
+          "month": [
+            2100,
+            1700
+          ],
+          "quarter": [
+            10000,
+            5000
+          ],
+          "year": [
+            26000,
+            25000
+          ],
+          "all_time": [
+            52000,
+            49000
+          ]
+        }
+      },
+      {
+        "capability_id": "format",
+        "counts": {
+          "hour": [
+            10,
+            25
+          ],
+          "day": [
+            110,
+            105
+          ],
+          "week": [
+            750,
+            500
+          ],
+          "month": [
+            2000,
+            2200
+          ],
+          "quarter": [
+            6100,
+            5900
+          ],
+          "year": [
+            34000,
+            17000
+          ],
+          "all_time": [
+            47000,
+            45000
+          ]
+        }
+      },
+      {
+        "capability_id": "destructive-hint",
+        "counts": {
+          "hour": [
+            11,
+            10
+          ],
+          "day": [
+            70,
+            65
+          ],
+          "week": [
+            300,
+            290
+          ],
+          "month": [
+            1800,
+            1700
+          ],
+          "quarter": [
+            5200,
+            5000
+          ],
+          "year": [
+            21000,
+            20000
+          ],
+          "all_time": [
+            41000,
+            39000
+          ]
+        }
+      }
+    ]
+  },
+  "cats": {
+    "Structure": [
+      "arrays-of-objects",
+      "nested-objects",
+      "one-of-any-of"
+    ],
+    "Identity and text": [
+      "description-fidelity",
+      "long-descriptions",
+      "tool-name"
+    ],
+    "Tool annotations": [
+      "destructive-hint",
+      "idempotent-hint",
+      "open-world-hint",
+      "read-only-hint",
+      "title-annotation"
+    ],
+    "Parameter contract": [
+      "enum",
+      "format",
+      "numeric-range",
+      "required"
+    ]
+  },
+  "data": {
+    "arrays-of-objects": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "arrays-of-objects",
+      "title": "Arrays of Objects",
+      "description": "A list parameter whose items are structured objects.",
+      "question": "Do arrays of structured items survive to the model?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Structure"
+      ],
+      "keywords": "array,items,list,structure",
+      "stats": {
+        "crewai": {
+          "1.14.7": "y"
+        },
+        "langchain": {
+          "0.3.0": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "1.107.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Measured as present in every framework's model input.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "y",
+        "headline": "Survives to the model in all five listed frameworks.",
+        "detail": "Item schemas arrive intact."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/array#items",
+          "title": "JSON Schema Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "Item schema loss would let the model send malformed list entries.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/array#items",
+      "docs_label": "JSON Schema Docs"
+    }
+  }
+}

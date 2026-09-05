@@ -1,0 +1,16 @@
+{
+  "schema": "mcp-mirror/popularity@1",
+  "mode": "mock",
+  "generated_at": "2026-09-04T00:00:00Z",
+  "windows": ["hour", "day", "week", "month", "quarter", "year", "all_time"],
+  "entries": [
+    {"capability_id": "tool-name", "counts": {"hour": [12, 11], "day": [100, 90], "week": [800, 700], "month": [3300, 3000], "quarter": [9800, 9000], "year": [39000, 35000], "all_time": [82000, 76000]}},
+    {"capability_id": "required", "counts": {"hour": [40, 20], "day": [50, 100], "week": [650, 500], "month": [2900, 2700], "quarter": [8700, 8200], "year": [35000, 33000], "all_time": [76000, 71000]}},
+    {"capability_id": "nested-objects", "counts": {"hour": [18, 30], "day": [140, 70], "week": [560, 600], "month": [3100, 2400], "quarter": [7400, 7900], "year": [32000, 28000], "all_time": [69000, 65000]}},
+    {"capability_id": "description-fidelity", "counts": {"hour": [22, 21], "day": [90, 120], "week": [900, 450], "month": [2500, 2600], "quarter": [9100, 7000], "year": [30000, 31000], "all_time": [64000, 60000]}},
+    {"capability_id": "arrays-of-objects", "counts": {"hour": [30, 10], "day": [80, 70], "week": [400, 300], "month": [3500, 1800], "quarter": [6900, 6200], "year": [28000, 23000], "all_time": [59000, 54000]}},
+    {"capability_id": "enum", "counts": {"hour": [15, 12], "day": [160, 80], "week": [500, 480], "month": [2100, 1700], "quarter": [10000, 5000], "year": [26000, 25000], "all_time": [52000, 49000]}},
+    {"capability_id": "format", "counts": {"hour": [10, 25], "day": [110, 105], "week": [750, 500], "month": [2000, 2200], "quarter": [6100, 5900], "year": [34000, 17000], "all_time": [47000, 45000]}},
+    {"capability_id": "destructive-hint", "counts": {"hour": [11, 10], "day": [70, 65], "week": [300, 290], "month": [1800, 1700], "quarter": [5200, 5000], "year": [21000, 20000], "all_time": [41000, 39000]}}
+  ]
+}

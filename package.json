@@ -1,0 +1,44 @@
+{
+  "name": "mcp-mirror",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Support tables for MCP tool-definition fidelity across agent frameworks.",
+  "type": "module",
+  "scripts": {
+    "build:data": "python3 scripts/build_data.py",
+    "build": "npm run build:data && npm run news:validate && npm run typecheck && vite build && node scripts/build_standalone.mjs",
+    "dev": "npm run build:data && vite",
+    "preview": "vite preview",
+    "news:validate": "node scripts/validate_news.mjs",
+    "smoke:site": "npm run build && node scripts/smoke_site.mjs",
+    "smoke:responsive": "npm run build && node scripts/smoke_responsive.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck"
+  },
+  "keywords": [
+    "mcp",
+    "agent-frameworks",
+    "compatibility"
+  ],
+  "author": "Thierry Damiba",
+  "license": "MIT",
+  "dependencies": {
+    "@fontsource/inconsolata": "^5.3.0",
+    "@fontsource/open-sans": "^5.3.0",
+    "@heroui/react": "^3.2.4",
+    "@heroui/styles": "^3.2.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "simple-icons": "^16.29.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "playwright-core": "^1.62.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2"
+  }
+}

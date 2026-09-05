@@ -1,0 +1,64 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "nested-objects",
+  "title": "Nested Objects",
+  "description": "An object typed parameter carrying its own nested properties.",
+  "question": "Does nested structure survive to the model?",
+  "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+  "status": "stable",
+  "categories": [
+    "Structure"
+  ],
+  "keywords": "nested,object,structure,schema",
+  "stats": {
+    "crewai": {
+      "1.14.7": "y #1"
+    },
+    "langchain": {
+      "0.3.0": "y"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "1.107.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "y"
+    }
+  },
+  "notes": "Nested input survives everywhere measured. A reference based encoding is an equivalent representation, not a loss.",
+  "notes_by_num": {
+    "1": "CrewAI: nested types are re expressed via `$defs` and `$ref`. Semantically equivalent, so mcp-mirror resolves the reference before comparing rather than reporting it as flattening."
+  },
+  "verdict": {
+    "code": "y",
+    "headline": "Survives to the model in all five listed frameworks.",
+    "detail": "One framework re expresses nesting by reference. The structure is preserved either way."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://json-schema.org/understanding-json-schema/reference/object#properties",
+      "title": "JSON Schema Docs"
+    },
+    {
+      "url": "https://platform.openai.com/docs/guides/function-calling",
+      "title": "OpenAI function calling, tool schema"
+    }
+  ],
+  "known_issues": [],
+  "why": "If nested structure were flattened or dropped, complex calls would silently degrade.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
+  "measured": {
+    "run_date": "2026-09-04",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "JSON Schema 2020-12",
+  "docs_url": "https://json-schema.org/understanding-json-schema/reference/object#properties",
+  "docs_label": "JSON Schema Docs"
+}

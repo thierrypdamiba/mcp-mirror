@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual env / tooling
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node (run `npm install` to restore dependencies)
+node_modules/
+src/mcp_mirror/renderers/mastra_node/package-lock.json
+
+# Generated compatibility-site output (`npm run build`)
+docs/
+
+# mcp-mirror run artifacts
+baseline.json
+report.json

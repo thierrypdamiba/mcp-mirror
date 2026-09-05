@@ -1,0 +1,62 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "arrays-of-objects",
+  "title": "Arrays of Objects",
+  "description": "A list parameter whose items are structured objects.",
+  "question": "Do arrays of structured items survive to the model?",
+  "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+  "status": "stable",
+  "categories": [
+    "Structure"
+  ],
+  "keywords": "array,items,list,structure",
+  "stats": {
+    "crewai": {
+      "1.14.7": "y"
+    },
+    "langchain": {
+      "0.3.0": "y"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "1.107.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "y"
+    }
+  },
+  "notes": "Measured as present in every framework's model input.",
+  "notes_by_num": {},
+  "verdict": {
+    "code": "y",
+    "headline": "Survives to the model in all five listed frameworks.",
+    "detail": "Item schemas arrive intact."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://json-schema.org/understanding-json-schema/reference/array#items",
+      "title": "JSON Schema Docs"
+    },
+    {
+      "url": "https://platform.openai.com/docs/guides/function-calling",
+      "title": "OpenAI function calling, tool schema"
+    }
+  ],
+  "known_issues": [],
+  "why": "Item schema loss would let the model send malformed list entries.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
+  "measured": {
+    "run_date": "2026-09-04",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "JSON Schema 2020-12",
+  "docs_url": "https://json-schema.org/understanding-json-schema/reference/array#items",
+  "docs_label": "JSON Schema Docs"
+}

@@ -1,0 +1,68 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "open-world-hint",
+  "title": "`openWorldHint`",
+  "description": "Marks a tool as touching the open world: external, non deterministic effects.",
+  "question": "Is the openWorldHint annotation present in the model input?",
+  "spec": "https://modelcontextprotocol.io/specification",
+  "status": "stable",
+  "categories": [
+    "Tool annotations"
+  ],
+  "keywords": "openWorldHint,open world hint,annotations,safety,authorization",
+  "stats": {
+    "crewai": {
+      "1.14.7": "n #1"
+    },
+    "langchain": {
+      "0.3.0": "a #2"
+    },
+    "openai-agents": {
+      "0.22.0": "n #3"
+    },
+    "pydantic-ai": {
+      "1.107.0": "a #4"
+    },
+    "mastra": {
+      "1.17.3": "n #5"
+    }
+  },
+  "notes": "No listed framework surfaces MCP annotations to the model. The function-tool format all of them serialise to has no field to carry one, so this row reads the same for every framework. Partial support ('a') means the framework still holds the value where your own policy layer can read it. Either way, the model input omits it.",
+  "notes_by_num": {
+    "1": "CrewAI: the adapted tool object exposes no annotations field, so the value is not recoverable after adaptation.",
+    "2": "LangChain: retained on `StructuredTool.metadata`, so your own code can read it. Not part of the payload `convert_to_openai_tool` produces for the model.",
+    "3": "OpenAI Agents SDK: `FunctionTool` keeps `_mcp_title` only. The behavioural hints are not carried.",
+    "4": "Pydantic AI: retained in `ToolDefinition.metadata['annotations']`. Not part of `parameters_json_schema`.",
+    "5": "Mastra: `mcpMetadata` carries the server name and version only. Annotations are not attached to the tool."
+  },
+  "verdict": {
+    "code": "n",
+    "headline": "Absent from every listed framework's model input.",
+    "detail": "MCP defines the annotation. The function-tool format every listed framework serialises to has no field to carry it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations",
+      "title": "MCP Docs"
+    },
+    {
+      "url": "https://platform.openai.com/docs/guides/function-calling",
+      "title": "OpenAI function calling, tool schema"
+    }
+  ],
+  "known_issues": [],
+  "why": "The model input contains no structured signal that a call escapes the local system.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+  "measured": {
+    "run_date": "2026-09-04",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2025-11-25",
+  "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations",
+  "docs_label": "MCP Docs"
+}

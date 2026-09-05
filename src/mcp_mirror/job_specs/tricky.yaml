@@ -1,0 +1,36 @@
+# Job spec for the bundled tricky fixture (fixtures/tricky_server.py).
+#
+# Pairs with the fixture so the whole pipeline is demoable end to end:
+#
+#     mcp-mirror scan "python fixtures/tricky_server.py" --jtbd tricky
+#
+# A job PASSES when what it needs survived to the model, DEGRADES when a
+# constraint or required safety signal was weakened, and FAILS when a needed
+# tool or param never reached the model.
+provider: tricky
+jobs:
+  - id: find-records
+    title: "When a user asks to find records by status or owner, the agent can search with the right filters, so it returns the correct subset instead of guessing."
+    requires:
+      - tool: search_records
+        params: [query, status, owner_email]
+        required_params: [query]
+        constraints:
+          status: [enum]          # the model must know the allowed statuses
+          owner_email: [format]   # the model must know this is an email
+          limit: [minimum, maximum]
+
+  - id: build-structured-report
+    title: "When a user asks for a structured report, the agent can supply the nested config and section objects, so the report renders as intended."
+    requires:
+      - tool: create_report
+        params: [title, config, sections]
+        required_params: [title, config]
+
+  - id: delete-account-safely
+    title: "When a user asks to delete an account, the agent can tell the tool is destructive, so it does not fire it unaware."
+    requires:
+      - tool: delete_account
+        params: [account_id, confirm]
+        required_params: [account_id, confirm]
+        annotations: [destructiveHint]   # must be SURFACED to the model to pass

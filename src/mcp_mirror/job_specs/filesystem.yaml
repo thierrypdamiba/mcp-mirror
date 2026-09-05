@@ -1,0 +1,52 @@
+# Jobs-To-Be-Done for the official MCP filesystem server
+# (npx -y @modelcontextprotocol/server-filesystem <dir>).
+#
+# Each job declares what a real task needs. A job passes if those needs survive the
+# framework, even if the framework dropped unrelated fields. Note the deliberate design:
+# read jobs do NOT require the readOnlyHint (you do not need to know a read is read-only
+# to do it safely), but every destructive job requires destructiveHint to reach the
+# model, because acting destructively without that signal is the real risk.
+provider: filesystem
+jobs:
+  - id: read-a-file
+    title: "When a user asks to read a file, the agent can call read_file with a path."
+    requires:
+      - tool: read_file
+        params: [path]
+        required_params: [path]
+
+  - id: list-a-folder
+    title: "When a user asks what is in a folder, the agent can call list_directory with a path."
+    requires:
+      - tool: list_directory
+        params: [path]
+        required_params: [path]
+
+  - id: search-for-files
+    title: "When a user asks to find files matching a pattern, the agent can call search_files."
+    requires:
+      - tool: search_files
+        params: [path, pattern]
+
+  - id: write-knowing-its-destructive
+    title: "When a user asks to write a file, the model gets path and content AND can see write_file is destructive before it acts."
+    requires:
+      - tool: write_file
+        params: [path, content]
+        required_params: [path, content]
+        annotations: [destructiveHint]
+
+  - id: move-knowing-its-destructive
+    title: "When a user asks to move a file, the model gets source and destination AND knows move_file is destructive."
+    requires:
+      - tool: move_file
+        params: [source, destination]
+        required_params: [source, destination]
+        annotations: [destructiveHint]
+
+  - id: edit-knowing-its-destructive
+    title: "When a user asks to edit a file in place, the model gets the edits AND can see edit_file is destructive."
+    requires:
+      - tool: edit_file
+        params: [path, edits]
+        annotations: [destructiveHint]

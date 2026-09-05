@@ -1,0 +1,62 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "required",
+  "title": "`required`",
+  "description": "Which parameters must be supplied for the call to be valid.",
+  "question": "Is the required parameter set present in the model input?",
+  "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+  "status": "stable",
+  "categories": [
+    "Parameter contract"
+  ],
+  "keywords": "required,required properties,parameters,contract",
+  "stats": {
+    "crewai": {
+      "1.14.7": "y"
+    },
+    "langchain": {
+      "0.3.0": "y"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "1.107.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "y"
+    }
+  },
+  "notes": "Measured as present in every framework's model input. Where a framework builds its schema from a model class, optional parameters are wrapped, but the constraint is preserved inside the wrapper.",
+  "notes_by_num": {},
+  "verdict": {
+    "code": "y",
+    "headline": "Reaches the model in all five listed frameworks.",
+    "detail": "The constraint arrives intact in the tool specification the model receives."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://json-schema.org/understanding-json-schema/reference/object#required",
+      "title": "JSON Schema Docs"
+    },
+    {
+      "url": "https://platform.openai.com/docs/guides/function-calling",
+      "title": "OpenAI function calling, tool schema"
+    }
+  ],
+  "known_issues": [],
+  "why": "If the required list shrank, the model could omit parameters your server depends on.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+  "measured": {
+    "run_date": "2026-09-04",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "JSON Schema 2020-12",
+  "docs_url": "https://json-schema.org/understanding-json-schema/reference/object#required",
+  "docs_label": "JSON Schema Docs"
+}
