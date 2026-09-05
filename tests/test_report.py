@@ -62,3 +62,14 @@ def test_human_reports_label_capture_boundaries_and_protocol_unknowns():
         assert "example.adapter.list_tools" in normalized
         assert "provider request: not captured" in normalized
         assert "adapter-negotiated MCP spec: not exposed" in normalized
+
+
+def test_job_filter_cannot_remove_mandatory_j5():
+    data = report_to_dict(_report(), jobs_filter=["J1"])
+    markdown = render_markdown(_report(), jobs_filter=["J1"])
+
+    assert [job["id"] for job in data["scorecard"]["jobs"]] == ["J1", "J5"]
+    assert "J1 desc" in markdown
+    assert "J5 authz" in markdown
+    assert "J2 params" not in markdown
+    assert "## J5 authorization findings" in markdown

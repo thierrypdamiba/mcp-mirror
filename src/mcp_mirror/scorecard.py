@@ -1,7 +1,7 @@
 """Jobs-To-Be-Done aggregation (DESIGN.md sections 10-11).
 
 The scorecard is the organizing lens: frameworks as rows, Jobs as columns. Each
-cell is the worst category seen across that job's dimensions plus a count. It is
+cell is the highest-severity category inside that job's dimensions plus a count. It is
 *derived* from a ``Report`` (DESIGN.md section 6) and never stored on it.
 """
 
@@ -71,7 +71,7 @@ JOBS: dict[str, dict[str, Any]] = {
     },
 }
 
-# "Worst" ordering used to pick a cell verdict. Lossy outranks transformative
+# Severity ordering used to pick one per-job cell verdict. Lossy outranks transformative
 # outranks additive outranks faithful. For J4 the only category present is
 # additive by construction, so this ordering never mislabels an injection job.
 SEVERITY: dict[Category, int] = {
@@ -126,16 +126,10 @@ def build_scorecard(report: Report) -> dict[str, Any]:
             by_job[job_id].append(diff)
 
         job_cells = {job_id: _cell(by_job[job_id]) for job_id in JOB_ORDER}
-        worst = max(
-            (cell["verdict"] for cell in job_cells.values()),
-            key=lambda c: SEVERITY[c],
-            default="faithful",
-        )
         frameworks[run.framework] = {
             "framework_version": run.framework_version,
             "adapter_version": run.adapter_version,
             "jobs": job_cells,
-            "worst": worst,
             "total_differences": len(run.differences),
             "authz_flags": _authz_flags(run.differences),
         }

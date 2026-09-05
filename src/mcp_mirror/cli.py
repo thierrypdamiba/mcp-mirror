@@ -122,7 +122,9 @@ def scan(
     ),
     output: str = typer.Option("table", "--output", help="Output format: table|json|md."),
     job: Optional[str] = typer.Option(
-        None, "--job", help="Filter the scorecard to specific job columns, e.g. J1,J5."
+        None,
+        "--job",
+        help="Filter scorecard columns, e.g. J1,J2. J5 is always included.",
     ),
     jtbd: Optional[str] = typer.Option(
         None,

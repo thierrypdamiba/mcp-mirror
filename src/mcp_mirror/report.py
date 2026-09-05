@@ -56,6 +56,9 @@ def report_to_dict(report: Report, jobs_filter: list[str] | None = None) -> dict
 
 def _filter_scorecard(scorecard: dict[str, Any], jobs_filter: list[str]) -> dict[str, Any]:
     keep = {j.upper() for j in jobs_filter}
+    # D4: authorization legibility remains visible even when the caller narrows
+    # the other scorecard columns.
+    keep.add("J5")
     scorecard = dict(scorecard)
     scorecard["jobs"] = [j for j in scorecard["jobs"] if j["id"] in keep]
     frameworks = {}
@@ -205,6 +208,20 @@ def render_markdown(report: Report, jobs_filter: list[str] | None = None) -> str
     lines.append("")
     for job in jobs:
         lines.append(f"- **{job['id']}** ({job['label']}): {JOBS[job['id']]['title']}")
+    lines.append("")
+
+    lines.append("## J5 authorization findings")
+    lines.append("")
+    authz_findings = [
+        (name, flag)
+        for name, framework in scorecard["frameworks"].items()
+        for flag in framework["authz_flags"]
+    ]
+    if authz_findings:
+        for name, flag in authz_findings:
+            lines.append(f"- **{name}:** {flag}")
+    else:
+        lines.append("_No authorization-signal differences at the declared capture boundaries._")
     lines.append("")
 
     if report.job_findings:

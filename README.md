@@ -127,7 +127,9 @@ to complete:
   reported as present at the boundary, retained elsewhere, or destroyed.
 
 Jobs return `pass`, `degraded`, or `fail`. Numerical difference counts are
-diagnostic detail, not intent scores.
+diagnostic detail, not intent scores. J5 is always present in JSON, terminal,
+and markdown scorecards even when `--job` narrows the other columns. No overall
+framework verdict is computed.
 
 ## Regression checks
 

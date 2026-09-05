@@ -270,7 +270,7 @@ def _diff(category, dimension, path="p", tool="t") -> Difference:
     )
 
 
-def test_scorecard_picks_worst_category_and_counts():
+def test_scorecard_picks_per_job_category_and_counts_without_overall_verdict():
     diffs = [
         _diff("lossy", Dimension.DESCRIPTION, "params.description"),
         _diff("lossy", Dimension.CONSTRAINT, "params.properties.a.enum"),
@@ -288,6 +288,7 @@ def test_scorecard_picks_worst_category_and_counts():
     assert jobs["J4"]["verdict"] == "additive"
     assert jobs["J5"]["verdict"] == "lossy"
     assert card["frameworks"]["fw"]["authz_flags"]
+    assert "worst" not in card["frameworks"]["fw"]
 
 
 def test_scorecard_faithful_when_no_diffs():
