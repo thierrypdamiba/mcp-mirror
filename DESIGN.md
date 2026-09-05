@@ -271,7 +271,7 @@ Jobs are the organizing lens. Each maps to a set of dimensions. A framework gets
 a per-job verdict (the highest-severity category inside that job, plus a count).
 No cross-job or overall framework verdict is computed.
 
-- **J1, "My tool description survives the declared capture boundary intact."** dimensions: description.
+- **J1, "My tool identity and purpose survive the declared capture boundary intact."** dimensions: name, description.
 - **J2, "My parameter contract survives (types, required, enums, formats)."** dimensions: param_type, constraint, required.
 - **J3, "My nested and structured inputs survive."** dimensions: structure.
 - **J4, "The captured definition contains nothing I did not author."** dimensions: injection (additive on name/description/params).
@@ -291,12 +291,12 @@ the highest-severity category inside that job with a count, color-coded. Example
 ```
 mcp-mirror, server: tricky-mcp, source-negotiated MCP spec: 2025-11-25, 5 tools
 
-framework      J1 desc      J2 params     J3 struct    J4 inject    J5 authz
+framework      J1 identity  J2 params     J3 struct    J4 inject    J5 authz
 LangChain      faithful     faithful      faithful     faithful     transform(7)
 Pydantic AI    faithful     faithful      faithful     faithful     transform(7)
 CrewAI         faithful     lossy (21)    transform(1) additive(5)  lossy (7)
 OpenAI Agents  faithful     faithful      faithful     faithful     lossy (7)
-Mastra         faithful     faithful      faithful     faithful     lossy (7)
+Mastra         transform(5) faithful      faithful     faithful     lossy (7)
 ```
 
 Before the scorecard, the terminal report prints each framework's capture API,

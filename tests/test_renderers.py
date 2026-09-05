@@ -372,6 +372,9 @@ def test_renderer_fixture_contract(renderer_id):
             "count": 1,
             "details": [structure[0].detail],
         }
+    if renderer_id == "mastra":
+        assert jobs["J1"]["verdict"] == "transformative"
+        assert jobs["J1"]["count"] == len(names) == 5
 
 
 @pytest.mark.skipif(

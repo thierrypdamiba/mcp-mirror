@@ -117,7 +117,7 @@ mcp-mirror scan "python fixtures/tricky_server.py" --job J2,J5
 Field-level differences are grouped by the production job a tool author needs
 to complete:
 
-- **J1, description**: the full tool purpose remains at the capture boundary.
+- **J1, identity**: the tool name and full purpose remain at the capture boundary.
 - **J2, parameters**: types, required fields, enums, formats, and constraints
   remain available after adaptation.
 - **J3, structure**: nested and structured input survives adaptation.

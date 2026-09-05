@@ -38,12 +38,13 @@ JOBS: dict[str, dict[str, Any]] = {
         "dimensions": {Dimension.ANNOTATION, Dimension.AUTHZ},
     },
     "J1": {
-        "label": "desc",
+        "label": "identity",
         "title": (
-            "When a tool is adapted, its full description remains in the captured "
-            "definition so downstream consumers retain the author's intent."
+            "When a tool is adapted, its name and full description remain in the "
+            "captured definition so downstream consumers retain its identity and "
+            "the author's intent."
         ),
-        "dimensions": {Dimension.DESCRIPTION},
+        "dimensions": {Dimension.NAME, Dimension.DESCRIPTION},
     },
     "J2": {
         "label": "params",

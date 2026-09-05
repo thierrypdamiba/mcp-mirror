@@ -69,7 +69,7 @@ def test_job_filter_cannot_remove_mandatory_j5():
     markdown = render_markdown(_report(), jobs_filter=["J1"])
 
     assert [job["id"] for job in data["scorecard"]["jobs"]] == ["J1", "J5"]
-    assert "J1 desc" in markdown
+    assert "J1 identity" in markdown
     assert "J5 authz" in markdown
     assert "J2 params" not in markdown
     assert "## J5 authorization findings" in markdown

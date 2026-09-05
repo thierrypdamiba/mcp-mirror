@@ -393,6 +393,22 @@ def test_scorecard_faithful_when_no_diffs():
     assert all(cell["verdict"] == "faithful" and cell["count"] == 0 for cell in jobs.values())
 
 
+def test_scorecard_projects_tool_name_changes_into_identity_job():
+    card = build_scorecard(
+        _report_with([_diff("transformative", Dimension.NAME, "name")])
+    )
+
+    assert card["frameworks"]["fw"]["jobs"]["J1"] == {
+        "verdict": "transformative",
+        "count": 1,
+        "details": ["d"],
+    }
+    j1 = next(job for job in card["jobs"] if job["id"] == "J1")
+    assert j1["label"] == "identity"
+    assert "name" in j1["title"]
+    assert "description" in j1["title"]
+
+
 def test_baseline_no_drift_when_equal():
     report = _report_with([_diff("lossy", Dimension.CONSTRAINT, "params.properties.a.enum")])
     drift, _ = compare_baseline(report, report)
