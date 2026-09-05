@@ -75,11 +75,21 @@ async def _load_async(handle: ServerHandle) -> tuple[str, list[ToolRep]]:
             return spec_version, reps
 
     if handle.transport == "http":
-        from mcp.client.streamable_http import streamablehttp_client
+        import httpx
+        from mcp.client.streamable_http import streamable_http_client
 
-        async with streamablehttp_client(handle.url, headers=handle.headers or None) as streams:
-            read, write = streams[0], streams[1]
-            return await run(read, write)
+        timeout = httpx.Timeout(30, read=300)
+        async with httpx.AsyncClient(
+            headers=handle.headers or None,
+            follow_redirects=True,
+            timeout=timeout,
+        ) as http_client:
+            async with streamable_http_client(
+                handle.url,
+                http_client=http_client,
+            ) as streams:
+                read, write = streams[0], streams[1]
+                return await run(read, write)
 
     from mcp import StdioServerParameters
     from mcp.client.stdio import stdio_client
