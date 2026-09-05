@@ -2,8 +2,8 @@
   "schema": "mcp-mirror/capability@3",
   "id": "tool-name",
   "title": "`name`",
-  "description": "The identifier the model emits in order to invoke the tool.",
-  "question": "Is the tool name unchanged in the model input?",
+  "description": "The identifier a downstream consumer uses to invoke the tool.",
+  "question": "Is the tool name unchanged at each capture boundary?",
   "spec": "https://modelcontextprotocol.io/specification",
   "status": "stable",
   "categories": [
@@ -18,7 +18,7 @@
       "0.3.0": "y"
     },
     "openai-agents": {
-      "0.22.0": "y"
+      "0.20.0": "y"
     },
     "pydantic-ai": {
       "1.107.0": "y"
@@ -29,12 +29,12 @@
   },
   "notes": "Four frameworks pass the tool name through untouched. One namespaces it with the server key.",
   "notes_by_num": {
-    "1": "Mastra: tools are namespaced as `<serverKey>_<toolName>`, so `delete_account` is presented to the model as `src_delete_account`."
+    "1": "Mastra: captured tool actions are namespaced as `<serverKey>_<toolName>`, so `delete_account` becomes `src_delete_account`."
   },
   "verdict": {
     "code": "a",
     "headline": "Unchanged in four frameworks, namespaced in one.",
-    "detail": "Prefixing is a transformation rather than a loss, but it changes the exact string the model must produce."
+    "detail": "Prefixing is a transformation rather than a loss, but it changes the exact invocation identifier."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,

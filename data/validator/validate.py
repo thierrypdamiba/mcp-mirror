@@ -177,6 +177,48 @@ def validate_all(data_dir: Path) -> tuple[dict, list[dict], list[str]]:
     for agent_id, agent in agents.items():
         eras = [e.get("era") for e in agent.get("version_list", [])]
         versions = {e.get("version") for e in agent.get("version_list", [])}
+        capture = agent.get("capture_boundary")
+        required_capture_keys = {
+            "capture_api",
+            "capture_object",
+            "capture_stage",
+            "provider_request_captured",
+            "negotiated_mcp_spec_version",
+            "protocol_version_evidence",
+        }
+        if not isinstance(capture, dict):
+            _err(errors, "frameworks.json", f"{agent_id}: capture_boundary must be an object")
+        else:
+            missing_capture = required_capture_keys - set(capture)
+            if missing_capture:
+                _err(
+                    errors,
+                    "frameworks.json",
+                    f"{agent_id}: capture_boundary missing {sorted(missing_capture)}",
+                )
+            stage = capture.get("capture_stage")
+            if stage not in {
+                "framework_tool_definition",
+                "provider_format",
+                "provider_request",
+            }:
+                _err(
+                    errors,
+                    "frameworks.json",
+                    f"{agent_id}: invalid capture_stage {stage!r}",
+                )
+            if capture.get("provider_request_captured") and stage != "provider_request":
+                _err(
+                    errors,
+                    "frameworks.json",
+                    f"{agent_id}: provider request can be captured only at provider_request stage",
+                )
+            if capture.get("negotiated_mcp_spec_version") != root.get("mcp_spec"):
+                _err(
+                    errors,
+                    "frameworks.json",
+                    f"{agent_id}: measured adapter MCP version must match root mcp_spec",
+                )
         if 0 not in eras:
             _err(errors, "frameworks.json", f"{agent_id}: version_list needs one entry at era 0 (current)")
         if len(eras) != len(set(eras)):

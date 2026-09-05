@@ -1,8 +1,9 @@
 """Renderer protocol + registry of installed renderers (DESIGN.md section 8).
 
-A renderer turns a live MCP server into the list of LLM-facing tool specs that one
-framework would send to a model. The cardinal rule (decision D1) is to always drive
-the framework's *real* adapter and never reimplement it.
+A renderer turns a live MCP server into the tool definitions exposed at one precise
+framework boundary. The cardinal rule (decision D1) is to always drive the
+framework's *real* adapter and never reimplement it. Each renderer declares whether
+that boundary is a framework object, a provider-shaped format, or a captured request.
 
 Renderers live behind optional extras. Importing a renderer module must not import
 its heavy framework at module load time; availability is checked with
@@ -14,7 +15,7 @@ from __future__ import annotations
 from importlib import import_module
 from typing import Protocol, runtime_checkable
 
-from ..models import ToolRep
+from ..models import RendererEvidence, ToolRep
 from ..source import ServerHandle
 
 
@@ -23,6 +24,8 @@ class Renderer(Protocol):
     id: str
 
     def versions(self) -> dict: ...
+
+    def evidence(self) -> RendererEvidence: ...
 
     def render(self, server: ServerHandle) -> list[ToolRep]: ...
 

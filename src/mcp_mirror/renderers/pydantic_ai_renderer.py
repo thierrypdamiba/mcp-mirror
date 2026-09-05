@@ -2,12 +2,9 @@
 
 Connects through the supported ``pydantic_ai.mcp.MCPToolset`` API and reads the
 tool definitions the agent would expose. Each Pydantic AI
-``ToolDefinition`` carries ``name``, ``description`` and ``parameters_json_schema`` -
-that schema is what the model receives.
-
-Pydantic AI's MCP API has moved across releases; this renderer tries the documented
-entry points in order and raises ``RenderError`` if none are available, so a version
-skew is reported cleanly rather than crashing the scan.
+``ToolDefinition`` carries ``name``, ``description`` and
+``parameters_json_schema``. This is the framework tool-definition boundary, before
+provider-specific request serialization.
 """
 
 from __future__ import annotations
@@ -17,7 +14,7 @@ from typing import Any
 
 import anyio
 
-from ..models import ToolRep
+from ..models import RendererEvidence, ToolRep
 from ..normalize import normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
@@ -44,6 +41,25 @@ class PydanticAIRenderer:
             version = dist_version("pydantic-ai")
         return {"framework": version, "adapter": version}
 
+    def evidence(self) -> RendererEvidence:
+        return RendererEvidence(
+            capture_api="pydantic_ai.mcp.MCPToolset.get_tools",
+            capture_object="pydantic_ai.tools.ToolDefinition",
+            capture_stage="framework_tool_definition",
+            provider_request_captured=False,
+            negotiated_mcp_spec_version=getattr(
+                self,
+                "_negotiated_mcp_spec_version",
+                None,
+            ),
+            protocol_version_evidence=(
+                "protocolVersion exposed by MCPToolset.client.initialize_result"
+            ),
+            limitation=(
+                "No Pydantic AI model adapter or serialized provider request was captured."
+            ),
+        )
+
     def render(self, server: ServerHandle) -> list[ToolRep]:
         try:
             return anyio.run(self._render_async, server)
@@ -56,6 +72,8 @@ class PydanticAIRenderer:
         toolset = self._build_server(server)
         async with toolset:
             tools = await self._list_tools(toolset)
+            initialize_result = toolset.client.initialize_result
+            self._negotiated_mcp_spec_version = initialize_result.protocolVersion
         return [self._to_rep(t) for t in tools]
 
     def _build_server(self, server: ServerHandle):
@@ -72,28 +90,19 @@ class PydanticAIRenderer:
                 command=server.command,
                 args=list(server.args),
             )
-        return MCPToolset(transport)
+        # Setting max_retries avoids constructing an Agent RunContext solely to list
+        # the ToolDefinition objects. No model is created or called.
+        return MCPToolset(transport, max_retries=0)
 
     async def _list_tools(self, mcp_server) -> list[Any]:
-        # Preferred: get_tools() reports the exact ToolDefinitions the agent exposes,
-        # including the metadata where Pydantic AI retains MCP annotations. The MCP
-        # toolset does not use the RunContext, so None is accepted; if a future version
-        # does, fall back to the raw tool list (which still carries inputSchema + annotations).
+        # get_tools() constructs the exact ToolDefinition objects declared as this
+        # renderer's capture boundary. max_retries is fixed on the toolset, so the
+        # RunContext is not consulted and no Agent or model is needed.
         get_tools = getattr(mcp_server, "get_tools", None)
-        if callable(get_tools):
-            try:
-                result = await get_tools(None)
-                tools = list(result.values()) if isinstance(result, dict) else list(result)
-                if tools:
-                    return tools
-            except (TypeError, AttributeError):
-                pass
-
-        list_tools = getattr(mcp_server, "list_tools", None)
-        if callable(list_tools):
-            return list(await list_tools())
-
-        raise RenderError("pydantic_ai MCP server exposes no known tool-listing method")
+        if not callable(get_tools):
+            raise RenderError("pydantic_ai MCPToolset exposes no get_tools method")
+        result = await get_tools(None)
+        return list(result.values()) if isinstance(result, dict) else list(result)
 
     def _to_rep(self, tool: Any) -> ToolRep:
         tool_def = getattr(tool, "tool_def", None)

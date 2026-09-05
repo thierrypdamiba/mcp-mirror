@@ -19,14 +19,14 @@ This is a multi-file contribution, not an external plug-in API. The checklist
 below names every required surface so adding a framework does not depend on
 repository folklore.
 
-## 1. Establish the model-facing boundary
+## 1. Establish and declare the capture boundary
 
 Find the published framework or adapter API that performs the MCP-to-tool
 conversion. Drive that API directly. Do not copy its implementation or write an
-equivalent converter inside `mcp-mirror`.
+equivalent converter inside `mcp-mirror`. Name the exact API and object inspected;
+do not silently describe an intermediate framework object as a provider request.
 
-The renderer must extract the request-side tool definition produced by that
-path:
+The renderer must extract the tool definition produced at that path:
 
 ```text
 name
@@ -34,18 +34,27 @@ description
 parameters  (JSON Schema)
 ```
 
-Prefer an API that returns the provider-bound function-tool payload. If the
-framework exposes only an intermediate tool object, document that limitation in
-the renderer and PR. Do not claim to capture the provider request unless the
-test reaches that boundary.
+Use the strongest deterministic boundary the framework exposes without making a
+model call. Classify it as:
+
+- `framework_tool_definition` for an adapted framework object;
+- `provider_format` for a provider-shaped tool dictionary that has not been
+  serialized into a request; or
+- `provider_request` only when the test actually intercepts the serialized
+  request body.
+
+`provider_request_captured` may be true only for the last case. If the adapter
+does not expose its independently negotiated MCP protocol version, record
+`None` and explain that limitation. Never copy the direct source connection's
+version into a framework run as an assumption.
 
 Also inspect what happens to MCP annotations:
 
-- put annotations in `ToolRep.annotations` only when the model-facing payload
-  contains them;
+- put annotations in `ToolRep.annotations` only when the declared capture
+  object contains them;
 - put annotations in
   `framework_metadata={"annotations": ...}` when the framework retains them
-  outside model input; and
+  outside the captured object; and
 - leave both empty when the adapted object no longer carries them.
 
 That distinction drives J5. Treating retained metadata as dropped, or treating
@@ -73,6 +82,17 @@ class FrameworkRenderer:
     def versions(self) -> dict:
         return {"framework": "...", "adapter": "..."}
 
+    def evidence(self) -> RendererEvidence:
+        return RendererEvidence(
+            capture_api="package.module.Adapter.method",
+            capture_object="package.TypeName",
+            capture_stage="framework_tool_definition",
+            provider_request_captured=False,
+            negotiated_mcp_spec_version=None,
+            protocol_version_evidence="the adapter does not expose it",
+            limitation="no serialized provider request was captured",
+        )
+
     def render(self, server: ServerHandle) -> list[ToolRep]:
         ...
 ```
@@ -97,14 +117,14 @@ src/mcp_mirror/renderers/<id>_node/_worker.mjs
 
 The Node worker drives the published adapter and emits JSON. The Python wrapper
 handles availability, subprocess isolation, timeout and error translation,
-version reporting, and conversion to `ToolRep`.
+version reporting, evidence declaration, and conversion to `ToolRep`.
 
 Commit the worker lockfile. Do not commit `node_modules/`.
 
 For example, a Vercel AI SDK contribution would use this route. The PR must
 identify and call the current AI SDK MCP/tool conversion API; the framework
 name alone is not evidence that a hand-built OpenAI-style schema matches its
-provider-bound payload.
+tool object or any provider-bound payload.
 
 ## 3. Register installation and discovery
 
@@ -145,7 +165,7 @@ The shared test verifies that the renderer:
 
 - connects through the real adapter;
 - returns tools from the fixture; and
-- reports `destructiveHint` as model-visible, retained outside model input, or
+- reports `destructiveHint` as present at the boundary, retained elsewhere, or
   dropped.
 
 Add framework-specific assertions for transformations that the generic test
@@ -196,8 +216,9 @@ Include the following in the PR description:
 - framework and adapter package names;
 - exact versions tested;
 - the real adapter/conversion API called by the renderer;
-- why the extracted object is the model-facing payload, or an explicit
-  intermediate-object limitation;
+- the exact extracted object and capture-stage classification;
+- whether a serialized provider request was actually captured;
+- whether the adapter-negotiated MCP version is observed or unknown;
 - the fate of MCP annotations and the object fields that prove it;
 - fixture command and test output;
 - data files changed; and

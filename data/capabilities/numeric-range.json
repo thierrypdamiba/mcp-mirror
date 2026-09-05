@@ -3,7 +3,7 @@
   "id": "numeric-range",
   "title": "Numeric Ranges",
   "description": "Bounds on a numeric parameter.",
-  "question": "Is the numeric range constraint present in the model input?",
+  "question": "Is the numeric range constraint present at each capture boundary?",
   "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
   "status": "stable",
   "categories": [
@@ -18,7 +18,7 @@
       "0.3.0": "y"
     },
     "openai-agents": {
-      "0.22.0": "y"
+      "0.20.0": "y"
     },
     "pydantic-ai": {
       "1.107.0": "y"
@@ -27,14 +27,14 @@
       "1.17.3": "y"
     }
   },
-  "notes": "Measured as present in every framework's model input. Where a framework builds its schema from a model class, optional parameters are wrapped, but the constraint is preserved inside the wrapper.",
+  "notes": "Measured as present at every declared framework capture boundary. Where a framework builds its schema from a model class, optional parameters are wrapped, but the constraint remains inside the wrapper.",
   "notes_by_num": {
     "1": "CrewAI: preserved inside the `anyOf` wrapper emitted for optional fields, so the constraint sits one level down rather than being lost."
   },
   "verdict": {
     "code": "y",
-    "headline": "Reaches the model in all five listed frameworks.",
-    "detail": "The constraint arrives intact in the tool specification the model receives."
+    "headline": "Present at all five declared capture boundaries.",
+    "detail": "The constraint remains intact in every captured tool definition."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,
@@ -50,7 +50,7 @@
     }
   ],
   "known_issues": [],
-  "why": "Without bounds the model may request out of range values.",
+  "why": "Without bounds a downstream model may request out-of-range values.",
   "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
   "measured": {
     "run_date": "2026-09-04",

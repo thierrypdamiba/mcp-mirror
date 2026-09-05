@@ -20,7 +20,7 @@ from rich.console import Console
 from . import __version__
 from .diff import diff_reps
 from .jobs import evaluate_jobs, load_jobs
-from .models import FrameworkRun, Report, ToolRep
+from .models import FrameworkRun, RendererEvidence, Report, ToolRep
 from .renderers import (
     RenderError,
     all_renderer_ids,
@@ -38,7 +38,7 @@ EXIT_SPEC = 3
 app = typer.Typer(
     add_completion=False,
     no_args_is_help=True,
-    help="Diff what an LLM receives from an MCP server across agent frameworks.",
+    help="Diff MCP tool definitions at declared agent-framework capture boundaries.",
 )
 console = Console()
 err_console = Console(stderr=True)
@@ -63,11 +63,16 @@ def _parse_headers(values: Optional[list[str]]) -> dict[str, str]:
     return headers
 
 
-def _render_isolated(rid: str, server: str, headers: dict) -> tuple[dict, list[ToolRep]]:
+def _render_isolated(
+    rid: str,
+    server: str,
+    headers: dict,
+) -> tuple[dict, RendererEvidence, list[ToolRep]]:
     """Render one framework in its own subprocess so frameworks cannot interfere.
 
-    Returns ``(versions, reps)`` or raises ``RenderError``. The worker writes JSON to a
-    temp file (never stdout) so framework and server log noise cannot corrupt the result.
+    Returns ``(versions, evidence, reps)`` or raises ``RenderError``. The worker writes
+    JSON to a temp file (never stdout) so framework and server log noise cannot corrupt
+    the result.
     """
 
     fd, out_path = tempfile.mkstemp(suffix=".json")
@@ -93,7 +98,11 @@ def _render_isolated(rid: str, server: str, headers: dict) -> tuple[dict, list[T
         if not payload.get("ok"):
             raise RenderError(payload.get("error", "unknown render error"))
         reps = [ToolRep.model_validate(r) for r in payload["reps"]]
-        return payload.get("versions", {}), reps
+        try:
+            evidence = RendererEvidence.model_validate(payload["evidence"])
+        except (KeyError, ValueError, TypeError) as exc:
+            raise RenderError(f"renderer returned invalid evidence: {exc}") from exc
+        return payload.get("versions", {}), evidence, reps
     finally:
         Path(out_path).unlink(missing_ok=True)
 
@@ -172,16 +181,25 @@ def scan(
     runs_reps: dict[str, list] = {}
     for rid in selected:
         try:
-            versions, rendered_reps = _render_isolated(rid, server, headers)
+            versions, evidence, rendered_reps = _render_isolated(rid, server, headers)
         except RenderError as exc:
             err_console.print(f"[yellow]skipping {rid}:[/yellow] {exc}")
             continue
+        renderer_spec_version = evidence.negotiated_mcp_spec_version
+        if renderer_spec_version != negotiated_version:
+            err_console.print(
+                f"[red]renderer spec-version mismatch:[/red] {rid!r} negotiated "
+                f"{renderer_spec_version!r}, while the direct source connection "
+                f"negotiated {negotiated_version!r}; refusing a cross-version diff"
+            )
+            raise typer.Exit(EXIT_SPEC)
         differences = diff_reps(source_reps, rendered_reps)
         runs.append(
             FrameworkRun(
                 framework=rid,
                 framework_version=str(versions.get("framework", "unknown")),
                 adapter_version=(str(versions["adapter"]) if versions.get("adapter") else None),
+                evidence=evidence,
                 differences=differences,
             )
         )

@@ -3,7 +3,7 @@
   "id": "one-of-any-of",
   "title": "`oneOf` / `anyOf`",
   "description": "A parameter that accepts one of several shapes, using JSON Schema 2020-12 combinators.",
-  "question": "Do union types survive to the model?",
+  "question": "Do both union combinators survive to each capture boundary?",
   "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
   "status": "stable",
   "categories": [
@@ -12,13 +12,13 @@
   "keywords": "oneOf,anyOf,one of,any of,union,combinator,2020-12",
   "stats": {
     "crewai": {
-      "1.14.7": "y"
+      "1.14.7": "a #1"
     },
     "langchain": {
       "0.3.0": "y"
     },
     "openai-agents": {
-      "0.22.0": "y"
+      "0.20.0": "y"
     },
     "pydantic-ai": {
       "1.107.0": "y"
@@ -27,12 +27,14 @@
       "1.17.3": "y"
     }
   },
-  "notes": "Measured as present in every framework's model input.",
-  "notes_by_num": {},
+  "notes": "Both combinators remain present in four captured definitions. CrewAI preserves the fixture's destination `anyOf` but collapses its mode `oneOf`.",
+  "notes_by_num": {
+    "1": "CrewAI: `destination.anyOf` survives, while `mode.oneOf` is collapsed by the generated `args_schema`; the combined capability is therefore only partly preserved."
+  },
   "verdict": {
-    "code": "y",
-    "headline": "Preserved to the model in all five listed frameworks.",
-    "detail": "The union arrives intact rather than being collapsed to a single branch."
+    "code": "a",
+    "headline": "Fully preserved at four boundaries, partly preserved at one.",
+    "detail": "CrewAI keeps `anyOf` but collapses the fixture's `oneOf`; the other captured definitions keep both."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,

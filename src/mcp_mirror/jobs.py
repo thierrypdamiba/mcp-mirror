@@ -6,8 +6,8 @@ deterministically, whether each framework's rendering still exposes it. This is 
 
 - ``pass``     the job's needs survived (even if the framework dropped other things).
 - ``degraded`` something aiding correctness or safety was weakened (a lost constraint,
-               a risk hint the model cannot see).
-- ``fail``     a needed tool or param never reached the model.
+               a risk hint retained outside the captured definition).
+- ``fail``     a needed tool or param did not survive to the capture boundary.
 
 It is deterministic and compliance-flavored: it measures whether the rendering *exposes*
 what the job requires, never whether the result is "better" (intent is not measured).
@@ -91,13 +91,15 @@ def evaluate_job(job: Job, reps: list[ToolRep]) -> tuple[str, list[str]]:
     for req in job.requires:
         rep = _match(req.tool, reps)
         if rep is None:
-            fails.append(f"tool {req.tool!r} not exposed to the model")
+            fails.append(f"tool {req.tool!r} absent at the capture boundary")
             continue
 
         props = _properties(rep)
         for param in req.params:
             if param not in props:
-                fails.append(f"{req.tool}: required param {param!r} never reached the model")
+                fails.append(
+                    f"{req.tool}: required param {param!r} absent at the capture boundary"
+                )
 
         req_set = _required(rep)
         for param in req.required_params:
@@ -116,22 +118,23 @@ def evaluate_job(job: Job, reps: list[ToolRep]) -> tuple[str, list[str]]:
                     degrades.append(f"{req.tool}: constraint {key!r} on {param!r} was lost")
 
         # Three fates for a required safety signal, mirroring the diff engine:
-        #   surfaced to the model    -> requirement met
-        #   retained but model-blind -> degraded (a policy layer could still gate on it)
-        #   destroyed (no trace)     -> fail (neither model nor policy layer can see it)
-        surfaced = rep.annotations or {}
+        #   present at capture boundary -> requirement met
+        #   retained elsewhere          -> degraded (a policy layer could still gate)
+        #   destroyed (no trace)        -> fail
+        captured = rep.annotations or {}
         retained = (rep.framework_metadata or {}).get("annotations") or {}
         for ann in req.annotations:
-            if ann in surfaced:
+            if ann in captured:
                 continue
             if ann in retained:
                 degrades.append(
-                    f"{req.tool}: {ann!r} is retained in framework metadata but the model cannot "
-                    "see it (a policy layer could still gate on it)"
+                    f"{req.tool}: {ann!r} is retained in framework metadata but absent "
+                    "from the captured tool definition (a policy layer could still gate on it)"
                 )
             else:
                 fails.append(
-                    f"{req.tool}: {ann!r} is destroyed; neither the model nor a policy layer can see it"
+                    f"{req.tool}: {ann!r} is destroyed; neither the captured definition "
+                    "nor retained framework metadata contains it"
                 )
 
     if fails:

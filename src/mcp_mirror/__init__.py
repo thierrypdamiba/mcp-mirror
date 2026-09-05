@@ -1,4 +1,4 @@
-"""mcp-mirror: diff what an LLM receives from an MCP server across agent frameworks."""
+"""mcp-mirror: diff MCP tool definitions at explicit framework boundaries."""
 
 from __future__ import annotations
 

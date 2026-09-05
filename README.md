@@ -3,9 +3,10 @@
 > An open compatibility tracker and deterministic scanner for MCP tool definitions across agent frameworks.
 
 An MCP server publishes a tool name, description, input schema, and optional
-annotations. An agent framework adapts that definition before it becomes model
-input. `mcp-mirror` records both sides and shows what stayed present, what moved
-to framework metadata, and what disappeared.
+annotations. An agent framework adapts that definition into its own tool object
+or provider-shaped format. `mcp-mirror` records the source and one declared
+framework boundary, then shows what stayed present, what moved to retained
+metadata, and what disappeared.
 
 The project has two public surfaces:
 
@@ -22,10 +23,11 @@ framework docs, and CI checks can consume it directly.
 
 Every framework-version cell has one of four factual states:
 
-- **Present in model input**: the value survives in the tool definition given to
-  the model.
-- **Retained outside model input**: the framework preserves the value in
-  metadata that application code can inspect, but it is absent from model input.
+- **Present at the capture boundary**: the value survives in the exact adapted
+  tool definition named by that framework's measurement.
+- **Changed or retained elsewhere**: a numbered note says whether the value was
+  transformed at the boundary, partly preserved, or retained only in framework
+  metadata.
 - **Dropped during adaptation**: the value is not recoverable from the adapted
   tool object.
 - **Not yet measured**: the release exists in PyPI or npm, but no scan has
@@ -42,15 +44,32 @@ alphabetically within language group, and no overall score is computed.
 
 A valid JSON Schema can become weaker after adaptation. A long description can
 be truncated. A nested object can be flattened. A risk annotation can be kept
-for application policy while remaining absent from model input, or it can be
+for application policy while remaining absent from the captured definition, or it can be
 dropped entirely.
 
 `destructiveHint` shows why those distinctions matter. In the currently measured
-releases, every listed framework omits MCP annotations from model input because
-the downstream function-tool format has no annotations field. LangChain and
-Pydantic AI retain the hint in framework metadata. CrewAI, OpenAI Agents SDK,
-and Mastra do not retain it on the adapted tool object. Those are different
-integration facts even though the model input is the same.
+releases, the hint is absent from every declared capture boundary. LangChain and
+Pydantic AI retain it in framework metadata. CrewAI, OpenAI Agents SDK, and
+Mastra do not retain that behavioral hint on the captured tool object. Those are
+different integration facts even when their normalized definitions look alike.
+
+## Evidence boundaries
+
+Every scanner run records the API and object it inspected:
+
+- LangChain: the OpenAI-compatible dictionary returned by
+  `convert_to_openai_tool`.
+- Pydantic AI: `ToolDefinition` objects returned by `MCPToolset.get_tools`.
+- CrewAI: adapted `BaseTool` name, description, and `args_schema` from
+  `MCPServerAdapter`.
+- OpenAI Agents SDK: the SDK `FunctionTool` returned by
+  `MCPUtil.to_function_tool`.
+- Mastra: tool actions returned by `MCPClient.listTools`, with JSON Schema
+  extracted from Mastra's Standard Schema wrapper.
+
+None of the v0.1 renderers captures a serialized provider request. Reports say
+that explicitly. A result therefore proves behavior at the named framework
+boundary, not the final bytes sent to OpenAI, Anthropic, or another provider.
 
 ## Install
 
@@ -98,15 +117,14 @@ mcp-mirror scan "python fixtures/tricky_server.py" --job J2,J5
 Field-level differences are grouped by the production job a tool author needs
 to complete:
 
-- **J1, description**: the full tool purpose is available when the model chooses
-  a tool.
+- **J1, description**: the full tool purpose remains at the capture boundary.
 - **J2, parameters**: types, required fields, enums, formats, and constraints
-  remain available when arguments are generated.
+  remain available after adaptation.
 - **J3, structure**: nested and structured input survives adaptation.
 - **J4, injection**: the adapted definition contains nothing the tool author did
   not write.
 - **J5, authorization**: dangerous or out-of-scope behavior remains legible,
-  reported as surfaced, retained outside model input, or destroyed.
+  reported as present at the boundary, retained elsewhere, or destroyed.
 
 Jobs return `pass`, `degraded`, or `fail`. Numerical difference counts are
 diagnostic detail, not intent scores.
@@ -126,8 +144,21 @@ mcp-mirror scan "python fixtures/tricky_server.py" \
   --fail-on-drift
 ```
 
-Reports include the MCP protocol version captured during the handshake.
-Baselines are compared only within the same protocol version.
+Reports include the MCP protocol version negotiated by mcp-mirror's direct
+source connection. Baselines are compared only within that same protocol
+version. Each framework run also records the version negotiated by that
+adapter's own connection. Four renderers read an initialization result exposed
+by their client path; CrewAI instruments the `ClientSession.initialize` result,
+and the pinned Mastra worker reads the underlying MCP client's negotiated
+version. If one of those evidence seams disappears, the renderer fails instead
+of copying the source connection's version by assumption. Baseline comparison
+also rejects per-renderer protocol mismatches and unknown mixed-version evidence.
+A live scan exits with code `3` rather than diffing a renderer response negotiated
+under a different MCP revision from the source snapshot.
+
+The compatibility site is currently one explicitly tagged MCP `2025-11-25`
+snapshot. Comparing another MCP revision requires a separately measured dataset;
+the project does not merge cells from different protocol revisions.
 
 ## CLI
 

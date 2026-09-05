@@ -3,7 +3,7 @@
   "id": "read-only-hint",
   "title": "`readOnlyHint`",
   "description": "Marks a tool as read only: safe to call, no side effects.",
-  "question": "Is the readOnlyHint annotation present in the model input?",
+  "question": "Is the readOnlyHint annotation present at each capture boundary?",
   "spec": "https://modelcontextprotocol.io/specification",
   "status": "stable",
   "categories": [
@@ -18,7 +18,7 @@
       "0.3.0": "a #2"
     },
     "openai-agents": {
-      "0.22.0": "n #3"
+      "0.20.0": "n #3"
     },
     "pydantic-ai": {
       "1.107.0": "a #4"
@@ -27,18 +27,18 @@
       "1.17.3": "n #5"
     }
   },
-  "notes": "No listed framework surfaces MCP annotations to the model. The function-tool format all of them serialise to has no field to carry one, so this row reads the same for every framework. Partial support ('a') means the framework still holds the value where your own policy layer can read it. Either way, the model input omits it.",
+  "notes": "The annotation is absent from all five declared capture objects. LangChain and Pydantic AI retain it elsewhere in framework metadata; CrewAI, OpenAI Agents SDK, and Mastra drop it. No v0.1 renderer captures a serialized provider request.",
   "notes_by_num": {
     "1": "CrewAI: the adapted tool object exposes no annotations field, so the value is not recoverable after adaptation.",
-    "2": "LangChain: retained on `StructuredTool.metadata`, so your own code can read it. Not part of the payload `convert_to_openai_tool` produces for the model.",
+    "2": "LangChain: retained on `StructuredTool.metadata`, but absent from the OpenAI-compatible dictionary produced by `convert_to_openai_tool`.",
     "3": "OpenAI Agents SDK: `FunctionTool` keeps `_mcp_title` only. The behavioural hints are not carried.",
     "4": "Pydantic AI: retained in `ToolDefinition.metadata['annotations']`. Not part of `parameters_json_schema`.",
     "5": "Mastra: `mcpMetadata` carries the server name and version only. Annotations are not attached to the tool."
   },
   "verdict": {
     "code": "n",
-    "headline": "Absent from every listed framework's model input.",
-    "detail": "MCP defines the annotation. The function-tool format every listed framework serialises to has no field to carry it."
+    "headline": "Absent at all five declared capture boundaries.",
+    "detail": "Two frameworks retain it elsewhere; three drop it during adaptation. Final provider requests were not captured."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,
@@ -54,7 +54,7 @@
     }
   ],
   "known_issues": [],
-  "why": "The model cannot tell a safe read from a risky write by annotation. It has only your description prose to go on.",
+  "why": "A downstream consumer relying only on the captured tool definition cannot use this structured hint to distinguish a safe read from a risky write.",
   "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
   "measured": {
     "run_date": "2026-09-04",

@@ -3,7 +3,7 @@
   "id": "title-annotation",
   "title": "`title`",
   "description": "A human friendly display name for the tool. Presentational, not a safety signal.",
-  "question": "Is the tool title annotation present in the model input?",
+  "question": "Is the tool title annotation present at each capture boundary?",
   "spec": "https://modelcontextprotocol.io/specification",
   "status": "stable",
   "categories": [
@@ -18,7 +18,7 @@
       "0.3.0": "a #2"
     },
     "openai-agents": {
-      "0.22.0": "a #3"
+      "0.20.0": "a #3"
     },
     "pydantic-ai": {
       "1.107.0": "a #4"
@@ -27,18 +27,18 @@
       "1.17.3": "n #5"
     }
   },
-  "notes": "No listed framework surfaces MCP annotations to the model. The function-tool format all of them serialise to has no field to carry one, so this row reads the same for every framework. Partial support ('a') means the framework still holds the value where your own policy layer can read it. Either way, the model input omits it.",
+  "notes": "The title is absent from all five declared capture definitions. LangChain, Pydantic AI, and OpenAI Agents SDK retain it elsewhere on their adapted tool objects; CrewAI and Mastra drop it. No v0.1 renderer captures a serialized provider request.",
   "notes_by_num": {
     "1": "CrewAI: the adapted tool object exposes no annotations field, so the value is not recoverable after adaptation.",
-    "2": "LangChain: retained on `StructuredTool.metadata`, so your own code can read it. Not part of the payload `convert_to_openai_tool` produces for the model.",
+    "2": "LangChain: retained on `StructuredTool.metadata`, but absent from the OpenAI-compatible dictionary produced by `convert_to_openai_tool`.",
     "3": "OpenAI Agents SDK: `FunctionTool` keeps `_mcp_title` only. The behavioural hints are not carried.",
     "4": "Pydantic AI: retained in `ToolDefinition.metadata['annotations']`. Not part of `parameters_json_schema`.",
     "5": "Mastra: `mcpMetadata` carries the server name and version only. Annotations are not attached to the tool."
   },
   "verdict": {
     "code": "a",
-    "headline": "Kept by three frameworks, shown to the model by none.",
-    "detail": "Listed so the annotation picture is complete. The model addresses tools by name, not title."
+    "headline": "Retained elsewhere by three frameworks, dropped by two.",
+    "detail": "The title is absent from every captured tool definition. Final provider requests were not captured."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,

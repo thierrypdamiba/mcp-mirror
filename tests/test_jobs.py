@@ -39,7 +39,7 @@ def test_fail_when_tool_missing():
     job = Job(id="w", title="write", requires=[JobRequirement(tool="write_file", params=["path"])])
     verdict, reasons = evaluate_job(job, [])
     assert verdict == "fail"
-    assert any("not exposed" in r for r in reasons)
+    assert any("absent at the capture boundary" in r for r in reasons)
 
 
 def test_fail_when_param_missing():
@@ -52,7 +52,7 @@ def test_fail_when_param_missing():
 
 
 def test_fail_when_annotation_destroyed():
-    # write_file present, but destructiveHint is nowhere: not surfaced and not retained.
+    # write_file is present, but destructiveHint is neither captured nor retained.
     reps = [_rep("write_file", {"path": {"type": "string"}}, ["path"], annotations={})]
     job = Job(id="w", title="write", requires=[
         JobRequirement(tool="write_file", params=["path"], annotations=["destructiveHint"])])
@@ -61,9 +61,9 @@ def test_fail_when_annotation_destroyed():
     assert any("destroyed" in r and "destructiveHint" in r for r in reasons)
 
 
-def test_degraded_when_annotation_retained_but_not_surfaced():
-    # The framework keeps destructiveHint in metadata (a policy layer can read it), but the
-    # model cannot see it. Degraded, not failed.
+def test_degraded_when_annotation_retained_outside_capture_boundary():
+    # The framework keeps destructiveHint in metadata for a policy layer, but it is
+    # absent from the captured definition. Degraded, not failed.
     reps = [_rep("write_file", {"path": {"type": "string"}}, ["path"],
                  annotations={}, framework_metadata={"annotations": {"destructiveHint": True}})]
     job = Job(id="w", title="write", requires=[
@@ -96,7 +96,7 @@ def test_namespaced_tool_matches():
 
 
 def test_fail_outranks_degrade():
-    # Missing param (fail) plus a retained-but-not-surfaced annotation (degrade) => overall fail.
+    # Missing param (fail) plus a retained-only annotation (degrade) => overall fail.
     reps = [_rep("write_file", {"path": {"type": "string"}}, ["path"],
                  annotations={}, framework_metadata={"annotations": {"destructiveHint": True}})]
     job = Job(id="w", title="write", requires=[

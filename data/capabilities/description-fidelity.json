@@ -2,8 +2,8 @@
   "schema": "mcp-mirror/capability@3",
   "id": "description-fidelity",
   "title": "`description`",
-  "description": "The natural language description, which is the model's primary guide to what a tool does.",
-  "question": "Is the full tool description present in the model input?",
+  "description": "The natural-language description an MCP server publishes to explain what a tool does.",
+  "question": "Is the full tool description present at each capture boundary?",
   "spec": "https://modelcontextprotocol.io/specification",
   "status": "stable",
   "categories": [
@@ -18,7 +18,7 @@
       "0.3.0": "y"
     },
     "openai-agents": {
-      "0.22.0": "y"
+      "0.20.0": "y"
     },
     "pydantic-ai": {
       "1.107.0": "y"
@@ -29,7 +29,7 @@
   },
   "notes": "Four frameworks pass the description through byte for byte. One rewrites it into a longer template.",
   "notes_by_num": {
-    "1": "CrewAI: the description is rebuilt as `Tool Name: ... Tool Arguments: {schema} Tool Description: ...`, so the model reads the schema twice, once as prose and once as parameters."
+    "1": "CrewAI: the captured description is rebuilt as `Tool Name: ... Tool Arguments: {schema} Tool Description: ...`, duplicating the schema as prose and parameters."
   },
   "verdict": {
     "code": "a",
@@ -55,14 +55,14 @@
     "before": [
       "\"description\": \"Search records with optional filters.\""
     ],
-    "after_label": "model receives (CrewAI)",
+    "after_label": "captured CrewAI BaseTool",
     "after": [
       "\"description\": \"Tool Name: search_records",
       "Tool Arguments: {'properties': {...}}",
       "Tool Description: Search records with optional filters.\""
     ]
   },
-  "why": "Injected text spends context tokens and can steer the model in ways the tool author did not write.",
+  "why": "If passed downstream, injected text spends context tokens and can steer a model in ways the tool author did not write.",
   "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J4",
   "measured": {
     "run_date": "2026-09-04",

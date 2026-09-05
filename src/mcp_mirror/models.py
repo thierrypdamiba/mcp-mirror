@@ -12,6 +12,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 Category = Literal["faithful", "lossy", "additive", "transformative"]
+CaptureStage = Literal["framework_tool_definition", "provider_format", "provider_request"]
 
 
 class Dimension:
@@ -36,12 +37,11 @@ class Dimension:
 class ToolRep(BaseModel):
     """Normalized representation of a tool, from the source or from a framework.
 
-    ``annotations`` are the annotations the model actually receives in the tool spec
-    (almost always empty for renderings, since the OpenAI/Anthropic function-tool
-    format has no slot for them). ``framework_metadata`` records what the framework
-    still *retains* out-of-band but does not surface to the model, e.g. annotations
-    kept on the tool object's metadata. Distinguishing the two is what lets J5 tell a
-    framework that merely fails to surface a risk hint apart from one that destroys it.
+    ``annotations`` are annotations present on the tool definition at the renderer's
+    declared capture boundary. ``framework_metadata`` records what the framework still
+    retains elsewhere, e.g. annotations kept on an adapted tool object's metadata but
+    absent from the captured definition. Distinguishing the two lets J5 tell retained
+    policy evidence apart from a signal destroyed during adaptation.
     """
 
     name: str
@@ -72,16 +72,17 @@ JobVerdict = Literal["pass", "degraded", "fail"]
 class JobRequirement(BaseModel):
     """What one job needs from one tool in order to be doable.
 
-    Every check is against the *rendered* tool (what the model receives). A job passes
-    as long as what it needs survived, even if the framework dropped other things.
-    Dropping irrelevant fields is not a failure: change is not degradation.
+    Every check is against the tool at the renderer's declared capture boundary. A job
+    passes as long as what it needs survived to that boundary, even if the framework
+    dropped other things. Dropping irrelevant fields is not a failure: change is not
+    degradation.
     """
 
     tool: str
     params: list[str] = Field(default_factory=list)  # must be present in the rendered params
     required_params: list[str] = Field(default_factory=list)  # must remain in the params' ``required`` set
     constraints: dict[str, list[str]] = Field(default_factory=dict)  # {param: [JSON-Schema keys that must survive]}
-    annotations: list[str] = Field(default_factory=list)  # annotation keys that must be SURFACED to the model
+    annotations: list[str] = Field(default_factory=list)  # keys required at the capture boundary
 
 
 class Job(BaseModel):
@@ -98,9 +99,10 @@ class JobSpec(BaseModel):
 class JobFinding(BaseModel):
     """The verdict for one job under one framework.
 
-    ``fail``     the job cannot be done: a needed tool or param never reached the model.
+    ``fail``     the job cannot be done from the captured definition: a needed tool or
+                 param did not survive adaptation.
     ``degraded`` it can probably still be done, but something aiding correctness or
-                 safety was weakened (a lost constraint, a risk hint the model cannot see).
+                 safety was weakened (a lost constraint, a retained-only risk hint).
     ``pass``     the job's needs survived intact, regardless of what else changed.
     """
 
@@ -111,20 +113,47 @@ class JobFinding(BaseModel):
     reasons: list[str] = Field(default_factory=list)
 
 
+class RendererEvidence(BaseModel):
+    """What a renderer actually inspected, and what remains unproven.
+
+    A published framework adapter can expose a framework tool object, a
+    provider-shaped tool dictionary, or a fully serialized provider request. Those
+    are different evidence strengths. ``provider_request_captured`` is deliberately
+    explicit so an intermediate object is never silently promoted to a stronger
+    claim. The adapter's negotiated MCP version is similarly nullable because most
+    current list-tools APIs do not expose it.
+    """
+
+    capture_api: str
+    capture_object: str
+    capture_stage: CaptureStage
+    provider_request_captured: bool
+    negotiated_mcp_spec_version: str | None = None
+    protocol_version_evidence: str
+    limitation: str | None = None
+
+
 class FrameworkRun(BaseModel):
     """Everything one framework produced for one scan."""
 
     framework: str
     framework_version: str
     adapter_version: str | None = None
+    evidence: RendererEvidence | None = None
     differences: list[Difference] = Field(default_factory=list)
 
 
 class Report(BaseModel):
-    """A full scan result. The scorecard is derived from this, not stored."""
+    """A full scan result. The scorecard is derived from this, not stored.
+
+    ``mcp_spec_version`` is the version negotiated by mcp-mirror's direct source
+    connection. A renderer's independently negotiated version belongs in its
+    ``RendererEvidence`` and remains ``None`` when the framework does not expose it.
+    """
 
     mcp_server: str
     mcp_spec_version: str
+    mcp_spec_version_evidence: str = "direct source connection initialize result"
     generated_with: str
     tools: list[str]
     runs: list[FrameworkRun] = Field(default_factory=list)

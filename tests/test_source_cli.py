@@ -17,6 +17,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from mcp_mirror.cli import app
+from mcp_mirror.models import RendererEvidence, ToolRep
 from mcp_mirror.source import SourceConnectionError, load_source, parse_server
 
 
@@ -112,3 +113,38 @@ def test_cli_returns_3_for_spec_version_mismatch(monkeypatch):
 
     assert result.exit_code == 3
     assert "spec-version assertion failed" in result.stderr
+
+
+def test_cli_returns_3_when_renderer_negotiates_another_spec(monkeypatch):
+    source = ToolRep(name="example", origin="mcp")
+    rendered = ToolRep(name="example", origin="framework")
+    evidence = RendererEvidence(
+        capture_api="framework.list_tools",
+        capture_object="Tool",
+        capture_stage="framework_tool_definition",
+        provider_request_captured=False,
+        negotiated_mcp_spec_version="2026-07-28",
+        protocol_version_evidence="initialize result",
+    )
+
+    monkeypatch.setattr(
+        "mcp_mirror.cli.load_source",
+        lambda _handle: ("2025-11-25", [source]),
+    )
+    monkeypatch.setattr(
+        "mcp_mirror.cli.select_renderers",
+        lambda _requested: ({"framework": object()}, []),
+    )
+    monkeypatch.setattr(
+        "mcp_mirror.cli._render_isolated",
+        lambda _rid, _server, _headers: (
+            {"framework": "1.0", "adapter": "1.0"},
+            evidence,
+            [rendered],
+        ),
+    )
+
+    result = RUNNER.invoke(app, ["scan", "unused-command"])
+
+    assert result.exit_code == 3
+    assert "renderer spec-version mismatch" in result.stderr

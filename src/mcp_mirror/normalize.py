@@ -42,12 +42,11 @@ def normalize_function_tool(
 ) -> ToolRep:
     """Build a rendered ``ToolRep`` from the standard function-tool spec.
 
-    The canonical LLM-facing shape (DESIGN.md section 8) is
-    ``{name, description, parameters}``, the OpenAI/Anthropic function-tool format.
-    Some libraries wrap it as ``{"type": "function", "function": {...}}``; unwrap it.
-    This format has no slot for MCP annotations, so ``annotations`` (what the model
-    sees) is empty; pass ``framework_metadata`` to record what the framework retains
-    out-of-band (e.g. ``{"annotations": {...}}`` kept on the tool object).
+    The normalized shape is ``{name, description, parameters}``. Some libraries wrap
+    it as ``{"type": "function", "function": {...}}``; unwrap it. This shape has no
+    slot for MCP annotations, so ``annotations`` is empty at the capture boundary;
+    pass ``framework_metadata`` to record what the framework retains elsewhere
+    (e.g. ``{"annotations": {...}}`` kept on the tool object).
     """
 
     inner = fn

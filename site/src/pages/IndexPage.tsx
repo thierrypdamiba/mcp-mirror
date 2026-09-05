@@ -121,14 +121,14 @@ function buildCapabilityFacts(
       return {
         capability,
         prefix: `Across ${measuredCount} current tested releases, `,
-        suffix: ` is retained outside model input by ${counts.a} frameworks and dropped during adaptation by ${counts.n}.`,
+        suffix: ` is changed or retained elsewhere by ${counts.a} frameworks and dropped during adaptation by ${counts.n}.`,
       };
     }
     if (counts.y === measuredCount && measuredCount > 0) {
       return {
         capability,
         prefix: "Across current tested releases, ",
-        suffix: ` is present in model input for all ${counts.y} measured frameworks.`,
+        suffix: ` is present at all ${counts.y} measured capture boundaries.`,
       };
     }
     if (counts.n === measuredCount && measuredCount > 0) {
@@ -142,13 +142,13 @@ function buildCapabilityFacts(
       return {
         capability,
         prefix: `Across ${measuredCount} current tested releases, `,
-        suffix: ` is present in model input for ${counts.y} frameworks and dropped by ${counts.n}.`,
+        suffix: ` is present at ${counts.y} capture boundaries and dropped by ${counts.n} frameworks.`,
       };
     }
     return {
       capability,
       prefix: `Across ${measuredCount} current tested releases, `,
-      suffix: ` is present in model input for ${counts.y}, retained outside it by ${counts.a}, and dropped by ${counts.n}.`,
+      suffix: ` is present at ${counts.y} capture boundaries, changed or retained elsewhere by ${counts.a}, and dropped by ${counts.n}.`,
     };
   });
 }

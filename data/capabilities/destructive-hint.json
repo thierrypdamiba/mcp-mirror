@@ -3,7 +3,7 @@
   "id": "destructive-hint",
   "title": "`destructiveHint`",
   "description": "An MCP tool annotation the author sets to declare that a tool is destructive, it deletes data, is irreversible, or has a large blast radius. It lives in the tool's `annotations` object alongside readOnlyHint, idempotentHint and openWorldHint.",
-  "question": "Is the destructive marker present in the model input?",
+  "question": "Is the destructive marker present at each capture boundary?",
   "spec": "https://modelcontextprotocol.io/specification",
   "status": "stable",
   "categories": [
@@ -18,7 +18,7 @@
       "0.3.0": "a #2"
     },
     "openai-agents": {
-      "0.22.0": "n #3"
+      "0.20.0": "n #3"
     },
     "pydantic-ai": {
       "1.107.0": "a #4"
@@ -27,18 +27,18 @@
       "1.17.3": "n #5"
     }
   },
-  "notes": "No listed framework surfaces MCP annotations to the model. The OpenAI/Anthropic function-tool format that all of them serialise to has no field to carry one, so this row reads the same for every framework, it is a fact about two specifications rather than a judgement about any implementation. Partial support ('a') means the framework still holds the value somewhere your own policy layer can read it; either way, the model input omits it.",
+  "notes": "The annotation is absent from all five declared capture objects. LangChain and Pydantic AI retain it elsewhere in framework metadata; CrewAI, OpenAI Agents SDK, and Mastra drop it. No v0.1 renderer captures a serialized provider request.",
   "notes_by_num": {
     "1": "CrewAI: the adapted tool object exposes no annotations field, so the value is not recoverable after adaptation.",
-    "2": "LangChain, retained on `StructuredTool.metadata`; not part of the payload `convert_to_openai_tool` produces for the model.",
+    "2": "LangChain: retained on `StructuredTool.metadata`, but absent from the OpenAI-compatible dictionary produced by `convert_to_openai_tool`.",
     "3": "OpenAI Agents SDK: `FunctionTool` keeps `_mcp_title` only; the behavioural hints are not carried.",
     "4": "Pydantic AI: retained in `ToolDefinition.metadata['annotations']`; not part of `parameters_json_schema`.",
     "5": "Mastra, `mcpMetadata` carries the server name and version only; annotations are not attached to the tool."
   },
   "verdict": {
     "code": "n",
-    "headline": "Absent from every listed framework's model input.",
-    "detail": "MCP defines the annotation. The function-tool format every listed framework serialises to has no field to carry it."
+    "headline": "Absent at all five declared capture boundaries.",
+    "detail": "Two frameworks retain it elsewhere; three drop it during adaptation. Final provider requests were not captured."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,
@@ -58,7 +58,7 @@
     }
   ],
   "known_issues": [
-    "A policy layer reading the annotation from framework metadata (LangChain, Pydantic AI) sees a value the model never saw, the two can disagree about whether a call is dangerous.",
+    "A policy layer reading retained metadata in LangChain or Pydantic AI sees a value absent from the captured tool definition; those two integration surfaces can disagree.",
     "Because the annotation is absent rather than false, a consumer cannot distinguish \"not destructive\" from \"never told\"."
   ],
   "example": {
@@ -68,7 +68,7 @@
       "  \"description\": \"Permanently deletes an account\u2026\",",
       "  \"annotations\": { \"destructiveHint\": true } }"
     ],
-    "after_label": "model receives (every listed framework)",
+    "after_label": "captured definition (all five frameworks)",
     "after": [
       "{ \"name\": \"delete_account\",",
       "  \"description\": \"Permanently deletes an account\u2026\",",
@@ -76,7 +76,7 @@
       ": no annotations field exists in this format"
     ]
   },
-  "why": "An agent asked to call delete_account receives no structured signal that the call is destructive. A \"confirm before destructive actions\" guardrail that relies on the model seeing the hint silently does nothing. Two frameworks still hold the value where your own policy layer could read it; three do not, but in all five the model itself is blind.",
+  "why": "A guardrail reading only the captured tool definition receives no structured destructive signal. Two frameworks still hold the value where an application policy layer can read it; three do not. This measurement does not claim what a later provider request contains.",
   "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
   "measured": {
     "run_date": "2026-09-04",

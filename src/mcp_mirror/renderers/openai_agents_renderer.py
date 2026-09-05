@@ -1,10 +1,10 @@
 """OpenAI Agents SDK renderer (DESIGN.md section 8).
 
-Drives the SDK's real MCP conversion: ``MCPUtil.to_function_tool`` is exactly what the
-Agent uses to turn an MCP tool into the ``FunctionTool`` it sends the model, so its
-``params_json_schema`` is what the LLM receives. The SDK keeps the MCP ``title`` (as
-``_mcp_title``) on the tool but does not carry the behavioral hints (destructiveHint,
-readOnlyHint, …), so, like CrewAI, those are not retained on the tool you register.
+Drives the SDK's real MCP conversion, ``MCPUtil.to_function_tool``, and captures the
+resulting SDK ``FunctionTool``. This is the framework's model-tool object, not a
+serialized provider request. The SDK keeps the MCP ``title`` (as ``_mcp_title``) on
+that object but does not carry the behavioral hints (destructiveHint, readOnlyHint,
+etc.).
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from typing import Any
 
 import anyio
 
-from ..models import ToolRep
+from ..models import RendererEvidence, ToolRep
 from ..normalize import normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
@@ -40,6 +40,25 @@ class OpenAIAgentsRenderer:
         version = dist_version("openai-agents")
         return {"framework": version, "adapter": version}
 
+    def evidence(self) -> RendererEvidence:
+        return RendererEvidence(
+            capture_api="agents.mcp.util.MCPUtil.to_function_tool",
+            capture_object="agents.tool.FunctionTool",
+            capture_stage="framework_tool_definition",
+            provider_request_captured=False,
+            negotiated_mcp_spec_version=getattr(
+                self,
+                "_negotiated_mcp_spec_version",
+                None,
+            ),
+            protocol_version_evidence=(
+                "protocolVersion exposed by MCPServer.server_initialize_result"
+            ),
+            limitation=(
+                "No Agents SDK model implementation or serialized provider request was captured."
+            ),
+        )
+
     def render(self, server: ServerHandle) -> list[ToolRep]:
         try:
             return anyio.run(self._render_async, server)
@@ -53,6 +72,8 @@ class OpenAIAgentsRenderer:
 
         mcp_server = self._build_server(server)
         async with mcp_server:
+            initialize_result = mcp_server.server_initialize_result
+            self._negotiated_mcp_spec_version = initialize_result.protocolVersion
             mcp_tools = await mcp_server.list_tools()
             reps: list[ToolRep] = []
             for tool in mcp_tools:
@@ -74,8 +95,8 @@ class OpenAIAgentsRenderer:
         )
 
     def _to_rep(self, function_tool: Any) -> ToolRep:
-        # The SDK keeps only the MCP title on the FunctionTool; the behavioral hints are
-        # not carried on the object you hand to the Agent, so they are not "retained".
+        # The SDK keeps only the MCP title on the captured FunctionTool; the
+        # behavioral hints are not carried on that object.
         retained: dict[str, Any] = {}
         title = getattr(function_tool, "_mcp_title", None)
         if title:

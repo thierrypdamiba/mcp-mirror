@@ -70,6 +70,23 @@ jobs:
               )
           }
           assert not unknown, f"renderers did not report exact versions: {unknown}"
+
+          evidence = {
+              renderer_id: renderer.evidence()
+              for renderer_id, renderer in available.items()
+          }
+          incomplete = {
+              renderer_id: item
+              for renderer_id, item in evidence.items()
+              if not item.capture_api
+              or not item.capture_object
+              or not item.protocol_version_evidence
+              or (
+                  item.provider_request_captured
+                  and item.capture_stage != "provider_request"
+              )
+          }
+          assert not incomplete, f"renderers declared incomplete evidence: {incomplete}"
           print(f"verified {len(available)} registered renderers")
           PY
 

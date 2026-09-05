@@ -71,7 +71,22 @@ def _header(report: Report) -> str:
     n = len(report.tools)
     return (
         f"mcp-mirror, server: {report.mcp_server}, "
-        f"MCP spec: {report.mcp_spec_version}, {n} tool{'s' if n != 1 else ''}"
+        f"source-negotiated MCP spec: {report.mcp_spec_version}, "
+        f"{n} tool{'s' if n != 1 else ''}"
+    )
+
+
+def _evidence_line(run) -> str | None:
+    evidence = run.evidence
+    if evidence is None:
+        return None
+    provider_request = "captured" if evidence.provider_request_captured else "not captured"
+    adapter_spec = evidence.negotiated_mcp_spec_version or "not exposed"
+    stage = evidence.capture_stage.replace("_", " ")
+    return (
+        f"{evidence.capture_api} -> {evidence.capture_object} ({stage}); "
+        f"provider request: {provider_request}; "
+        f"adapter-negotiated MCP spec: {adapter_spec}"
     )
 
 
@@ -83,6 +98,14 @@ def render_table(report: Report, console: Console, jobs_filter: list[str] | None
     console.print(Text(_header(report), style="bold"))
     console.print(f"generated with {report.generated_with}", style="dim")
     console.print(Text(MAIN_JOB, style="italic dim"))
+    if report.runs:
+        console.print(Text("\nCapture boundaries", style="bold"))
+        for run in report.runs:
+            line = _evidence_line(run)
+            if line:
+                console.print(f"  {run.framework}: {line}")
+                if run.evidence and run.evidence.limitation:
+                    console.print(f"    limitation: {run.evidence.limitation}", style="dim")
 
     table = Table(show_lines=False, header_style="bold")
     table.add_column("framework", style="bold cyan", no_wrap=True)
@@ -114,7 +137,13 @@ def render_table(report: Report, console: Console, jobs_filter: list[str] | None
 
     if report.job_findings:
         job_ids, fws, cells, titles = _job_grid(report.job_findings)
-        console.print(Text("\nJobs-To-Be-Done  (does the job still work with what reached the model?)", style="bold"))
+        console.print(
+            Text(
+                "\nJobs-To-Be-Done  "
+                "(does the captured framework definition still satisfy the job?)",
+                style="bold",
+            )
+        )
         jt = Table(show_lines=False, header_style="bold")
         jt.add_column("job", style="cyan")
         for fw in fws:
@@ -183,8 +212,9 @@ def render_markdown(report: Report, jobs_filter: list[str] | None = None) -> str
         lines.append("## Jobs-To-Be-Done")
         lines.append("")
         lines.append(
-            "_Does the job still work with what reached the model? pass = its needs survived, "
-            "degraded = weakened, fail = a needed tool or param never arrived._"
+            "_Does the captured framework definition still satisfy the job? "
+            "pass = its needs survived, degraded = weakened, "
+            "fail = a needed tool or parameter did not survive adaptation._"
         )
         lines.append("")
         lines.append("| job | " + " | ".join(fws) + " |")
@@ -206,6 +236,13 @@ def render_markdown(report: Report, jobs_filter: list[str] | None = None) -> str
     for run in report.runs:
         lines.append(f"### {run.framework} (`{run.framework_version}`)")
         lines.append("")
+        evidence_line = _evidence_line(run)
+        if evidence_line:
+            lines.append(f"**Capture boundary:** {evidence_line}.")
+            if run.evidence and run.evidence.limitation:
+                lines.append("")
+                lines.append(f"**Limitation:** {run.evidence.limitation}")
+            lines.append("")
         if not run.differences:
             lines.append("_fully faithful, no differences._")
             lines.append("")
@@ -239,6 +276,38 @@ def compare_baseline(current: Report, baseline: Report) -> tuple[bool, list[str]
             f"{baseline.mcp_spec_version!r} vs current {current.mcp_spec_version!r} "
             "(baselines are only comparable within one spec version)"
         ]
+
+    baseline_runs = {run.framework: run for run in baseline.runs}
+    current_runs = {run.framework: run for run in current.runs}
+    for framework in sorted(set(baseline_runs) & set(current_runs)):
+        baseline_evidence = baseline_runs[framework].evidence
+        current_evidence = current_runs[framework].evidence
+        # Two legacy reports without renderer evidence retain the v0.1 baseline
+        # behavior. A mixed old/new comparison fails closed because equivalence
+        # cannot be established.
+        if baseline_evidence is None and current_evidence is None:
+            continue
+        baseline_version = (
+            baseline_evidence.negotiated_mcp_spec_version
+            if baseline_evidence
+            else None
+        )
+        current_version = (
+            current_evidence.negotiated_mcp_spec_version
+            if current_evidence
+            else None
+        )
+        if not baseline_version or not current_version:
+            return True, [
+                f"renderer MCP spec unavailable for {framework!r}: "
+                f"baseline {baseline_version!r} vs current {current_version!r}; "
+                "cannot compare adapter outputs across an unknown protocol boundary"
+            ]
+        if current_version != baseline_version:
+            return True, [
+                f"renderer MCP spec mismatch for {framework!r}: "
+                f"baseline {baseline_version!r} vs current {current_version!r}"
+            ]
 
     baseline_index = _index(baseline)
     current_index = _index(current)

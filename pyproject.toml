@@ -1,7 +1,7 @@
 [project]
 name = "mcp-mirror"
 version = "0.1.0"
-description = "Capture what an LLM actually receives from an MCP server after tool definitions pass through different agent frameworks, and score each transform as faithful, lossy, additive, or transformative."
+description = "Capture and diff MCP tool definitions at explicit agent-framework adaptation boundaries."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

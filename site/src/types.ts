@@ -15,6 +15,17 @@ export interface Agent {
   registry: "pypi" | "npm" | string;
   adapter: string;
   renderer: string;
+  capture_boundary: {
+    capture_api: string;
+    capture_object: string;
+    capture_stage:
+      | "framework_tool_definition"
+      | "provider_format"
+      | "provider_request";
+    provider_request_captured: boolean;
+    negotiated_mcp_spec_version: string | null;
+    protocol_version_evidence: string;
+  };
   current_version: string;
   stable_version: string;
   dev_version: string | null;

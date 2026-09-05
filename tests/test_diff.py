@@ -7,7 +7,14 @@ objects by hand and assert the expected category per dimension (DESIGN.md sectio
 from __future__ import annotations
 
 from mcp_mirror.diff import diff_reps, diff_tool
-from mcp_mirror.models import Difference, Dimension, FrameworkRun, Report, ToolRep
+from mcp_mirror.models import (
+    Difference,
+    Dimension,
+    FrameworkRun,
+    RendererEvidence,
+    Report,
+    ToolRep,
+)
 from mcp_mirror.report import compare_baseline
 from mcp_mirror.scorecard import build_scorecard
 
@@ -212,18 +219,18 @@ def test_annotation_destroyed_is_lossy():
     assert ("lossy", Dimension.ANNOTATION) in diffs
 
 
-def test_annotation_retained_but_not_surfaced_is_transformative():
-    # The framework keeps the hint out-of-band but the model never sees it.
+def test_annotation_retained_outside_capture_boundary_is_transformative():
+    # The framework keeps the hint outside the declared capture object.
     s = src(annotations={"destructiveHint": True})
     r = rendered(annotations={}, framework_metadata={"annotations": {"destructiveHint": True}})
     diffs = categories_at(diff_tool(s, r), "annotations.destructiveHint")
     assert ("transformative", Dimension.ANNOTATION) in diffs
     detail = next(d for d in diff_tool(s, r) if d.path == "annotations.destructiveHint").detail
-    assert "not surfaced" in detail
+    assert "absent from the captured tool definition" in detail
 
 
-def test_annotation_surfaced_to_model_is_faithful():
-    # The framework injected the hint into the model-facing spec: fully preserved.
+def test_annotation_present_at_capture_boundary_is_faithful():
+    # The captured tool definition preserves the hint unchanged.
     s = src(annotations={"destructiveHint": True})
     r = rendered(annotations={"destructiveHint": True})
     assert not find(diff_tool(s, r), dimension=Dimension.ANNOTATION)
@@ -318,3 +325,25 @@ def test_baseline_spec_version_mismatch_is_drift():
     drift, messages = compare_baseline(current, baseline)
     assert drift is True
     assert any("spec version mismatch" in m for m in messages)
+
+
+def test_baseline_renderer_spec_version_mismatch_is_drift():
+    baseline = _report_with([])
+    current = _report_with([])
+    for report, version in (
+        (baseline, "2025-11-25"),
+        (current, "2026-07-28"),
+    ):
+        report.runs[0].evidence = RendererEvidence(
+            capture_api="adapter.list_tools",
+            capture_object="Tool",
+            capture_stage="framework_tool_definition",
+            provider_request_captured=False,
+            negotiated_mcp_spec_version=version,
+            protocol_version_evidence="initialize result",
+        )
+
+    drift, messages = compare_baseline(current, baseline)
+
+    assert drift is True
+    assert "renderer MCP spec mismatch" in messages[0]

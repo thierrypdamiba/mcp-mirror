@@ -10,8 +10,11 @@ Complete this section for a new or changed renderer. Otherwise write
 - Framework package and version:
 - Adapter package and version:
 - Real MCP adapter/conversion API called:
-- Captured payload boundary:
-- MCP annotations are surfaced, retained outside model input, or dropped:
+- Capture object and stage (`framework_tool_definition`, `provider_format`, or
+  `provider_request`):
+- Serialized provider request captured (`yes` requires interception evidence):
+- Adapter-negotiated MCP version observed, or why it is unknown:
+- MCP annotations are present at the boundary, retained elsewhere, or dropped:
 - Evidence for that annotation fate:
 - Transports exercised:
 

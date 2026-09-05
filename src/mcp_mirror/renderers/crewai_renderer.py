@@ -1,8 +1,8 @@
 """CrewAI renderer (DESIGN.md section 8).
 
 Loads tools through ``crewai_tools``' ``MCPServerAdapter`` (the real adapter) and
-renders each to the spec CrewAI passes to the model: the tool's name, description and
-its ``args_schema`` serialized to JSON Schema.
+captures each adapted CrewAI tool's name, description, and ``args_schema`` serialized
+to JSON Schema. This is a framework tool object, not a captured provider request.
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ from __future__ import annotations
 from importlib import util
 from typing import Any
 
-from ..models import ToolRep
+from ..models import RendererEvidence, ToolRep
 from ..normalize import normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
@@ -34,6 +34,26 @@ class CrewAIRenderer:
     def versions(self) -> dict:
         return {"framework": dist_version("crewai-tools"), "adapter": dist_version("crewai")}
 
+    def evidence(self) -> RendererEvidence:
+        return RendererEvidence(
+            capture_api="crewai_tools.MCPServerAdapter",
+            capture_object="CrewAI BaseTool name, description, and args_schema",
+            capture_stage="framework_tool_definition",
+            provider_request_captured=False,
+            negotiated_mcp_spec_version=getattr(
+                self,
+                "_negotiated_mcp_spec_version",
+                None,
+            ),
+            protocol_version_evidence=(
+                "protocolVersion instrumented from ClientSession.initialize inside "
+                "MCPServerAdapter"
+            ),
+            limitation=(
+                "No CrewAI LLM serializer or serialized provider request was captured."
+            ),
+        )
+
     def render(self, server: ServerHandle) -> list[ToolRep]:
         try:
             return self._render(server)
@@ -44,11 +64,31 @@ class CrewAIRenderer:
 
     def _render(self, server: ServerHandle) -> list[ToolRep]:
         from crewai_tools import MCPServerAdapter
+        from mcp.client.session import ClientSession
+        from unittest.mock import patch
 
         params = self._build_params(server)
+        protocol_versions: list[str] = []
+        original_initialize = ClientSession.initialize
+
+        async def capture_initialize(session, *args, **kwargs):
+            result = await original_initialize(session, *args, **kwargs)
+            protocol_versions.append(result.protocolVersion)
+            return result
+
         # MCPServerAdapter is a synchronous context manager yielding CrewAI tools.
-        with MCPServerAdapter(params) as tools:
-            return [self._to_rep(tool) for tool in tools]
+        with patch.object(ClientSession, "initialize", capture_initialize):
+            with MCPServerAdapter(params) as tools:
+                reps = [self._to_rep(tool) for tool in tools]
+
+        observed = set(protocol_versions)
+        if len(observed) != 1:
+            raise RenderError(
+                "crewai renderer could not establish one negotiated MCP protocol "
+                f"version (observed: {sorted(observed)})"
+            )
+        self._negotiated_mcp_spec_version = observed.pop()
+        return reps
 
     def _build_params(self, server: ServerHandle) -> Any:
         if server.transport == "http":

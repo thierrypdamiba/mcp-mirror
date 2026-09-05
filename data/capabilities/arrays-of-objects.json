@@ -3,7 +3,7 @@
   "id": "arrays-of-objects",
   "title": "Arrays of Objects",
   "description": "A list parameter whose items are structured objects.",
-  "question": "Do arrays of structured items survive to the model?",
+  "question": "Do arrays of structured items survive to each capture boundary?",
   "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
   "status": "stable",
   "categories": [
@@ -18,7 +18,7 @@
       "0.3.0": "y"
     },
     "openai-agents": {
-      "0.22.0": "y"
+      "0.20.0": "y"
     },
     "pydantic-ai": {
       "1.107.0": "y"
@@ -27,12 +27,12 @@
       "1.17.3": "y"
     }
   },
-  "notes": "Measured as present in every framework's model input.",
+  "notes": "Measured as present at every declared framework capture boundary.",
   "notes_by_num": {},
   "verdict": {
     "code": "y",
-    "headline": "Survives to the model in all five listed frameworks.",
-    "detail": "Item schemas arrive intact."
+    "headline": "Survives to all five declared capture boundaries.",
+    "detail": "Item schemas remain intact in every captured tool definition."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,
@@ -48,7 +48,7 @@
     }
   ],
   "known_issues": [],
-  "why": "Item schema loss would let the model send malformed list entries.",
+  "why": "Item schema loss can let a downstream model produce malformed list entries.",
   "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
   "measured": {
     "run_date": "2026-09-04",

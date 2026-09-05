@@ -9,7 +9,8 @@
     "e-1": "1 release(s) before current",
     "e0": "current release",
     "e1": "1 release(s) after current",
-    "e2": "2 release(s) after current"
+    "e2": "2 release(s) after current",
+    "e3": "3 release(s) after current"
   },
   "agents": {
     "crewai": {
@@ -20,6 +21,14 @@
       "registry": "pypi",
       "adapter": "crewai_tools.MCPServerAdapter",
       "renderer": "src/mcp_mirror/renderers/crewai_renderer.py",
+      "capture_boundary": {
+        "capture_api": "crewai_tools.MCPServerAdapter",
+        "capture_object": "CrewAI BaseTool name, description, and args_schema",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion instrumented from ClientSession.initialize inside MCPServerAdapter"
+      },
       "current_version": "1.14.7",
       "stable_version": "1.15.1",
       "dev_version": null,
@@ -70,6 +79,14 @@
       "registry": "pypi",
       "adapter": "langchain_mcp_adapters with convert_to_openai_tool",
       "renderer": "src/mcp_mirror/renderers/langchain_renderer.py",
+      "capture_boundary": {
+        "capture_api": "langchain_core.utils.function_calling.convert_to_openai_tool",
+        "capture_object": "OpenAI-compatible function-tool dictionary",
+        "capture_stage": "provider_format",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion returned by ClientSession.initialize inside the langchain-mcp-adapters session"
+      },
       "current_version": "0.3.0",
       "stable_version": "0.3.2",
       "dev_version": null,
@@ -120,32 +137,40 @@
       "registry": "pypi",
       "adapter": "agents.mcp.util.MCPUtil.to_function_tool",
       "renderer": "src/mcp_mirror/renderers/openai_agents_renderer.py",
-      "current_version": "0.22.0",
+      "capture_boundary": {
+        "capture_api": "agents.mcp.util.MCPUtil.to_function_tool",
+        "capture_object": "agents.tool.FunctionTool",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion exposed by MCPServer.server_initialize_result"
+      },
+      "current_version": "0.20.0",
       "stable_version": "0.22.0",
       "dev_version": null,
       "version_list": [
         {
           "version": "0.20.0",
           "release_date": "2026-08-11T03:12:47Z",
-          "era": -3,
+          "era": 0,
           "release_date_unix": 1786417967
         },
         {
           "version": "0.21.0",
           "release_date": "2026-08-15T02:50:08Z",
-          "era": -2,
+          "era": 1,
           "release_date_unix": 1786762208
         },
         {
           "version": "0.21.1",
           "release_date": "2026-08-16T22:29:33Z",
-          "era": -1,
+          "era": 2,
           "release_date_unix": 1786919373
         },
         {
           "version": "0.22.0",
           "release_date": "2026-08-19T13:45:19Z",
-          "era": 0,
+          "era": 3,
           "release_date_unix": 1787147119
         }
       ]
@@ -158,6 +183,14 @@
       "registry": "pypi",
       "adapter": "pydantic_ai.mcp toolset ToolDefinition",
       "renderer": "src/mcp_mirror/renderers/pydantic_ai_renderer.py",
+      "capture_boundary": {
+        "capture_api": "pydantic_ai.mcp.MCPToolset.get_tools",
+        "capture_object": "pydantic_ai.tools.ToolDefinition",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion exposed by MCPToolset.client.initialize_result"
+      },
       "current_version": "1.107.0",
       "stable_version": "2.1.0",
       "dev_version": null,
@@ -208,6 +241,14 @@
       "registry": "npm",
       "adapter": "@mastra/mcp MCPClient.listTools",
       "renderer": "src/mcp_mirror/renderers/mastra_renderer.py",
+      "capture_boundary": {
+        "capture_api": "@mastra/mcp MCPClient.listTools",
+        "capture_object": "Mastra Tool action returned by listTools",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion observed from the pinned @modelcontextprotocol/client instance used by MCPClient.listTools"
+      },
       "current_version": "1.17.3",
       "stable_version": "1.17.3",
       "dev_version": null,
@@ -254,17 +295,17 @@
     }
   },
   "support_codes": {
-    "y": "present in the model input",
-    "a": "kept by the framework, not surfaced to the model",
-    "n": "dropped",
+    "y": "present at the declared capture boundary",
+    "a": "changed at the boundary or retained elsewhere",
+    "n": "dropped during adaptation",
     "u": "not yet measured"
   },
   "defaults": {
     "inclusion_rule": "A framework is listed if it ships a first-party or officially documented MCP adapter. Nothing is excluded on quality grounds.",
     "order_rule": "Alphabetical within language group. No ranking is implied or computed.",
     "version_policy": "Era 0 is the release actually measured. Surrounding releases come from the package registry (PyPI, npm) and are shown as not yet measured until a scan covers them.",
-    "green_rule": "A cell is 'y' only if the value is present in the tool specification the model receives. Nothing else counts.",
-    "partial_rule": "'a' means the framework still holds the value where your own code can read it, but it is absent from what the model sees.",
+    "green_rule": "A cell is 'y' only if the value is present in the tool definition at that framework's declared capture boundary. Nothing else counts.",
+    "partial_rule": "'a' means the capability is not present unchanged: the note must say whether it was transformed at the boundary, only partly preserved, or retained elsewhere by the framework.",
     "note_rule": "Every 'a' and 'n' cell must carry a #n note reference naming the exact mechanism, so a status can be checked rather than trusted.",
     "usage_rule": "No adoption weighting is published. We have no defensible source yet, and an invented percentage would be the least trustworthy number on the page."
   },
@@ -579,7 +620,7 @@
       "id": "arrays-of-objects",
       "title": "Arrays of Objects",
       "description": "A list parameter whose items are structured objects.",
-      "question": "Do arrays of structured items survive to the model?",
+      "question": "Do arrays of structured items survive to each capture boundary?",
       "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
       "status": "stable",
       "categories": [
@@ -594,7 +635,7 @@
           "0.3.0": "y"
         },
         "openai-agents": {
-          "0.22.0": "y"
+          "0.20.0": "y"
         },
         "pydantic-ai": {
           "1.107.0": "y"
@@ -603,12 +644,12 @@
           "1.17.3": "y"
         }
       },
-      "notes": "Measured as present in every framework's model input.",
+      "notes": "Measured as present at every declared framework capture boundary.",
       "notes_by_num": {},
       "verdict": {
         "code": "y",
-        "headline": "Survives to the model in all five listed frameworks.",
-        "detail": "Item schemas arrive intact."
+        "headline": "Survives to all five declared capture boundaries.",
+        "detail": "Item schemas remain intact in every captured tool definition."
       },
       "usage_perc_y": null,
       "usage_perc_a": null,
@@ -624,7 +665,7 @@
         }
       ],
       "known_issues": [],
-      "why": "Item schema loss would let the model send malformed list entries.",
+      "why": "Item schema loss can let a downstream model produce malformed list entries.",
       "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
       "measured": {
         "run_date": "2026-09-04",

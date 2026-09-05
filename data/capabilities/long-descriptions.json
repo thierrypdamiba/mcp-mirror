@@ -18,7 +18,7 @@
       "0.3.0": "y"
     },
     "openai-agents": {
-      "0.22.0": "y"
+      "0.20.0": "y"
     },
     "pydantic-ai": {
       "1.107.0": "y"
@@ -34,7 +34,7 @@
   "verdict": {
     "code": "y",
     "headline": "No truncation observed in any listed framework.",
-    "detail": "Worth re checking as model side description limits change."
+    "detail": "Worth rechecking as framework and provider description limits change."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,

@@ -3,7 +3,7 @@
   "id": "nested-objects",
   "title": "Nested Objects",
   "description": "An object typed parameter carrying its own nested properties.",
-  "question": "Does nested structure survive to the model?",
+  "question": "Does nested structure survive to each capture boundary?",
   "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
   "status": "stable",
   "categories": [
@@ -18,7 +18,7 @@
       "0.3.0": "y"
     },
     "openai-agents": {
-      "0.22.0": "y"
+      "0.20.0": "y"
     },
     "pydantic-ai": {
       "1.107.0": "y"
@@ -33,7 +33,7 @@
   },
   "verdict": {
     "code": "y",
-    "headline": "Survives to the model in all five listed frameworks.",
+    "headline": "Survives to all five declared capture boundaries.",
     "detail": "One framework re expresses nesting by reference. The structure is preserved either way."
   },
   "usage_perc_y": null,

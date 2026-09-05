@@ -3,7 +3,8 @@
 Mastra is a TypeScript framework, so, to honor the cardinal rule of driving the
 framework's *real* adapter (decision D1) rather than reimplementing it, this renderer
 shells out to a small Node worker (``mastra_node/_mastra_worker.mjs``) that runs
-Mastra's real ``@mastra/mcp`` client and reports the tools Mastra would hand the model.
+Mastra's real ``@mastra/mcp`` client and reports the tool actions returned by
+``MCPClient.listTools``. It does not run a model provider or capture a request.
 
 Enable it once with:  ``cd src/mcp_mirror/renderers/mastra_node && npm install``
 (requires Node on PATH). When the Node project is absent the renderer reports itself
@@ -17,7 +18,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from ..models import ToolRep
+from ..models import RendererEvidence, ToolRep
 from ..normalize import normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
@@ -48,6 +49,28 @@ class MastraRenderer:
             pass
         return {"framework": version, "adapter": f"node {_node_version()}"}
 
+    def evidence(self) -> RendererEvidence:
+        return RendererEvidence(
+            capture_api="@mastra/mcp MCPClient.listTools",
+            capture_object="Mastra Tool action returned by listTools",
+            capture_stage="framework_tool_definition",
+            provider_request_captured=False,
+            negotiated_mcp_spec_version=getattr(
+                self,
+                "_negotiated_mcp_spec_version",
+                None,
+            ),
+            protocol_version_evidence=(
+                "protocolVersion observed from the pinned @modelcontextprotocol/client "
+                "instance used by MCPClient.listTools"
+            ),
+            limitation=(
+                "The worker extracts JSON Schema from Mastra's Standard Schema wrapper; "
+                "the negotiated protocol field is not a public @mastra/mcp API; no AI "
+                "SDK provider adapter or serialized request was captured."
+            ),
+        )
+
     def render(self, server: ServerHandle) -> list[ToolRep]:
         config = self._config(server)
         try:
@@ -70,14 +93,21 @@ class MastraRenderer:
             raise RenderError(f"mastra worker error: {detail}")
 
         try:
-            entries = json.loads(proc.stdout)
+            payload = json.loads(proc.stdout)
         except json.JSONDecodeError as exc:
             raise RenderError(
                 f"mastra worker returned invalid JSON ({exc}): {proc.stdout[:200]!r}"
             ) from exc
 
+        if not isinstance(payload, dict) or not isinstance(payload.get("tools"), list):
+            raise RenderError("mastra worker returned no tool list")
+        protocol_version = payload.get("negotiatedMcpSpecVersion")
+        if not isinstance(protocol_version, str) or not protocol_version:
+            raise RenderError("mastra worker returned no negotiated MCP protocol version")
+        self._negotiated_mcp_spec_version = protocol_version
+
         reps: list[ToolRep] = []
-        for entry in entries:
+        for entry in payload["tools"]:
             payload = {
                 "name": entry.get("name"),
                 "description": entry.get("description"),

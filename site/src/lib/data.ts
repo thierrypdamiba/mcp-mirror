@@ -12,13 +12,13 @@ export const SUPPORT_META: Record<
   {label: string; shortLabel: string; symbol: string}
 > = {
   y: {
-    label: "Present in model input",
+    label: "Present at capture boundary",
     shortLabel: "Present",
     symbol: "✓",
   },
   a: {
-    label: "Retained outside model input",
-    shortLabel: "Retained",
+    label: "Changed or retained elsewhere",
+    shortLabel: "Changed/retained",
     symbol: "◐",
   },
   n: {

@@ -39,9 +39,11 @@ def main() -> int:
             handle.headers = headers
             versions = renderer.versions()
             reps = renderer.render(handle)
+            evidence = renderer.evidence()
             result = {
                 "ok": True,
                 "versions": versions,
+                "evidence": evidence.model_dump(mode="json"),
                 "reps": [rep.model_dump() for rep in reps],
             }
     except Exception as exc:  # noqa: BLE001 - report any failure back to the parent

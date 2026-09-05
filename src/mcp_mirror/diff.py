@@ -267,25 +267,25 @@ def _diff_annotations(s: ToolRep, r: ToolRep, tool: str, fw: str, diffs: list[Di
     """Three-way annotation comparison (the J5 core).
 
     For each source annotation, the rendering can:
-    - **surface** it to the model (present in ``annotations``)        -> faithful / transformative
-    - **retain** it out-of-band only (``framework_metadata``)         -> transformative (model-blind)
-    - **destroy** it (no trace anywhere)                              -> lossy (the dangerous case)
+    - preserve it at the declared capture boundary (``annotations``) -> faithful / transformative
+    - retain it elsewhere (``framework_metadata``)                    -> transformative
+    - destroy it (no trace anywhere)                                  -> lossy
     """
 
     authz_keys = {"destructiveHint", "readOnlyHint", "openWorldHint", "idempotentHint"}
-    surfaced = r.annotations or {}
+    captured = r.annotations or {}
     retained = (r.framework_metadata or {}).get("annotations") or {}
 
     for key, value in (s.annotations or {}).items():
         relevant = " (authorization-relevant)" if key in authz_keys else ""
-        if key in surfaced:
-            if surfaced[key] != value:
+        if key in captured:
+            if captured[key] != value:
                 diffs.append(
                     Difference(
                         tool=tool, framework=fw, path=f"annotations.{key}",
                         category="transformative", dimension=Dimension.ANNOTATION,
-                        detail=f"annotation {key!r}{relevant} changed in the model-facing spec",
-                        source_value=value, rendered_value=surfaced[key],
+                        detail=f"annotation {key!r}{relevant} changed at the capture boundary",
+                        source_value=value, rendered_value=captured[key],
                     )
                 )
             continue
@@ -296,7 +296,7 @@ def _diff_annotations(s: ToolRep, r: ToolRep, tool: str, fw: str, diffs: list[Di
                     category="transformative", dimension=Dimension.ANNOTATION,
                     detail=(
                         f"annotation {key!r}{relevant} retained in framework metadata "
-                        "but not surfaced to the model"
+                        "but absent from the captured tool definition"
                     ),
                     source_value=value, rendered_value=retained[key],
                 )

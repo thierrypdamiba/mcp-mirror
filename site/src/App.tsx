@@ -115,9 +115,9 @@ function SiteFooter({database}: {database: MirrorDatabase}) {
         <section>
           <h2>Legend</h2>
           <ul className="footer-legend">
-            <li><i className="support-y" /> Present in model input</li>
+            <li><i className="support-y" /> Present at capture boundary</li>
             <li><i className="support-n" /> Dropped during adaptation</li>
-            <li><i className="support-a" /> Retained outside model input</li>
+            <li><i className="support-a" /> Changed or retained elsewhere</li>
             <li><i className="support-u" /> Not yet measured</li>
           </ul>
         </section>

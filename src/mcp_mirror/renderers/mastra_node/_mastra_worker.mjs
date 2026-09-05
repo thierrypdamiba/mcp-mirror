@@ -1,5 +1,6 @@
 // Node worker that drives Mastra's REAL MCP client (@mastra/mcp) so mcp-mirror can
-// capture what Mastra actually sends the model, never a reimplementation (decision D1).
+// capture the tool actions returned by MCPClient.listTools, never a reimplementation
+// (decision D1). It does not invoke an AI SDK provider or capture a provider request.
 //
 // Usage: node _mastra_worker.mjs '<json-server-config>'
 //   stdio: {"transport":"stdio","command":"python","args":["server.py"]}
@@ -8,8 +9,8 @@
 
 import { MCPClient } from '@mastra/mcp';
 
-// Mastra wraps a tool's schema in a Standard-Schema JsonSchemaWrapper. Pull the real
-// JSON Schema back out (that is what the AI SDK serializes to the model).
+// Mastra wraps a tool's schema in a Standard-Schema JsonSchemaWrapper. Extract the
+// JSON Schema represented by that wrapper at the declared capture boundary.
 function extractJsonSchema(inputSchema) {
   if (!inputSchema || typeof inputSchema !== 'object') return {};
   if (typeof inputSchema.getSchema === 'function') {
@@ -54,13 +55,24 @@ async function main() {
     const out = [];
     for (const [name, tool] of Object.entries(tools)) {
       out.push({
-        name, // Mastra namespaces as `<server>_<tool>`; that is the name the model sees
+        name, // Mastra namespaces this captured action as `<server>_<tool>`
         description: tool && tool.description != null ? String(tool.description) : null,
         parameters: extractJsonSchema(tool && tool.inputSchema),
         annotations: {}, // Mastra does not carry MCP annotations onto the tool
       });
     }
-    process.stdout.write(JSON.stringify(out));
+    // @mastra/mcp does not expose the negotiated version publicly. Its pinned MCP
+    // client stores the initialize result here; fail closed if that evidence seam
+    // moves rather than copying the direct source connection's version by assumption.
+    const negotiatedMcpSpecVersion =
+      mcp.mcpClientsById.get('src')?.client?._negotiatedProtocolVersion;
+    if (typeof negotiatedMcpSpecVersion !== 'string' || !negotiatedMcpSpecVersion) {
+      throw new Error('mastra worker: negotiated MCP protocol version was not observable');
+    }
+    process.stdout.write(JSON.stringify({
+      tools: out,
+      negotiatedMcpSpecVersion,
+    }));
   } finally {
     try {
       await mcp.disconnect();

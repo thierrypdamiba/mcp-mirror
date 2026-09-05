@@ -141,11 +141,24 @@ export function ComparePage({
                 <DistributionBar counts={counts} />
                 <div className="distribution-tally">
                   <span><b>{counts.y}</b> present</span>
-                  <span><b>{counts.a}</b> retained</span>
+                  <span><b>{counts.a}</b> changed/retained</span>
                   <span><b>{counts.n}</b> dropped</span>
                   {counts.u ? <span><b>{counts.u}</b> unmeasured</span> : null}
                 </div>
                 <p className="adapter-name">{agent.adapter}</p>
+                <p className="adapter-name">
+                  Capture: {agent.capture_boundary.capture_api} →{" "}
+                  {agent.capture_boundary.capture_object}
+                </p>
+                <p className="adapter-name">
+                  Provider request:{" "}
+                  {agent.capture_boundary.provider_request_captured
+                    ? "captured"
+                    : "not captured"}{" "}
+                  · Adapter-negotiated MCP spec:{" "}
+                  {agent.capture_boundary.negotiated_mcp_spec_version ??
+                    "not exposed"}
+                </p>
               </Card.Content>
               <Card.Footer>
                 <Chip size="sm" variant="tertiary">{agent.type}</Chip>
@@ -164,13 +177,19 @@ export function MethodPage({database}: {database: MirrorDatabase}) {
     {
       title: "The measurement",
       body:
-        "Each cell compares what an MCP server publishes with the tool definition a framework adapter produces. No model is called, so the same inputs produce the same result.",
+        "Each cell compares what an MCP server publishes with the tool definition at a declared framework capture boundary. No model is called and no serialized provider request is implied.",
       variant: "default" as const,
     },
     {
       title: "The data shape",
       body:
         "Frameworks carry version lists and release dates. Capabilities carry one support code per tested framework version, plus numbered notes that name the mechanism.",
+      variant: "secondary" as const,
+    },
+    {
+      title: "Protocol versions stay separate",
+      body:
+        "The scan records the version negotiated by its direct source connection. A framework adapter's independently negotiated version is recorded only when the adapter exposes it; unknown is never filled from the source by assumption.",
       variant: "secondary" as const,
     },
     {

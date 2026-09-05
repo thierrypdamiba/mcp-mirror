@@ -1,9 +1,10 @@
 """LangChain renderer (DESIGN.md section 8).
 
 Loads tools with ``langchain-mcp-adapters`` (the real adapter) and then runs each
-through ``langchain_core.utils.function_calling.convert_to_openai_tool``, the exact
-function object ``bind_tools`` would send to the model. That payload is what the LLM
-receives, so we map it straight into a ``ToolRep``.
+through ``langchain_core.utils.function_calling.convert_to_openai_tool``. The result
+is an OpenAI-compatible tool dictionary. This renderer does not bind a chat model or
+capture a serialized provider request, so it reports that boundary without claiming
+stronger provider evidence.
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ from importlib import util
 
 import anyio
 
-from ..models import ToolRep
+from ..models import RendererEvidence, ToolRep
 from ..normalize import normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
@@ -48,6 +49,26 @@ class LangChainRenderer:
             "adapter": dist_version("langchain-core"),
         }
 
+    def evidence(self) -> RendererEvidence:
+        return RendererEvidence(
+            capture_api="langchain_core.utils.function_calling.convert_to_openai_tool",
+            capture_object="OpenAI-compatible function-tool dictionary",
+            capture_stage="provider_format",
+            provider_request_captured=False,
+            negotiated_mcp_spec_version=getattr(
+                self,
+                "_negotiated_mcp_spec_version",
+                None,
+            ),
+            protocol_version_evidence=(
+                "protocolVersion returned by ClientSession.initialize inside the "
+                "langchain-mcp-adapters session"
+            ),
+            limitation=(
+                "No chat model was bound and no serialized provider request was captured."
+            ),
+        )
+
     def render(self, server: ServerHandle) -> list[ToolRep]:
         try:
             return anyio.run(self._render_async, server)
@@ -56,17 +77,25 @@ class LangChainRenderer:
 
     async def _render_async(self, server: ServerHandle) -> list[ToolRep]:
         from langchain_core.utils.function_calling import convert_to_openai_tool
-        from langchain_mcp_adapters.client import MultiServerMCPClient
+        from langchain_mcp_adapters.client import create_session
+        from langchain_mcp_adapters.tools import load_mcp_tools
 
-        client = MultiServerMCPClient({"src": _connection(server)})
-        tools = await client.get_tools()
+        connection = _connection(server)
+        async with create_session(connection) as session:
+            initialize_result = await session.initialize()
+            self._negotiated_mcp_spec_version = initialize_result.protocolVersion
+            tools = await load_mcp_tools(
+                session,
+                connection=connection,
+                server_name="src",
+            )
 
         reps: list[ToolRep] = []
         for tool in tools:
-            # convert_to_openai_tool is exactly the model-facing payload bind_tools sends.
+            # Capture the provider-shaped conversion output, not a provider request.
             oai_tool = convert_to_openai_tool(tool)
             # langchain-mcp-adapters keeps the MCP annotations on StructuredTool.metadata,
-            # so they are retained by the framework even though they never reach the model.
+            # separate from the provider-shaped dictionary captured above.
             retained = {k: v for k, v in (getattr(tool, "metadata", None) or {}).items() if v is not None}
             metadata = {"annotations": retained} if retained else {}
             reps.append(normalize_function_tool(oai_tool, origin=self.id, framework_metadata=metadata))

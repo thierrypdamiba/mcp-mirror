@@ -3,7 +3,7 @@
 This repository is two things, and they are contributed to differently:
 
 - **The scanner** (`src/mcp_mirror/`), code that drives each framework's *real*
-  MCP adapter and diffs model input against what the server sent. MIT.
+  MCP adapter and diffs its declared capture object against what the server sent. MIT.
 - **The support data** (`data/`), the tables the site and other tools read. CC BY 4.0.
 
 The data is the part most people want to change, so start there.
@@ -42,28 +42,30 @@ evidence.
 
 The short version is:
 
-1. Drive the framework's **real** adapter and identify the model-facing payload.
+1. Drive the framework's **real** adapter and declare the exact capture API,
+   object, and evidence stage.
 2. Register the renderer and its pinned dependency path.
 3. Prove it against the tricky fixture, including annotation retention.
 4. Add exact versions and measured cells to the compatibility data.
 
 Once registered, the existing process isolation, `ToolRep` differ, J1-J5
 scorecard, reporters, baseline comparison, and common integration test apply
-automatically. Extracting the correct framework payload and publishing measured
+automatically. Extracting the correct framework object and publishing measured
 data remain deliberate, reviewable work.
 
 ## Adding a capability
 
 Copy an existing file in `data/capabilities/`. Coverage is deliberately partial
 and grows by contribution; a capability that hasn't been measured should be
-listed with status `unknown` rather than left out, so the gaps are visible.
+listed with status `u` rather than left out, so the gaps are visible.
 
 ## The rules the data must satisfy
 
 These are enforced in CI by `data/validator/validate.py`:
 
-- Statuses are `y` (present in model input), `a` (retained by the framework but
-  absent from model input), `n` (dropped), or `u` (not yet measured).
+- Statuses are `y` (present unchanged at the declared boundary), `a`
+  (transformed, partly preserved, or retained elsewhere), `n` (dropped), or
+  `u` (not yet measured).
 - **Every `a` and `n` cell must cite a note that names the exact mechanism.** A
   status has to be checkable, not trusted, "dropped" alone is an opinion,
   "the adapted tool object exposes no annotations field" is a fact someone can verify.

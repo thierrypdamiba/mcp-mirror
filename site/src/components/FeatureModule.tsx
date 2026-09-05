@@ -29,7 +29,7 @@ function baselineHeadline(counts: Record<SupportCode, number>) {
   );
   if (observedKinds.length > 1) return "Mixed handling across tested releases";
   if (counts.y) return "Present across tested releases";
-  if (counts.a) return "Retained outside model input";
+  if (counts.a) return "Changed or retained elsewhere";
   if (counts.n) return "Dropped across tested releases";
   return "Not yet measured";
 }
@@ -244,7 +244,7 @@ export function FeatureModule({
           </div>
           <p className="feature-observed-summary" aria-label="Observed support summary">
             <span>Observed</span>
-            <strong>{counts.y} present · {counts.a} retained · {counts.n} dropped</strong>
+            <strong>{counts.y} present · {counts.a} changed/retained · {counts.n} dropped</strong>
             <small>{frameworkCount} tested releases</small>
           </p>
         </header>

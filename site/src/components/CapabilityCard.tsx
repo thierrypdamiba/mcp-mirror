@@ -16,7 +16,7 @@ function currentSummary(
   const counts = supportCounts(database, capability);
   const labels: Record<SupportCode, string> = {
     y: "present",
-    a: "retained",
+    a: "changed/retained",
     n: "dropped",
     u: "unmeasured",
   };

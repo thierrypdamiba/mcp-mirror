@@ -16,8 +16,8 @@ from .models import Category, Difference, Dimension, Report
 # circumstance, and the technical dimensions are how we measure whether it is met.
 MAIN_JOB = (
     "When I publish one MCP server and developers reach it through different agent "
-    "frameworks, my tools should arrive at each model faithfully, so the server behaves "
-    "the same no matter which framework wraps it."
+    "frameworks, my tools should survive each framework's published adaptation "
+    "faithfully, so the server's contract does not silently change."
 )
 
 # IMPORTANT framing (from the team review): these categories measure what each framework
@@ -32,40 +32,40 @@ JOBS: dict[str, dict[str, Any]] = {
     "J5": {
         "label": "authz",
         "title": (
-            "When the model chooses whether to call a tool, it can tell which tools are "
-            "dangerous, so it never fires a destructive or out-of-scope tool unaware."
+            "When a tool is adapted, structured danger and scope signals remain at the "
+            "declared capture boundary or in explicit retained metadata."
         ),
         "dimensions": {Dimension.ANNOTATION, Dimension.AUTHZ},
     },
     "J1": {
         "label": "desc",
         "title": (
-            "When the model reasons about a tool, it receives the full description, "
-            "so it uses the tool for what it is actually for."
+            "When a tool is adapted, its full description remains in the captured "
+            "definition so downstream consumers retain the author's intent."
         ),
         "dimensions": {Dimension.DESCRIPTION},
     },
     "J2": {
         "label": "params",
         "title": (
-            "When the model fills in arguments, the parameter contract (types, required, "
-            "enums, formats) reaches it intact, so it calls the tool correctly the first time."
+            "When a tool is adapted, its parameter contract (types, required, enums, "
+            "formats) remains intact at the capture boundary."
         ),
         "dimensions": {Dimension.PARAM_TYPE, Dimension.CONSTRAINT, Dimension.REQUIRED},
     },
     "J3": {
         "label": "struct",
         "title": (
-            "When a tool takes nested or structured input, that structure survives to the "
-            "model, so complex calls do not silently degrade."
+            "When a tool takes nested or structured input, that structure survives "
+            "adaptation so complex calls do not silently degrade."
         ),
         "dimensions": {Dimension.STRUCTURE},
     },
     "J4": {
         "label": "inject",
         "title": (
-            "When a tool reaches the model, it carries nothing the author did not write, "
-            "so no framework-injected text or phantom tool steers the agent."
+            "At the capture boundary, a tool carries nothing the author did not write, "
+            "so framework-injected text and phantom tools stay visible as changes."
         ),
         "dimensions": {Dimension.INJECTION},
     },
@@ -153,7 +153,7 @@ def _authz_flags(differences: list[Difference]) -> list[str]:
     """Human-readable J5 notes for the scorecard, limited to authorization signals.
 
     Filters out non-authz annotation noise (e.g. ``title``) and surfaces both the
-    dangerous case (destroyed) and the model-blind case (retained but not surfaced).
+    dangerous case (destroyed) and the retained-but-absent case.
     """
 
     flags: list[str] = []
