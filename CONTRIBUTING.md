@@ -35,14 +35,22 @@ the table will show it. We'd rather celebrate a fix than sit on a stale red cell
 A framework is listed if it ships a first-party or officially documented MCP
 adapter. Nothing is excluded on quality grounds.
 
-1. Add a renderer in `src/mcp_mirror/renderers/` that drives the framework's
-   **real** adapter. Never reimplement the conversion, the entire value of this
-   project is reporting what the framework actually does.
-2. Register it in `src/mcp_mirror/renderers/__init__.py` and add an optional
-   extra in `pyproject.toml`.
-3. Add the framework to `data/frameworks.json` (alphabetical within its language
-   group, the order carries no ranking).
-4. Re-run the scan and add your cell to each capability file.
+Follow [`ADDING_A_FRAMEWORK.md`](ADDING_A_FRAMEWORK.md) for the complete
+renderer contract, Python and Node worker patterns, dependency and registry
+wiring, J5 annotation handling, fixture tests, support-data changes, and PR
+evidence.
+
+The short version is:
+
+1. Drive the framework's **real** adapter and identify the model-facing payload.
+2. Register the renderer and its pinned dependency path.
+3. Prove it against the tricky fixture, including annotation retention.
+4. Add exact versions and measured cells to the compatibility data.
+
+Once registered, the existing process isolation, `ToolRep` differ, J1-J5
+scorecard, reporters, baseline comparison, and common integration test apply
+automatically. Extracting the correct framework payload and publishing measured
+data remain deliberate, reviewable work.
 
 ## Adding a capability
 
@@ -64,6 +72,8 @@ These are enforced in CI by `data/validator/validate.py`:
 Run the checks and regenerate the published aggregate:
 
 ```bash
+uv sync --locked --extra dev --extra all
+uv run pytest tests -q
 python3 data/validator/validate.py data
 python3 scripts/build_data.py
 npm run build

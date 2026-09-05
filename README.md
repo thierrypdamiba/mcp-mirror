@@ -70,8 +70,7 @@ Mastra is a TypeScript framework. Its renderer drives the real `@mastra/mcp`
 client through the included Node worker:
 
 ```bash
-cd src/mcp_mirror/renderers/mastra_node
-npm install
+npm ci --prefix src/mcp_mirror/renderers/mastra_node
 ```
 
 ## Quickstart
@@ -181,9 +180,9 @@ npm run preview
 ## Development
 
 ```bash
-uv venv --python 3.11
-uv pip install -e ".[dev,langchain]"
-uv run pytest
+uv sync --locked --extra dev --extra all
+npm ci --prefix src/mcp_mirror/renderers/mastra_node
+uv run pytest tests -q
 ```
 
 Run the data validator directly when editing support records:
@@ -193,9 +192,11 @@ python3 data/validator/validate.py data
 python3 scripts/build_data.py
 ```
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for framework inclusion, correction,
-and tone rules. Renderers must drive the framework's real adapter rather than a
-reimplementation.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for correction and tone rules. The
+complete [`ADDING_A_FRAMEWORK.md`](ADDING_A_FRAMEWORK.md) runbook covers
+framework inclusion, Python and Node renderer patterns, J5 handling, tests,
+compatibility data, and PR evidence. Renderers must drive the framework's real
+adapter rather than a reimplementation.
 
 ## License
 

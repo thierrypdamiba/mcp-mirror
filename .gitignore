@@ -14,7 +14,6 @@ dist/
 
 # Node (run `npm install` to restore dependencies)
 node_modules/
-src/mcp_mirror/renderers/mastra_node/package-lock.json
 
 # Generated compatibility-site output (`npm run build`)
 docs/

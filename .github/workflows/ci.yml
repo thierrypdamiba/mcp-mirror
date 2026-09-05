@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Scanner, data, and site
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            src/mcp_mirror/renderers/mastra_node/package-lock.json
+
+      - name: Install Python framework adapters
+        run: uv sync --locked --extra dev --extra all
+
+      - name: Install site dependencies
+        run: npm ci
+
+      - name: Install Mastra adapter
+        run: npm ci --prefix src/mcp_mirror/renderers/mastra_node
+
+      - name: Require every registered renderer
+        run: |
+          uv run python - <<'PY'
+          from mcp_mirror.renderers import all_renderer_ids, available_renderers
+
+          registered = set(all_renderer_ids())
+          available = available_renderers()
+          missing = sorted(registered - set(available))
+          assert not missing, f"registered renderers unavailable in CI: {missing}"
+
+          reported = {
+              renderer_id: renderer.versions()
+              for renderer_id, renderer in available.items()
+          }
+          unknown = {
+              renderer_id: versions
+              for renderer_id, versions in reported.items()
+              if any(
+                  not versions.get(key) or versions.get(key) == "unknown"
+                  for key in ("framework", "adapter")
+              )
+          }
+          assert not unknown, f"renderers did not report exact versions: {unknown}"
+          print(f"verified {len(available)} registered renderers")
+          PY
+
+      - name: Run scanner and real-adapter tests
+        run: uv run pytest tests -q
+
+      - name: Validate compatibility data
+        run: python3 data/validator/validate.py data
+
+      - name: Build compatibility site
+        run: npm run build
+
+      - name: Build Python wheel
+        run: uv build --wheel
