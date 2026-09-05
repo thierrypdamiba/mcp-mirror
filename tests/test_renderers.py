@@ -64,3 +64,16 @@ def test_renderer_reports_annotation_not_surfaced_to_model(renderer_id):
     else:
         # Unknown framework: just assert the signal does not reach the model unchanged.
         assert d.category in ("transformative", "lossy")
+
+
+@pytest.mark.skipif(
+    "pydantic_ai" not in RENDERERS,
+    reason="pydantic_ai renderer not installed",
+)
+def test_pydantic_ai_renderer_uses_current_mcp_toolset():
+    from pydantic_ai.mcp import MCPToolset
+
+    renderer = RENDERERS["pydantic_ai"]
+    toolset = renderer._build_server(_handle())
+
+    assert isinstance(toolset, MCPToolset)

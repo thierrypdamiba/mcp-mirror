@@ -1,7 +1,7 @@
 """Pydantic AI renderer (DESIGN.md section 8).
 
-Connects through ``pydantic_ai.mcp`` (``MCPServerStdio`` / ``MCPServerStreamableHTTP``)
-and reads the tool definitions the agent would expose. Each Pydantic AI
+Connects through the supported ``pydantic_ai.mcp.MCPToolset`` API and reads the
+tool definitions the agent would expose. Each Pydantic AI
 ``ToolDefinition`` carries ``name``, ``description`` and ``parameters_json_schema`` -
 that schema is what the model receives.
 
@@ -53,17 +53,26 @@ class PydanticAIRenderer:
             raise RenderError(f"pydantic_ai renderer failed: {exc}") from exc
 
     async def _render_async(self, server: ServerHandle) -> list[ToolRep]:
-        mcp_server = self._build_server(server)
-        async with mcp_server:
-            tools = await self._list_tools(mcp_server)
+        toolset = self._build_server(server)
+        async with toolset:
+            tools = await self._list_tools(toolset)
         return [self._to_rep(t) for t in tools]
 
     def _build_server(self, server: ServerHandle):
-        from pydantic_ai.mcp import MCPServerStdio, MCPServerStreamableHTTP
+        from fastmcp.client.transports import StdioTransport, StreamableHttpTransport
+        from pydantic_ai.mcp import MCPToolset
 
         if server.transport == "http":
-            return MCPServerStreamableHTTP(url=server.url, headers=dict(server.headers) or None)
-        return MCPServerStdio(command=server.command, args=list(server.args))
+            transport = StreamableHttpTransport(
+                url=server.url,
+                headers=dict(server.headers) or None,
+            )
+        else:
+            transport = StdioTransport(
+                command=server.command,
+                args=list(server.args),
+            )
+        return MCPToolset(transport)
 
     async def _list_tools(self, mcp_server) -> list[Any]:
         # Preferred: get_tools() reports the exact ToolDefinitions the agent exposes,
