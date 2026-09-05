@@ -23,6 +23,11 @@ All gaps it identified as recommended v0.1 follow-up are now closed:
   SDK `0.20.0` is the locked measured version rather than `0.22.0`, and CrewAI
   preserves the fixture's `anyOf` but collapses its `oneOf`, so the combined
   capability is partial rather than fully present.
+- A subsequent semantic fixture audit found that the original walker looked
+  through CrewAI's wrappers too aggressively: it missed a changed default,
+  newly accepted nulls, closed-object constraints, and a lost `uri` format plus
+  branch descriptions inside `anyOf`. The walker and renderer goldens now
+  report those changes, and the public CrewAI `format` cell is partial.
 - J5 can no longer be filtered out, markdown has a dedicated J5 findings
   section, and the internal cross-job `worst` value has been removed. There is
   no overall framework verdict.
@@ -32,10 +37,11 @@ All gaps it identified as recommended v0.1 follow-up are now closed:
   2026-07-28 launch hook is recorded as historical; replacement framing remains
   an owner/marketing decision.
 
-Current verification passes 63 tests across all five installed renderers, data
-validation, the complete site build, the wheel build, and a same-version JSON
-baseline round trip. The only Python warning is an upstream CrewAI internal
-deprecation. No model or model API key is used.
+Current verification passes 67 tests across all five installed renderers, data
+validation, the complete site build, desktop/mobile and responsive smoke tests,
+the wheel build, and a same-version JSON baseline round trip. The only Python
+warning is an upstream CrewAI internal deprecation. No model or model API key is
+used.
 
 ## Baseline runtime verification (`533f74c`)
 
@@ -188,6 +194,8 @@ The follow-up declares each boundary without a provider-request claim, captures
 each adapter's independently negotiated MCP version, and adds per-renderer
 goldens across all fixture dimensions. Pydantic AI now captures
 `MCPToolset.get_tools` `ToolDefinition` objects through the supported API.
+Those goldens also assert every currently observed CrewAI parameter-type and
+constraint delta by semantic path, including changes within union branches.
 
 ## Additional shipped renderers
 

@@ -171,9 +171,11 @@ The shared test verifies that the renderer:
 Add framework-specific assertions for transformations that the generic test
 cannot establish. At minimum cover the framework's expected handling of:
 
-- names and descriptions;
-- required parameters, enums, formats, and numeric constraints;
-- nested objects, arrays of objects, and `oneOf` / `anyOf`;
+- names, tool descriptions, and per-property descriptions;
+- required parameters, enums, formats, defaults, numeric constraints, and
+  whether optional wrappers newly accept `null`;
+- nested objects, arrays of objects, `additionalProperties`, and every
+  `oneOf` / `anyOf` branch;
 - injected wrapper text or fields; and
 - `readOnlyHint`, `destructiveHint`, `idempotentHint`, and `openWorldHint`.
 

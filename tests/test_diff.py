@@ -125,6 +125,19 @@ def test_format_lost_is_lossy_constraint():
     assert ("lossy", Dimension.CONSTRAINT) in diffs
 
 
+def test_constraint_value_change_is_transformative():
+    s = src(params={
+        "type": "object",
+        "properties": {"limit": {"type": "integer", "default": 20}},
+    })
+    r = rendered(params={
+        "type": "object",
+        "properties": {"limit": {"type": "integer", "default": None}},
+    })
+    diffs = categories_at(diff_tool(s, r), "params.properties.limit.default")
+    assert ("transformative", Dimension.CONSTRAINT) in diffs
+
+
 def test_type_changed_is_transformative():
     s = src(params={"type": "object", "properties": {"x": {"type": "string"}}})
     r = rendered(params={"type": "object", "properties": {"x": {"type": "object"}}})
@@ -149,9 +162,9 @@ def test_anyof_collapse_is_transformative_structure():
     assert any("anyOf" in d.path and d.category == "transformative" for d in structure)
 
 
-def test_optional_anyof_wrapper_does_not_lose_constraints():
+def test_optional_anyof_wrapper_preserves_constraints_but_reports_null_widening():
     # A framework serializing `Optional[str-with-enum]` as anyOf:[{enum}, {null}] keeps
-    # the enum one level down. It must NOT be reported lost (fairness for CrewAI et al.).
+    # the enum one level down, but accepting null is still a semantic addition.
     s = src(params={"type": "object", "properties": {"status": {"type": "string", "enum": ["a", "b"]}}})
     r = rendered(params={
         "type": "object",
@@ -161,7 +174,90 @@ def test_optional_anyof_wrapper_does_not_lose_constraints():
     })
     diffs = diff_tool(s, r)
     assert not find(diffs, dimension=Dimension.CONSTRAINT)
-    assert not find(diffs, dimension=Dimension.PARAM_TYPE)
+    assert categories_at(diffs, "params.properties.status.null") == [
+        ("additive", Dimension.PARAM_TYPE)
+    ]
+
+
+def test_anyof_branches_are_compared_by_semantic_shape():
+    source_branch = {
+        "description": "Destination.",
+        "anyOf": [
+            {
+                "type": "string",
+                "format": "uri",
+                "description": "Webhook URL.",
+            },
+            {
+                "type": "object",
+                "description": "Object store.",
+                "properties": {"bucket": {"type": "string"}},
+                "required": ["bucket"],
+            },
+        ],
+    }
+    rendered_branch = {
+        "description": "Destination.",
+        "anyOf": [
+            {"type": "string"},
+            {
+                "type": "object",
+                "properties": {"bucket": {"type": "string"}},
+                "required": ["bucket"],
+            },
+        ],
+    }
+    diffs = diff_tool(
+        src(params={"type": "object", "properties": {"destination": source_branch}}),
+        rendered(params={"type": "object", "properties": {"destination": rendered_branch}}),
+    )
+
+    assert ("lossy", Dimension.CONSTRAINT) in categories_at(
+        diffs,
+        "params.properties.destination.anyOf[0].format",
+    )
+    assert ("lossy", Dimension.CONSTRAINT) in categories_at(
+        diffs,
+        "params.properties.destination.anyOf[0].description",
+    )
+    assert ("lossy", Dimension.CONSTRAINT) in categories_at(
+        diffs,
+        "params.properties.destination.anyOf[1].description",
+    )
+
+
+def test_same_type_union_branches_can_reorder_without_false_diffs():
+    source_union = {
+        "anyOf": [
+            {"type": "string", "format": "uri"},
+            {"type": "string", "format": "email"},
+        ]
+    }
+    rendered_union = {
+        "anyOf": [
+            {"type": "string", "format": "email"},
+            {"type": "string", "format": "uri"},
+        ]
+    }
+    diffs = diff_tool(
+        src(params={"type": "object", "properties": {"value": source_union}}),
+        rendered(params={"type": "object", "properties": {"value": rendered_union}}),
+    )
+    assert diffs == []
+
+
+def test_additional_properties_restriction_is_transformative():
+    s = src(params={
+        "type": "object",
+        "properties": {"value": {"type": "string"}},
+    })
+    r = rendered(params={
+        "type": "object",
+        "properties": {"value": {"type": "string"}},
+        "additionalProperties": False,
+    })
+    diffs = categories_at(diff_tool(s, r), "params.additionalProperties")
+    assert ("transformative", Dimension.CONSTRAINT) in diffs
 
 
 def test_ref_nested_object_is_resolved_not_flattened():

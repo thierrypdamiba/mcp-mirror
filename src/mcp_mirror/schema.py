@@ -3,10 +3,10 @@
 Frameworks that build their tool schema from a Pydantic model (CrewAI, and any
 ``args_schema``-based adapter) serialize an *optional* field ``x: T | None`` as
 ``{"anyOf": [<T>, {"type": "null"}]}`` and nest objects via ``$defs`` + ``$ref``.
-The information is fully present, just one level down. Without normalizing that, a
-shallow diff reports enums, formats and nested structure as "lost" when they are not -
-which would unfairly malign a framework. These helpers collapse those two patterns so
-comparisons see the effective schema.
+The non-null branch's information may be fully present one level down even though the
+wrapper also broadens the accepted values. These helpers expose that branch so nested
+constraints can be compared. The differ separately reports newly accepted nulls before
+using this effective view.
 """
 
 from __future__ import annotations
@@ -50,9 +50,9 @@ def effective_schema(node: Any, root: dict[str, Any]) -> Any:
     """Resolve ``$ref`` and collapse an ``Optional[X]`` wrapper down to ``X``.
 
     ``{"anyOf": [<X>, {"type": "null"}]}`` (or ``oneOf``) with exactly one non-null
-    branch becomes that branch, merged with the wrapper's sibling keys. A genuine union
-    (two or more non-null branches) is left intact, so a real ``anyOf`` collapse is still
-    detectable by the differ.
+    branch becomes that branch, merged with the wrapper's sibling keys. This is an
+    inspection view, not a declaration that accepting null is semantically equivalent.
+    A genuine union (two or more non-null branches) is left intact.
     """
 
     node = resolve_ref(node, root)

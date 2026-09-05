@@ -921,7 +921,7 @@
       "keywords": "format,email,date-time,uri,constraint",
       "stats": {
         "crewai": {
-          "1.14.7": "y #1"
+          "1.14.7": "a #1"
         },
         "langchain": {
           "0.3.0": "y"
@@ -936,14 +936,14 @@
           "1.17.3": "y"
         }
       },
-      "notes": "Measured as present at every declared framework capture boundary. Where a framework builds its schema from a model class, optional parameters are wrapped, but the constraint remains inside the wrapper.",
+      "notes": "All measured `format` values survive at four capture boundaries. CrewAI preserves `email` and `date-time` inside optional wrappers but drops `uri` from the string branch of the destination `anyOf`.",
       "notes_by_num": {
-        "1": "CrewAI: preserved inside the `anyOf` wrapper emitted for optional fields, so the constraint sits one level down rather than being lost."
+        "1": "CrewAI: `email` and `date-time` remain inside generated optional wrappers; `destination.anyOf[0].format: uri` is absent from the generated `args_schema`."
       },
       "verdict": {
-        "code": "y",
-        "headline": "Present at all five declared capture boundaries.",
-        "detail": "The constraint remains intact in every captured tool definition."
+        "code": "a",
+        "headline": "Fully preserved at four boundaries, partly preserved at one.",
+        "detail": "CrewAI keeps two measured formats but drops `uri` inside a union branch."
       },
       "usage_perc_y": null,
       "usage_perc_a": null,
@@ -959,7 +959,7 @@
         }
       ],
       "known_issues": [],
-      "why": "Losing it means malformed emails or non RFC 3339 timestamps arriving at your server.",
+      "why": "Losing it can allow malformed emails, timestamps, or URIs to reach your server.",
       "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
       "measured": {
         "run_date": "2026-09-04",

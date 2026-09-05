@@ -247,14 +247,17 @@ For a source `ToolRep` S and a framework `ToolRep` F of the same tool, walk thes
 | param: constraint (min/max, format, pattern) in S, absent in F | | lossy |
 | param: per-property description in S, absent in F | | lossy |
 | param: required set shrinks vs S | | lossy |
-| param: equivalent `$ref` or optional-null wrapper | resolve before comparison | faithful |
+| param: equivalent local `$ref` | resolve before comparison | faithful |
+| param: rendered wrapper newly accepts `null` | compare before unwrapping | additive |
 | param: nested object flattened or `oneOf`/`anyOf` collapsed | | transformative |
 | annotation preserved on captured definition | | faithful |
 | annotation absent from capture but retained in framework metadata | | transformative |
 | annotation absent everywhere after adaptation | | lossy |
 
 Implementation: recursively walk JSON Schema over `params`, resolve local
-`$ref` values, and unwrap semantically equivalent optional-null wrappers. Keep
+`$ref` values, report null-acceptance changes, then unwrap optional-null wrappers
+only to inspect their non-null branch. Match and recurse through genuine
+combinator branches, compare constraint values as well as presence, and keep
 `path` precise (`params.properties.x.enum`). When in doubt between
 transformative and lossy, prefer lossy if information capacity decreased,
 additive if it increased, and transformative if it merely changed shape. A tool
@@ -291,7 +294,7 @@ mcp-mirror, server: tricky-mcp, source-negotiated MCP spec: 2025-11-25, 5 tools
 framework      J1 desc      J2 params     J3 struct    J4 inject    J5 authz
 LangChain      faithful     faithful      faithful     faithful     transform(7)
 Pydantic AI    faithful     faithful      faithful     faithful     transform(7)
-CrewAI         faithful     faithful      transform(1) additive(5)  lossy (7)
+CrewAI         faithful     lossy (21)    transform(1) additive(5)  lossy (7)
 OpenAI Agents  faithful     faithful      faithful     faithful     lossy (7)
 Mastra         faithful     faithful      faithful     faithful     lossy (7)
 ```

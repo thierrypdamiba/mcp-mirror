@@ -16,8 +16,9 @@ import pytest
 
 from mcp_mirror.cli import _render_isolated
 from mcp_mirror.diff import diff_reps
-from mcp_mirror.models import Dimension
+from mcp_mirror.models import Dimension, FrameworkRun, Report
 from mcp_mirror.renderers import available_renderers
+from mcp_mirror.scorecard import build_scorecard
 from mcp_mirror.source import load_source, parse_server
 
 FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "tricky_server.py"
@@ -57,6 +58,7 @@ EXPECTED_BOUNDARIES = {
 PUBLISHED_CODE_OVERRIDES = {
     "crewai": {
         "description-fidelity": "a",
+        "format": "a",
         "one-of-any-of": "a",
         "destructive-hint": "n",
         "idempotent-hint": "n",
@@ -243,14 +245,43 @@ def test_renderer_fixture_contract(renderer_id):
 
     diffs = diff_reps(source_reps, rendered_reps)
 
-    # Every enum, format, numeric bound, required set, nested object, array item,
-    # and destination anyOf in the fixture survives. CrewAI alone collapses mode.oneOf.
-    assert not [
+    schema_diffs = [
         diff
         for diff in diffs
         if diff.dimension
         in {Dimension.PARAM_TYPE, Dimension.CONSTRAINT, Dimension.REQUIRED}
     ]
+    if renderer_id == "crewai":
+        expected_schema_diffs = {
+            ("search_records", "params.additionalProperties", "transformative", Dimension.CONSTRAINT),
+            ("search_records", "params.properties.status.null", "additive", Dimension.PARAM_TYPE),
+            ("search_records", "params.properties.owner_email.null", "additive", Dimension.PARAM_TYPE),
+            ("search_records", "params.properties.created_after.null", "additive", Dimension.PARAM_TYPE),
+            ("search_records", "params.properties.limit.null", "additive", Dimension.PARAM_TYPE),
+            ("search_records", "params.properties.limit.default", "transformative", Dimension.CONSTRAINT),
+            ("create_report", "params.additionalProperties", "transformative", Dimension.CONSTRAINT),
+            ("create_report", "params.properties.config.additionalProperties", "transformative", Dimension.CONSTRAINT),
+            ("create_report", "params.properties.config.properties.include_summary.null", "additive", Dimension.PARAM_TYPE),
+            ("create_report", "params.properties.sections.null", "additive", Dimension.PARAM_TYPE),
+            ("create_report", "params.properties.sections.items.additionalProperties", "transformative", Dimension.CONSTRAINT),
+            ("create_report", "params.properties.sections.items.properties.body.null", "additive", Dimension.PARAM_TYPE),
+            ("deliver_payload", "params.additionalProperties", "transformative", Dimension.CONSTRAINT),
+            ("deliver_payload", "params.properties.destination.anyOf[0].format", "lossy", Dimension.CONSTRAINT),
+            ("deliver_payload", "params.properties.destination.anyOf[0].description", "lossy", Dimension.CONSTRAINT),
+            ("deliver_payload", "params.properties.destination.anyOf[1].additionalProperties", "transformative", Dimension.CONSTRAINT),
+            ("deliver_payload", "params.properties.destination.anyOf[1].description", "lossy", Dimension.CONSTRAINT),
+            ("deliver_payload", "params.properties.mode.null", "additive", Dimension.PARAM_TYPE),
+            ("delete_account", "params.additionalProperties", "transformative", Dimension.CONSTRAINT),
+            ("explain_topic", "params.additionalProperties", "transformative", Dimension.CONSTRAINT),
+            ("explain_topic", "params.properties.max_words.null", "additive", Dimension.PARAM_TYPE),
+        }
+        assert {
+            (diff.tool, diff.path, diff.category, diff.dimension)
+            for diff in schema_diffs
+        } == expected_schema_diffs
+    else:
+        assert schema_diffs == []
+
     structure = [diff for diff in diffs if diff.dimension == Dimension.STRUCTURE]
     if renderer_id == "crewai":
         assert [(diff.path, diff.category) for diff in structure] == [
@@ -316,6 +347,31 @@ def test_renderer_fixture_contract(renderer_id):
         else "lossy"
     )
     assert annotations["title"].category == expected_title_category
+
+    scorecard = build_scorecard(
+        Report(
+            mcp_server=handle.spec,
+            mcp_spec_version=source_spec_version,
+            generated_with="mcp-mirror/test",
+            tools=sorted(source_by_name),
+            runs=[
+                FrameworkRun(
+                    framework=renderer_id,
+                    framework_version=RENDERERS[renderer_id].versions()["framework"],
+                    differences=diffs,
+                )
+            ],
+        )
+    )
+    jobs = scorecard["frameworks"][renderer_id]["jobs"]
+    if renderer_id == "crewai":
+        assert jobs["J2"]["verdict"] == "lossy"
+        assert jobs["J2"]["count"] == len(schema_diffs)
+        assert jobs["J3"] == {
+            "verdict": "transformative",
+            "count": 1,
+            "details": [structure[0].detail],
+        }
 
 
 @pytest.mark.skipif(

@@ -10,10 +10,11 @@ decreased, *additive* if it increased, *transformative* if it merely changed sha
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from .models import Difference, Dimension, ToolRep
-from .schema import effective_schema
+from .schema import effective_schema, resolve_ref
 
 # Keywords that, when present in a source description and absent from the rendered
 # one, indicate an authorization-relevant signal was lost (feeds J5, section 10).
@@ -324,10 +325,16 @@ def _walk_schema(
 ) -> None:
     """Recursive JSON Schema walk comparing source subschema ``s`` to rendered ``r``.
 
-    Both sides are normalized first (``$ref`` resolved, ``Optional[X]`` wrappers
-    collapsed) so that a framework serializing optional params as ``anyOf:[X, null]`` or
-    nesting via ``$defs`` is not falsely reported as dropping enums, formats or structure.
+    Both sides are normalized for recursive comparison (``$ref`` resolved and the
+    non-null branch of ``Optional[X]`` exposed). Semantic changes on the wrappers,
+    including newly accepted nulls and changed defaults, are compared before that
+    normalization.
     """
+
+    raw_s = s
+    raw_r = r
+    if isinstance(raw_s, dict) and isinstance(raw_r, dict):
+        _diff_null_acceptance(raw_s, raw_r, path, tool, fw, diffs, s_root, r_root)
 
     if isinstance(s, dict):
         s = effective_schema(s, s_root)
@@ -351,6 +358,23 @@ def _walk_schema(
                     s.get(ck), None,
                 )
             )
+        elif (
+            ck in s
+            and ck in r
+            and isinstance(s.get(ck), list)
+            and isinstance(r.get(ck), list)
+        ):
+            _diff_combinator_branches(
+                s[ck],
+                r[ck],
+                ck,
+                path,
+                tool,
+                fw,
+                diffs,
+                s_root,
+                r_root,
+            )
 
     if "$ref" in s and "$ref" not in r:
         diffs.append(
@@ -370,6 +394,22 @@ def _walk_schema(
                     f"{key} constraint lost", s.get(key), None,
                 )
             )
+        elif key in s and key in r and not _constraint_values_equal(key, s[key], r[key]):
+            category = _changed_constraint_category(key, s[key], r[key])
+            diffs.append(
+                _d(
+                    tool,
+                    fw,
+                    f"{path}.{key}",
+                    category,
+                    Dimension.CONSTRAINT,
+                    f"{key} constraint changed: {s[key]!r} -> {r[key]!r}",
+                    s[key],
+                    r[key],
+                )
+            )
+
+    _diff_additional_properties(s, r, path, tool, fw, diffs)
 
     # A subschema's own description (not the tool description at "params").
     if path != "params" and s.get("description") and not r.get("description"):
@@ -395,6 +435,269 @@ def _walk_schema(
                     "array item schema dropped", s_items, r_items,
                 )
             )
+
+
+def _diff_null_acceptance(
+    s: dict,
+    r: dict,
+    path: str,
+    tool: str,
+    fw: str,
+    diffs: list[Difference],
+    s_root: dict,
+    r_root: dict,
+) -> None:
+    source_accepts = _accepts_null(s, s_root)
+    rendered_accepts = _accepts_null(r, r_root)
+    if source_accepts == rendered_accepts:
+        return
+    if rendered_accepts:
+        diffs.append(
+            _d(
+                tool,
+                fw,
+                f"{path}.null",
+                "additive",
+                Dimension.PARAM_TYPE,
+                "rendering additionally accepts null",
+                False,
+                True,
+            )
+        )
+    else:
+        diffs.append(
+            _d(
+                tool,
+                fw,
+                f"{path}.null",
+                "lossy",
+                Dimension.PARAM_TYPE,
+                "rendering no longer accepts null",
+                True,
+                False,
+            )
+        )
+
+
+def _accepts_null(schema: Any, root: dict) -> bool:
+    schema = resolve_ref(schema, root)
+    if not isinstance(schema, dict):
+        return False
+    schema_type = schema.get("type")
+    if schema_type == "null":
+        return True
+    if isinstance(schema_type, list) and "null" in schema_type:
+        return True
+    for combinator in ("anyOf", "oneOf"):
+        branches = schema.get(combinator)
+        if isinstance(branches, list) and any(_accepts_null(branch, root) for branch in branches):
+            return True
+    return False
+
+
+def _diff_combinator_branches(
+    source_branches: list,
+    rendered_branches: list,
+    combinator: str,
+    path: str,
+    tool: str,
+    fw: str,
+    diffs: list[Difference],
+    s_root: dict,
+    r_root: dict,
+) -> None:
+    source_non_null = [
+        (index, branch)
+        for index, branch in enumerate(source_branches)
+        if not _accepts_null(branch, s_root)
+    ]
+    rendered_non_null = [
+        (index, branch)
+        for index, branch in enumerate(rendered_branches)
+        if not _accepts_null(branch, r_root)
+    ]
+    unused_rendered = {index for index, _ in rendered_non_null}
+    rendered_by_index = dict(rendered_non_null)
+
+    rendered_identities = [
+        _branch_identity(branch, r_root)
+        for _, branch in rendered_non_null
+    ]
+    ordered_source = sorted(
+        source_non_null,
+        key=lambda item: (
+            rendered_identities.count(_branch_identity(item[1], s_root)) != 1,
+            item[0],
+        ),
+    )
+
+    for source_index, source_branch in ordered_source:
+        rendered_index = _match_branch(
+            source_branch,
+            source_index,
+            rendered_by_index,
+            unused_rendered,
+            s_root,
+            r_root,
+        )
+        branch_path = f"{path}.{combinator}[{source_index}]"
+        if rendered_index is None:
+            diffs.append(
+                _d(
+                    tool,
+                    fw,
+                    branch_path,
+                    "lossy",
+                    Dimension.STRUCTURE,
+                    f"{combinator} branch dropped",
+                    _summarize(source_branch),
+                    None,
+                )
+            )
+            continue
+        unused_rendered.remove(rendered_index)
+        _walk_schema(
+            source_branch,
+            rendered_by_index[rendered_index],
+            branch_path,
+            tool,
+            fw,
+            diffs,
+            s_root,
+            r_root,
+        )
+
+    for rendered_index in sorted(unused_rendered):
+        diffs.append(
+            _d(
+                tool,
+                fw,
+                f"{path}.{combinator}[+{rendered_index}]",
+                "additive",
+                Dimension.INJECTION,
+                f"{combinator} branch injected",
+                None,
+                _summarize(rendered_by_index[rendered_index]),
+            )
+        )
+
+
+def _match_branch(
+    source_branch: Any,
+    source_index: int,
+    rendered_by_index: dict[int, Any],
+    unused_rendered: set[int],
+    s_root: dict,
+    r_root: dict,
+) -> int | None:
+    source_identity = _branch_identity(source_branch, s_root)
+    exact = [
+        index
+        for index in unused_rendered
+        if _branch_identity(rendered_by_index[index], r_root) == source_identity
+    ]
+    if len(exact) == 1:
+        return exact[0]
+
+    source_type = _branch_type(source_branch, s_root)
+    same_type = [
+        index
+        for index in unused_rendered
+        if _branch_type(rendered_by_index[index], r_root) == source_type
+    ]
+    if len(same_type) == 1:
+        return same_type[0]
+    if source_index in unused_rendered:
+        return source_index
+    return min(unused_rendered) if len(unused_rendered) == 1 else None
+
+
+def _branch_identity(branch: Any, root: dict) -> tuple:
+    branch = resolve_ref(branch, root)
+    if not isinstance(branch, dict):
+        return ("value", _stable_value(branch))
+
+    identity: list[tuple[str, Any]] = []
+    if "type" in branch:
+        identity.append(("type", _stable_value(branch["type"])))
+    for key in CONSTRAINT_KEYS:
+        if key not in branch:
+            continue
+        value = branch[key]
+        if key == "enum" and isinstance(value, list):
+            identity.append((key, tuple(sorted(_stable_value(item) for item in value))))
+        else:
+            identity.append((key, _stable_value(value)))
+    properties = branch.get("properties")
+    if isinstance(properties, dict):
+        identity.append(("properties", tuple(sorted(properties))))
+    required = branch.get("required")
+    if isinstance(required, list):
+        identity.append(("required", tuple(sorted(_stable_value(item) for item in required))))
+    return tuple(identity)
+
+
+def _stable_value(value: Any) -> str:
+    try:
+        return json.dumps(value, sort_keys=True, separators=(",", ":"))
+    except (TypeError, ValueError):
+        return repr(value)
+
+
+def _branch_type(branch: Any, root: dict) -> Any:
+    branch = resolve_ref(branch, root)
+    return branch.get("type") if isinstance(branch, dict) else None
+
+
+def _constraint_values_equal(key: str, source: Any, rendered: Any) -> bool:
+    if key == "enum" and isinstance(source, list) and isinstance(rendered, list):
+        return {repr(value) for value in source} == {repr(value) for value in rendered}
+    return source == rendered
+
+
+def _changed_constraint_category(key: str, source: Any, rendered: Any) -> str:
+    if key == "enum" and isinstance(source, list) and isinstance(rendered, list):
+        source_values = {repr(value) for value in source}
+        rendered_values = {repr(value) for value in rendered}
+        if source_values - rendered_values:
+            return "lossy"
+        if rendered_values - source_values:
+            return "additive"
+    return "transformative"
+
+
+def _diff_additional_properties(
+    s: dict,
+    r: dict,
+    path: str,
+    tool: str,
+    fw: str,
+    diffs: list[Difference],
+) -> None:
+    is_object = (
+        s.get("type") == "object"
+        or r.get("type") == "object"
+        or isinstance(s.get("properties"), dict)
+        or isinstance(r.get("properties"), dict)
+    )
+    if not is_object:
+        return
+    source_value = s.get("additionalProperties", True)
+    rendered_value = r.get("additionalProperties", True)
+    if source_value == rendered_value:
+        return
+    diffs.append(
+        _d(
+            tool,
+            fw,
+            f"{path}.additionalProperties",
+            "transformative",
+            Dimension.CONSTRAINT,
+            "additionalProperties behavior changed",
+            source_value,
+            rendered_value,
+        )
+    )
 
 
 def _diff_type(s: dict, r: dict, path: str, tool: str, fw: str, diffs: list[Difference]) -> None:
