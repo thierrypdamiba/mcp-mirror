@@ -7,6 +7,9 @@
   Is in Another Castle", from MCP Community Connect at GitHub in San Francisco,
   on why MCP's `isError` failure signal does not survive the framework adapter
   boundary. Arrow keys advance the 39 slides.
+- **Slides as PDF**:
+  <https://thierrypdamiba.github.io/mcp-mirror/talk/mcp-mirror-talk.pdf>, 39
+  pages, 2.73 MB.
 
 MCP defines three server primitives, a set of client features, and a base
 protocol of transports, notifications and authorization. An agent framework
@@ -314,9 +317,9 @@ The site uses React 19, HeroUI v3, Tailwind CSS 4, and Vite. The production buil
 is written to `docs/` for static hosting. The build also inlines the compiled
 CSS, JavaScript, and support data into `docs/standalone.html`, which opens
 directly from `file://` without a server. Because the Vite build empties
-`docs/`, `scripts/publish_deck.mjs` republishes `talk/deck.html` to
-`docs/talk/index.html` on every run rather than leaving a copy the next build
-would delete.
+`docs/`, `scripts/publish_deck.mjs` republishes `talk/deck.html` and its
+committed PDF export into `docs/talk/` on every run rather than leaving copies
+the next build would delete.
 
 ```bash
 npm install

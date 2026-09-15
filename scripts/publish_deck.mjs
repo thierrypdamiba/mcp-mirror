@@ -4,6 +4,8 @@ import {fileURLToPath} from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const deckPath = path.join(root, "talk", "deck.html");
+const pdfName = "mcp-mirror-talk.pdf";
+const pdfPath = path.join(root, "talk", pdfName);
 const targetDir = path.join(root, "docs", "talk");
 
 const deck = await readFile(deckPath, "utf8");
@@ -31,10 +33,27 @@ for (const [pattern, description] of REMOTE_REFERENCES) {
   }
 }
 
-// Only the deck travels. `present.html` reads the verbatim speaking script over fetch,
-// so publishing the presenter console would publish the script along with it.
+/** The PDF ships as a committed export rather than a build product.
+ *
+ * Rendering it here would put a browser and a PDF library in the build path for a file
+ * that only changes when the slides do. That makes a missing one a deletion rather than
+ * a first-run gap, and the README offers it as a download, so stopping the build beats
+ * publishing a link that 404s for everyone who trusts it.
+ */
+const pdf = await readFile(pdfPath).catch((cause) => {
+  throw new Error(
+    `talk/${pdfName} is missing, so the download the README offers would 404. ` +
+      "Restore the committed export, or drop the link if the deck now travels alone.",
+    {cause},
+  );
+});
+
+// Only the deck and its PDF travel. `present.html` reads the verbatim speaking script
+// over fetch, so publishing the presenter console would publish the script with it.
 await mkdir(targetDir, {recursive: true});
 await writeFile(path.join(targetDir, "index.html"), deck);
+await writeFile(path.join(targetDir, pdfName), pdf);
 console.log(
-  `wrote docs/talk/index.html (${Buffer.byteLength(deck).toLocaleString()} bytes)`,
+  `wrote docs/talk/index.html (${Buffer.byteLength(deck).toLocaleString()} bytes) ` +
+    `and docs/talk/${pdfName} (${pdf.byteLength.toLocaleString()} bytes)`,
 );
