@@ -12,7 +12,8 @@ const widths = [320, 375, 390, 768, 1024];
 const routes = [
   ["index", "#/"],
   ["destructiveHint detail", "#/cap/destructive-hint"],
-  ["compare", "#/compare"],
+  ["stats capabilities", "#/stats"],
+  ["stats frameworks", "#/stats?view=frameworks"],
   ["changes", "#/changes"],
   ["method", "#/method"],
 ];
@@ -49,6 +50,9 @@ async function assertNoHorizontalOverflow(page, label) {
 const database = JSON.parse(
   await readFile("site/public/data/data-1.0.json", "utf8"),
 );
+const legacyDatabase = JSON.parse(
+  await readFile("site/public/data/data-2025-11-25.json", "utf8"),
+);
 const server = await preview({
   configFile: "vite.config.ts",
   preview: {
@@ -83,24 +87,19 @@ try {
     }
 
     await page.goto(`${baseUrl}#/`, {waitUntil: "networkidle"});
-    const shellStyle = await page.evaluate(() => {
-      const body = getComputedStyle(document.body);
-      const heading = document.querySelector(".search-hero h1");
-      const accent = document.querySelector(".search-wordmark span");
-      return {
-        canvasColor: body.backgroundColor,
-        backgroundImage: body.backgroundImage,
-        bodyFont: body.fontFamily,
-        headingFont: getComputedStyle(heading).fontFamily,
-        accentColor: getComputedStyle(accent).color,
-      };
-    });
     assert(
-      shellStyle.canvasColor === "rgb(250, 250, 249)" &&
-        shellStyle.backgroundImage.includes("linear-gradient") &&
-        shellStyle.bodyFont === shellStyle.headingFont &&
-        shellStyle.accentColor === "rgb(0, 153, 101)",
-      `${width}px: Context7 light shell tokens are incorrect: ${JSON.stringify(shellStyle)}`,
+      (await page.getByLabel("MCP specification revision").inputValue()) ===
+        "2026-07-28" &&
+        (await page.getByText("2 of 5 frameworks reach this revision").count()) ===
+          1,
+      `${width}px: current MCP snapshot is not explicit`,
+    );
+    const canvasColor = await page.evaluate(
+      () => getComputedStyle(document.body).backgroundColor,
+    );
+    assert(
+      canvasColor === "rgb(0, 43, 54)",
+      `${width}px: page canvas is not Solarized base03 (${canvasColor})`,
     );
     const headerGeometry = await page.evaluate(() => {
       const header = document.querySelector(".site-header");
@@ -110,14 +109,18 @@ try {
       const links = [...nav.querySelectorAll(".nav-link")];
       const tickerStyle = getComputedStyle(ticker);
       const headerStyle = getComputedStyle(header);
+      const activeLinkStyle = getComputedStyle(links[0]);
+      const activeBackgroundParts =
+        activeLinkStyle.backgroundColor.match(/[\d.]+/g)?.map(Number) ?? [];
       const mainRect = main.getBoundingClientRect();
       const tickerRect = ticker.getBoundingClientRect();
-      const compare = links[2];
-      const compareWords = compare.querySelectorAll("span");
-      const source = header.querySelector(".header-source");
+      const linkRects = links.map((link) => link.getBoundingClientRect());
+      const isMobile = window.innerWidth <= 544;
       return {
         labels: links.map((link) => link.getAttribute("aria-label")),
         navCount: document.querySelectorAll(".site-header nav").length,
+        listCount: document.querySelectorAll(".site-header nav > ul").length,
+        brandCount: document.querySelectorAll(".site-header .header-brand").length,
         active: links.map((link) => link.getAttribute("aria-current")),
         ordered: links.every(
           (link, index) =>
@@ -125,7 +128,12 @@ try {
             link.getBoundingClientRect().left >=
               links[index - 1].getBoundingClientRect().right,
         ),
-        tickerAbove: tickerRect.bottom <= mainRect.top,
+        tickerPlacement: isMobile
+          ? tickerRect.top >= linkRects[0].bottom
+          : linkRects[1].right <= tickerRect.left &&
+            tickerRect.right <= linkRects[2].left &&
+            tickerRect.top >= mainRect.top &&
+            tickerRect.bottom <= mainRect.bottom,
         background: tickerStyle.backgroundColor,
         border: tickerStyle.borderStyle,
         shadow: tickerStyle.boxShadow,
@@ -133,70 +141,50 @@ try {
         fontFamilyMatches: tickerStyle.fontFamily === headerStyle.fontFamily,
         headerHeight: header.getBoundingClientRect().height,
         tickerTimeCount: ticker.querySelectorAll("time").length,
-        tickerFontSize: tickerStyle.fontSize,
-        headlineFontSize: getComputedStyle(
-          ticker.querySelector(".news-ticker-link"),
-        ).fontSize,
-        sourceHref: source?.getAttribute("href"),
-        compareText: compare.textContent.trim().replace(/\s+/g, " "),
-        compareWordGap:
-          compareWords.length === 2
-            ? compareWords[1].getBoundingClientRect().left -
-              compareWords[0].getBoundingClientRect().right
-            : null,
+        navFontSize: Number.parseFloat(activeLinkStyle.fontSize),
+        navFontWeight: Number.parseInt(activeLinkStyle.fontWeight, 10),
+        activeBackground: activeLinkStyle.backgroundColor,
+        activeBackgroundAlpha: activeBackgroundParts[3] ?? 1,
       };
     });
     assert(
       JSON.stringify(headerGeometry.labels) ===
-        JSON.stringify(["Home", "News", "Compare frameworks", "About"]) &&
+        JSON.stringify(["Home", "Stats", "News", "About"]) &&
         headerGeometry.navCount === 1 &&
+        headerGeometry.listCount === 1 &&
+        headerGeometry.brandCount === 0 &&
         headerGeometry.active[0] === "page" &&
         headerGeometry.ordered &&
-        headerGeometry.tickerAbove &&
+        headerGeometry.tickerPlacement &&
         headerGeometry.background === "rgba(0, 0, 0, 0)" &&
         headerGeometry.border === "none" &&
         headerGeometry.shadow === "none" &&
         headerGeometry.radius === "0px" &&
         headerGeometry.fontFamilyMatches &&
         headerGeometry.tickerTimeCount === 0 &&
-        Number.parseFloat(headerGeometry.tickerFontSize) >= 12 &&
-        Number.parseFloat(headerGeometry.tickerFontSize) <= 13.5 &&
-        Number.parseFloat(headerGeometry.headlineFontSize) >= 12 &&
-        headerGeometry.sourceHref === database.repo &&
-        headerGeometry.compareText ===
-          (width <= 400 ? "Compare frameworks" : "Compare frameworks") &&
-        (width < 768 ||
-          (headerGeometry.compareWordGap !== null &&
-            headerGeometry.compareWordGap >= 4)) &&
-        Math.abs(headerGeometry.headerHeight - 86) <= 1,
-      `${width}px: header hierarchy or ticker integration is incorrect`,
+        headerGeometry.navFontSize >= 11.5 &&
+        headerGeometry.navFontWeight >= 600 &&
+        headerGeometry.activeBackground.includes("203, 75, 22") &&
+        headerGeometry.activeBackgroundAlpha <= 0.25 &&
+        Math.abs(headerGeometry.headerHeight - (width <= 544 ? 71 : 43)) <= 1,
+      `${width}px: header hierarchy or ticker integration is incorrect: ${JSON.stringify(headerGeometry)}`,
     );
-    const heroGeometry = await page.evaluate(() => {
-      const heading = document.querySelector(".search-hero h1");
-      const copy = document.querySelector(".hero-copy").getBoundingClientRect();
+    const searchGapGeometry = await page.evaluate(() => {
+      const wordmark = document.querySelector(".search-wordmark").getBoundingClientRect();
       const field = document.querySelector(".capability-search-wrap").getBoundingClientRect();
-      const inputGroup = document.querySelector(".search-field__group").getBoundingClientRect();
+      const question = document.querySelector(".search-question").getBoundingClientRect();
       return {
-        heading: heading.textContent.trim().replace(/\s+/g, " "),
-        detail: document.querySelector(".hero-copy").textContent.trim().replace(/\s+/g, " "),
-        fieldGap: field.top - copy.bottom,
-        fieldWidth: field.width,
-        fieldHeight: inputGroup.height,
+        before: field.left - wordmark.right,
+        after: question.left - field.right,
       };
     });
     assert(
-      heroGeometry.heading ===
-        "MCP capability support across agent frameworks" &&
-        heroGeometry.detail ===
-          "Search a tool-definition capability to see whether each framework preserves it across exact tested versions." &&
-        heroGeometry.fieldGap >= 20 &&
-        heroGeometry.fieldWidth <= 500 &&
-        Math.abs(heroGeometry.fieldHeight - 44) <= 1,
-      `${width}px: capability-first hero geometry is incorrect: ${JSON.stringify(heroGeometry)}`,
+      searchGapGeometry.before > 0 && searchGapGeometry.after > 0,
+      `${width}px: highlighted search field lacks word gaps: ${JSON.stringify(searchGapGeometry)}`,
     );
-    const rows = await page
+    const frameworkRows = await page
       .locator(
-        '.home-framework-scores[data-version-kind="stable_version"] .home-framework-score',
+        '.home-framework-scores[data-version-kind="current_version"] .home-framework-score',
       )
       .evaluateAll(
       (elements) =>
@@ -209,11 +197,11 @@ try {
         })),
       );
     assert(
-      rows.length === Object.keys(database.agents).length,
-      `${width}px: framework summary rendered ${rows.length} rows`,
+      frameworkRows.length === Object.keys(database.agents).length,
+      `${width}px: framework summary rendered ${frameworkRows.length} rows`,
     );
-    rows.forEach(({agentId, version, visibleVersion}) => {
-      const expected = database.agents[agentId]?.stable_version;
+    frameworkRows.forEach(({agentId, version, visibleVersion}) => {
+      const expected = database.agents[agentId]?.current_version;
       assert(expected, `${width}px: unknown framework summary row ${agentId}`);
       assert(
         version === expected && visibleVersion === expected,
@@ -221,271 +209,66 @@ try {
       );
     });
     assert(
-      (await page.getByText("Current tested version", {exact: true}).count()) === 0 &&
-        (await page.getByRole("heading", {name: "Measured frameworks"}).count()) === 1 &&
-        (await page.getByRole("radio", {name: "Current version"}).count()) === 1 &&
-        (await page.getByRole("radio", {name: "Dev version"}).count()) === 1 &&
-        (await page.locator(".home-framework-scores").count()) === 1,
-      `${width}px: framework summaries retained obsolete version labeling`,
+      (await page.getByRole("heading", {name: "Frameworks", exact: true}).count()) === 1 &&
+        (await page.getByRole("radio", {name: "Current version"}).count()) === 0 &&
+        (await page.getByRole("radio", {name: "Dev version"}).count()) === 0 &&
+        (await page.getByRole("link", {name: "Compare all frameworks"}).getAttribute("href")) ===
+          "#/stats?view=frameworks",
+      `${width}px: framework snapshot is not a compact current-version answer`,
     );
-    const currentToggle = page.getByRole("radio", {name: "Current version"});
-    const devToggle = page.getByRole("radio", {name: "Dev version"});
-    assert(await currentToggle.isChecked(), `${width}px: Current version is not the default`);
-    await devToggle.focus();
-    await devToggle.press("Space");
-    const devVersions = await page.locator(".framework-summary-version").allTextContents();
+    const newIds = await page
+      .locator(".home-section-new li")
+      .evaluateAll((items) => items.map((item) => item.dataset.capabilityId));
+    const popularIds = await page
+      .locator(".home-section-popular li")
+      .evaluateAll((items) => items.map((item) => item.dataset.capabilityId));
+    const expectedNewIds = Object.values(database.data)
+      .filter(
+        (capability) =>
+          capability.shown !== false && Boolean(capability.measured.run_date),
+      )
+      .sort(
+        (left, right) =>
+          right.measured.run_date.localeCompare(left.measured.run_date) ||
+          left.title.localeCompare(right.title),
+      )
+      .slice(0, 5)
+      .map(({id}) => id);
     assert(
-      devVersions.length === Object.keys(database.agents).length &&
-        devVersions.every((value) => value.trim() === "Not tracked") &&
-        (await page.locator('.home-framework-scores[data-version-kind="dev_version"]').count()) === 1,
-      `${width}px: unverified dev versions were invented`,
+      JSON.stringify(newIds) === JSON.stringify(expectedNewIds) &&
+        JSON.stringify(popularIds) ===
+          JSON.stringify(["destructive-hint", "read-only-hint", "required", "nested-objects", "enum"]) &&
+        (await page.locator(".home-section").count()) === 7 &&
+        (await page.locator(".home-section-coverage").count()) === 0 &&
+        (await page.locator(".home-sections > .home-section").first().getAttribute("class"))
+          ?.includes("home-section-scores") &&
+        (await page.locator(".home-section-new small").count()) === 0 &&
+        (await page.locator(".home-section-popular small").count()) === 0 &&
+        (await page.getByRole("heading", {name: "Test a capability"}).count()) === 1 &&
+        (await page.getByRole("heading", {name: "MCP facts"}).count()) === 1 &&
+        (await page.getByRole("heading", {name: "How it works"}).count()) === 1 &&
+        (await page.locator(".home-evidence-table, .home-explore, .feature-strip").count()) === 0 &&
+        (await page.getByRole("radio", {name: "Popular"}).count()) === 0 &&
+        (await page.getByRole("radio", {name: "Trending"}).count()) === 0,
+      `${width}px: homepage is not the expected framework-first seven-section answer`,
     );
-    await currentToggle.click();
-    const versionToggleGeometry = await page
-      .locator(".home-section-scores")
-      .evaluate((section) => {
-        const group = section.querySelector(".home-version-toggle");
-        const heading = section.querySelector("h2");
-        const buttons = [...group.querySelectorAll('[role="radio"]')];
-        const horizontalInsets = buttons.map((button) => {
-          const outer = button.getBoundingClientRect();
-          const range = document.createRange();
-          range.selectNodeContents(button);
-          const inner = range.getBoundingClientRect();
-          return Math.min(
-            inner.left - outer.left,
-            outer.right - inner.right,
-          );
-        });
-        const firstRow = group.nextElementSibling?.querySelector("li");
-        const groupRect = group.getBoundingClientRect();
-        const headingRect = heading.getBoundingClientRect();
-        const sectionRect = section.getBoundingClientRect();
-        const headingStyles = [
-          section.closest(".home-sections").querySelector(".home-section-dyk h2"),
-          section.closest(".home-sections").querySelector(".home-section-tools h2"),
-          heading,
-        ].map((element) => {
-          const style = getComputedStyle(element);
-          return {
-            fontSize: style.fontSize,
-            fontWeight: style.fontWeight,
-            lineHeight: style.lineHeight,
-          };
-        });
-        return {
-          minimumHorizontalInset: Math.min(...horizontalInsets),
-          buttonHeights: buttons.map(
-            (button) => button.getBoundingClientRect().height,
-          ),
-          groupWidth: groupRect.width,
-          sectionWidth: sectionRect.width,
-          headingGap: groupRect.top - headingRect.bottom,
-          rowGap: firstRow
-            ? firstRow.getBoundingClientRect().top -
-              groupRect.bottom
-            : -1,
-          headingStyles,
-        };
-      });
-    assert(
-      versionToggleGeometry.minimumHorizontalInset >= 10 &&
-        versionToggleGeometry.buttonHeights.every(
-          (height) => height >= 32 && height <= 36,
-        ) &&
-        versionToggleGeometry.groupWidth <= versionToggleGeometry.sectionWidth &&
-        versionToggleGeometry.headingGap >= 0 &&
-        versionToggleGeometry.headingGap <= 4 &&
-        versionToggleGeometry.rowGap >= 10 &&
-        versionToggleGeometry.rowGap <= 14 &&
-        versionToggleGeometry.headingStyles.every(
-          (style) =>
-            JSON.stringify(style) ===
-            JSON.stringify(versionToggleGeometry.headingStyles[0]),
-        ),
-      `${width}px: framework heading or compact toggle geometry is incorrect: ${JSON.stringify(versionToggleGeometry)}`,
-    );
-    assert(
-      (await page.locator(".home-framework-score .framework-logo").count()) ===
-        Object.keys(database.agents).length &&
-        (await page.locator(".home-framework-score-bars").count()) === 0,
-      `${width}px: Measured frameworks did not replace support bars with identity rows`,
-    );
-    const evidenceTable = page.locator(".home-evidence-table");
-    const evidenceHeaders = await evidenceTable.locator("thead th").allTextContents();
-    assert(
-      JSON.stringify(evidenceHeaders.map((value) => value.trim())) ===
-        JSON.stringify(["Capability", "Source", "Present", "Retained", "Dropped", "Measured"]),
-      `${width}px: evidence table headers are incorrect`,
-    );
-    assert(
-      (await evidenceTable.locator("tbody tr").count()) === 10 &&
-        (await page.getByText("Sample activity order until telemetry launches.", {exact: true}).count()) === 1 &&
-        !(await evidenceTable.textContent()).includes("%"),
-      `${width}px: compact evidence rows or activity disclosure are incorrect`,
-    );
-    const firstEvidenceRow = evidenceTable.locator("tbody tr").first();
-    const firstCapabilityId = await firstEvidenceRow.getAttribute("data-capability-id");
-    const firstCapability = database.data[firstCapabilityId];
-    const supportCodes = Object.entries(database.agents).map(([agentId, agent]) =>
-      (firstCapability.stats[agentId]?.[agent.current_version] ?? "u").trim()[0],
-    );
-    const measured = supportCodes.filter((code) => code !== "u").length;
-    for (const [cellIndex, code] of [["3", "y"], ["4", "a"], ["5", "n"]]) {
-      const expected = `${supportCodes.filter((value) => value === code).length} / ${measured}`;
-      assert(
-        (await firstEvidenceRow.locator(`td:nth-child(${cellIndex})`).textContent()).trim() === expected,
-        `${width}px: evidence count ${code} is not deterministic`,
+    const homepageColumnCount = await page
+      .locator(".home-sections")
+      .evaluate(
+        (element) =>
+          getComputedStyle(element).gridTemplateColumns.split(" ").length,
       );
-    }
     assert(
-      (await firstEvidenceRow.locator(".evidence-source a").getAttribute("href")) ===
-        (firstCapability.docs_url ?? firstCapability.spec) &&
-        (await firstEvidenceRow.locator("time").getAttribute("datetime")) ===
-          firstCapability.measured.run_date,
-      `${width}px: evidence source or measured time metadata is incorrect`,
+      homepageColumnCount === (width <= 640 ? 1 : width <= 835 ? 2 : 3),
+      `${width}px: homepage uses ${homepageColumnCount} columns at the wrong breakpoint`,
     );
     if (width === 1024) {
-      const popular = page.getByRole("radio", {name: "Popular"});
-      const trending = page.getByRole("radio", {name: "Trending"});
-      const newest = page.getByRole("radio", {name: "New"});
-      const cadence = page.getByRole("button", {name: "Activity cadence"});
-      const controlsGeometry = await page.evaluate(() => {
-        const modes = [...document.querySelectorAll(".explore-mode-toggle [role=radio]")];
-        const cadence = document.querySelector(".explore-period-select");
-        const cadenceRect = cadence.getBoundingClientRect();
-        return {
-          groupCount: document.querySelectorAll(".explore-controls .explore-mode-toggle").length,
-          modeCount: modes.length,
-          cadenceCount: document.querySelectorAll(".explore-period-select").length,
-          aligned: modes.every((mode) => {
-            const rect = mode.getBoundingClientRect();
-            return Math.abs(rect.top - cadenceRect.top) <= 2 &&
-              Math.abs(rect.bottom - cadenceRect.bottom) <= 2;
-          }),
-        };
-      });
-      assert(
-        await popular.isChecked() &&
-          controlsGeometry.groupCount === 1 &&
-          controlsGeometry.modeCount === 3 &&
-          controlsGeometry.cadenceCount === 1 &&
-          controlsGeometry.aligned,
-        `Explore controls are not one three-mode group plus one cadence: ${JSON.stringify(controlsGeometry)}`,
-      );
-      const popularWeekFirst = await firstEvidenceRow.getAttribute("data-capability-id");
-      await cadence.click();
-      await page.locator('[role="option"]').filter({hasText: "All time"}).first().click();
-      const popularAllFirst = await evidenceTable.locator("tbody tr").first().getAttribute("data-capability-id");
-      assert(popularAllFirst !== popularWeekFirst, "Popular period did not change ordering");
-      await trending.click();
-      const trendingAllFirst = await evidenceTable.locator("tbody tr").first().getAttribute("data-capability-id");
-      await cadence.click();
-      await page.locator('[role="option"]').filter({hasText: "Today"}).first().click();
-      const trendingDayFirst = await evidenceTable.locator("tbody tr").first().getAttribute("data-capability-id");
-      assert(
-        trendingDayFirst !== trendingAllFirst &&
-          (await cadence.textContent()).includes("Today"),
-        "Shared cadence did not update Trending ordering",
-      );
-      await newest.click();
-      const newIds = await evidenceTable.locator("tbody tr").evaluateAll((rows) =>
-        rows.map((row) => row.getAttribute("data-capability-id")),
-      );
-      const expectedNewIds = Object.values(database.data)
-        .sort(
-          (left, right) =>
-            right.measured.run_date.localeCompare(left.measured.run_date) ||
-            left.title.localeCompare(right.title) ||
-            left.id.localeCompare(right.id),
-        )
-        .slice(0, 10)
-        .map((capability) => capability.id);
-      assert(
-        JSON.stringify(newIds) === JSON.stringify(expectedNewIds),
-        "New mode is not ordered by factual measurement date and stable title ties",
-      );
-      await page.getByRole("button", {name: `Show all ${Object.keys(database.data).length} capabilities`}).click();
-      assert(
-        (await evidenceTable.locator("tbody tr").count()) === Object.keys(database.data).length,
-        "Show all capabilities did not expand the evidence table",
-      );
-      await cadence.click();
-      await page.locator('[role="option"]').filter({hasText: "This week"}).first().click();
-      assert(
-        (await evidenceTable.locator("tbody tr").count()) === 10,
-        "Changing cadence did not collapse expanded evidence rows",
-      );
-    }
-    const stripGeometry = await page.locator(".feature-strip > *").evaluateAll(
-      (elements) =>
-        elements.map((element) => {
-          const rect = element.getBoundingClientRect();
-          const content = element.querySelector("svg")?.parentElement ?? element;
-          const contentRect = content.getBoundingClientRect();
-          return {
-            width: rect.width,
-            height: rect.height,
-            centerX: rect.x + rect.width / 2,
-            centerY: rect.y + rect.height / 2,
-            contentCenterX: contentRect.x + contentRect.width / 2,
-          };
-        }),
-    );
-    assert(
-      stripGeometry.length === 2 &&
-        Math.abs(stripGeometry[0].height - stripGeometry[1].height) <= 1 &&
-        Math.abs(stripGeometry[0].centerY - stripGeometry[1].centerY) <= 1 &&
-        Math.abs(stripGeometry[1].contentCenterX - stripGeometry[1].centerX) <= 1 &&
-        (width !== 1024 || stripGeometry[1].width < stripGeometry[0].width),
-      `${width}px: index/filter controls are not geometrically aligned`,
-    );
-    if (width === 390 || width === 1024) {
-      const factRect = await page.locator(".home-fact").boundingBox();
-      const nextRect = await page
-        .getByRole("button", {name: "Next fact"})
-        .boundingBox();
-      const gap =
-        factRect && nextRect ? nextRect.y - (factRect.y + factRect.height) : -1;
-      assert(
-        gap >= 4 && gap <= 8,
-        `${width}px: Next fact gap is ${gap}px instead of 4–8px`,
-      );
-    }
-    if (width === 1024) {
-      assert(
-        (await page.locator(".home-section").count()) === 3 &&
-          (await page.locator(".home-explore").count()) === 1,
-        "Homepage does not contain one evidence module and three lower sections",
-      );
-      assert(
-        (await page.getByRole("heading", {name: "Capability groups"}).count()) ===
-          0,
-        "Capability groups leaked out of the index/filter UI",
-      );
-      const firstFact = page.locator(".home-fact");
-      assert(
-        (await firstFact.getAttribute("data-capability-id")) ===
-          "destructive-hint",
-        "First deterministic fact is not the annotation retained-vs-dropped split",
-      );
-      assert(
-        (await firstFact.textContent()).includes("2 frameworks") &&
-          (await firstFact.textContent()).includes("dropped during adaptation by 3"),
-        "First fact does not reflect current destructiveHint counts",
-      );
       const factSection = page.locator(".home-section-dyk");
       assert(
-        (await factSection.getAttribute("data-fact-count")) === "5",
-        "Homepage did not build the expected five distinct data-derived facts",
-      );
-      const nextFact = factSection.getByRole("button", {name: "Next fact"});
-      assert((await nextFact.count()) === 1, "Next fact control is missing");
-      const initialFactId = await firstFact.getAttribute("data-capability-id");
-      await nextFact.click();
-      assert(
-        (await firstFact.getAttribute("data-capability-id")) !== initialFactId,
-        "Next fact control did not visibly cycle to a distinct fact",
+        (await factSection.locator("li").count()) === 3 &&
+          (await factSection.getByText("MCP messages use JSON-RPC 2.0.").count()) === 1 &&
+          (await factSection.locator('a[target="_blank"]').count()) === 3,
+        "Homepage MCP facts are not concise and source-linked",
       );
       assert(
         (await page
@@ -499,6 +282,72 @@ try {
       );
     }
 
+    await page.goto(`${baseUrl}#/stats`, {waitUntil: "networkidle"});
+    const statsHeaders = (await page.locator(".stats-matrix thead th").allTextContents())
+      .map((value) => value.trim().replace(/\s+/g, " "));
+    assert(
+      statsHeaders.length === Object.keys(database.agents).length + 4 &&
+        statsHeaders[0] === "Capability" &&
+        statsHeaders.slice(-3).join("|") === "Present|Retained|Dropped" &&
+        (await page.locator(".stats-matrix tbody tr").count()) ===
+          Object.values(database.data).filter(
+            (capability) => capability.shown !== false,
+          ).length &&
+        (await page
+          .locator(".stats-matrix tbody tr")
+          .first()
+          .locator(".stats-framework-cell")
+          .count()) === Object.keys(database.agents).length,
+      `${width}px: Stats does not expose every capability and framework column`,
+    );
+    await assertNoHorizontalOverflow(page, `${width}px stats matrix`);
+    if (width === 1024) {
+      await page.getByLabel("Sort").selectOption("dropped");
+      const droppedCounts = await page
+        .locator(".stats-total-n strong")
+        .allTextContents();
+      assert(
+        droppedCounts.every(
+          (value, index) =>
+            index === 0 || Number(droppedCounts[index - 1]) >= Number(value),
+        ),
+        "Dropped sort is not descending",
+      );
+      await page
+        .locator(".stats-filter-grid label")
+        .filter({hasText: "Framework"})
+        .locator("select")
+        .selectOption("openai-agents");
+      assert(
+        !(await page.getByLabel("Version").isDisabled()),
+        "Framework selection did not enable version filtering",
+      );
+      await page.getByLabel("Support state").selectOption("n");
+      assert(
+        page.url().includes("sort=dropped") &&
+          page.url().includes("framework=openai-agents") &&
+          page.url().includes("support=n"),
+        "Stats state is not encoded in the shareable URL",
+      );
+      await page.getByRole("button", {name: "Copy view link"}).click();
+      await page.getByRole("status").filter({hasText: "Link copied"}).waitFor();
+      assert(
+        (await page.evaluate(() => navigator.clipboard.readText())) === page.url(),
+        "Stats view link was not copied",
+      );
+      await page.getByRole("tab", {name: /Frameworks/}).click();
+      assert(
+        page.url().includes("view=frameworks") &&
+          (await page.locator(".framework-card").count()) ===
+            Object.keys(database.agents).length &&
+          (await page.locator(".framework-measurement-note").count()) === 3 &&
+          (await page.getByText(/not a “best framework” leaderboard/i).count()) === 1,
+        "Framework comparison is not contained within Stats",
+      );
+      await assertNoHorizontalOverflow(page, "1024px filtered framework stats");
+    }
+
+    await page.goto(`${baseUrl}#/`, {waitUntil: "networkidle"});
     const search = page.getByRole("searchbox", {
       name: "Search MCP capabilities",
     });
@@ -559,22 +408,35 @@ try {
           `Search FeatureModule ${index + 1} does not have exactly one Test a feature tab`,
         );
         await testTab.click();
+        // A feature no scan covers has no command to offer, so the panel explains what a
+        // probe would have to do instead of printing a command that reproduces nothing.
+        const unmeasured =
+          (await module.getAttribute("data-measurement-state")) ===
+          "not_measured";
         assert(
-          (await module.locator(".feature-test-controls select").count()) === 2 &&
-            (await module.getByRole("button", {name: "Copy command"}).count()) === 1,
+          unmeasured
+            ? (await module.locator(".feature-probe").count()) === 1 &&
+              (await module.getByRole("button", {name: "Copy command"}).count()) === 0
+            : (await module.locator(".feature-test-controls select").count()) === 2 &&
+              (await module.getByRole("button", {name: "Copy command"}).count()) === 1,
           `Search FeatureModule ${index + 1} Test a feature panel is not functional`,
         );
       }
       const destructiveSearchModule = page.locator(
         '.feature-module.is-search-result[data-capability-id="destructive-hint"]',
       );
+      // Derived rather than hardcoded: how many cells carry a note changes with the
+      // data, but they must always number 1..n left to right.
+      const noteMarkers = (
+        await destructiveSearchModule
+          .locator('.support-cell[data-current="true"] .support-note-ref')
+          .allTextContents()
+      ).map((value) => value.trim());
       assert(
-        JSON.stringify(
-          (await destructiveSearchModule
-            .locator('.support-cell[data-current="true"] .support-note-ref')
-            .allTextContents()).map((value) => value.trim()),
-        ) === JSON.stringify(["#1", "#2", "#3", "#4", "#5"]),
-        "Search-result FeatureModule note markers are not in reading order",
+        noteMarkers.length > 0 &&
+          JSON.stringify(noteMarkers) ===
+            JSON.stringify(noteMarkers.map((_, index) => `#${index + 1}`)),
+        `Search-result FeatureModule note markers are not in reading order: ${noteMarkers.join(" ")}`,
       );
       await firstModule.getByRole("tab", {name: "Feedback"}).click();
       assert(
@@ -649,7 +511,9 @@ try {
       `${width}px: FeatureModule tabs are not one attached horizontal row: ${JSON.stringify({tabGeometry, matrixLeft, tabListBottom, panelTop})}`,
     );
     const contrast = await page
-      .locator('.support-cell[data-agent-id="crewai"][data-version="1.14.7"]')
+      .locator(
+        '.support-cell[data-agent-id="openai-agents"][data-version="0.22.0"]',
+      )
       .evaluate((element) => {
         const parse = (color) => {
           const value = color.trim();
@@ -681,7 +545,7 @@ try {
                 : "--solar-base01";
         const foregroundColor =
           element.classList.contains("support-y") ||
-          element.classList.contains("support-n")
+          element.classList.contains("support-a")
             ? "--solar-base03"
             : "--solar-base3";
         const foreground = luminance(
@@ -695,18 +559,27 @@ try {
       });
     assert(contrast >= 4.5, `${width}px: representative support cell contrast is ${contrast}`);
     if (width === 1024) {
-      const expectedNotes = Object.entries(database.agents).map(
-        ([, agent], index) => ({
+      // Derived from the cells themselves: an adapter owes a note whenever it did
+      // something to the value or could not reach the revision at all, so which
+      // frameworks are annotated is a property of the row, not of who was scanned.
+      const destructiveStats = database.data["destructive-hint"].stats;
+      const expectedNotes = Object.entries(database.agents)
+        .filter(([agentId, agent]) =>
+          (destructiveStats[agentId]?.[agent.current_version] ?? "").includes("#"),
+        )
+        .map(([, agent], index) => ({
           number: index + 1,
           label: `${agent.name} ${agent.current_version}`,
-        }),
-      );
-      const visibleRefs = await page
-        .locator('.support-cell[data-current="true"] .support-note-ref')
-        .allTextContents();
+        }));
+      const visibleRefs = (
+        await page
+          .locator('.support-cell[data-current="true"] .support-note-ref')
+          .allTextContents()
+      ).map((value) => value.trim());
       assert(
-        JSON.stringify(visibleRefs.map((value) => value.trim())) ===
-          JSON.stringify(["#1", "#2", "#3", "#4", "#5"]),
+        visibleRefs.length === expectedNotes.length &&
+          JSON.stringify(visibleRefs) ===
+            JSON.stringify(expectedNotes.map(({number}) => `#${number}`)),
         `Current note markers are not in reading order: ${visibleRefs.join(", ")}`,
       );
       for (const {number, label} of expectedNotes) {
@@ -728,7 +601,7 @@ try {
       }
       await page
         .locator(
-          '.support-cell[data-agent-id="crewai"][data-version="1.14.7"]',
+          '.support-cell[data-agent-id="openai-agents"][data-version="0.22.0"]',
         )
         .screenshot({path: "/tmp/mcp-mirror-note-cell.png"});
     }
@@ -740,6 +613,34 @@ try {
         fullPage: true,
       });
     }
+    await page.close();
+  }
+
+  for (const width of [544, 640, 641, 835, 836, 900, 901, 1280]) {
+    const page = await context.newPage();
+    await page.setViewportSize({width, height: 900});
+    await page.goto(`${baseUrl}#/`, {waitUntil: "networkidle"});
+    await assertNoHorizontalOverflow(page, `${width}px home breakpoint`);
+    const homepageColumnCount = await page
+      .locator(".home-sections")
+      .evaluate(
+        (element) =>
+          getComputedStyle(element).gridTemplateColumns.split(" ").length,
+      );
+    assert(
+      homepageColumnCount === (width <= 640 ? 1 : width <= 835 ? 2 : 3),
+      `${width}px breakpoint rendered ${homepageColumnCount} homepage columns`,
+    );
+
+    await page.goto(`${baseUrl}#/stats`, {waitUntil: "networkidle"});
+    await assertNoHorizontalOverflow(page, `${width}px stats breakpoint`);
+    const statsMatrixDisplay = await page
+      .locator(".stats-matrix")
+      .evaluate((element) => getComputedStyle(element).display);
+    assert(
+      statsMatrixDisplay === (width <= 900 ? "block" : "table"),
+      `${width}px Stats matrix used ${statsMatrixDisplay} at the wrong breakpoint`,
+    );
     await page.close();
   }
 
@@ -863,6 +764,11 @@ try {
     "News crawl transform did not change over elapsed time",
   );
   await ticker.hover();
+  await ticker.waitFor({state: "visible"});
+  await tickerPage.waitForFunction(
+    () => document.querySelector(".news-ticker")?.hasAttribute("data-paused"),
+  );
+  await tickerPage.waitForTimeout(50);
   const pausedTransform = await track.evaluate(
     (element) => getComputedStyle(element).transform,
   );
@@ -900,7 +806,7 @@ try {
   const desktop = await context.newPage();
   await desktop.setViewportSize({width: 1920, height: 1100});
   await desktop.goto(`${baseUrl}#/`, {waitUntil: "networkidle"});
-  await assertNoHorizontalOverflow(desktop, "1920px light desktop");
+  await assertNoHorizontalOverflow(desktop, "1920px reflected desktop");
   const reflection = await desktop.evaluate(() => {
     const style = getComputedStyle(document.body, "::before");
     return {
@@ -910,8 +816,10 @@ try {
     };
   });
   assert(
-    reflection.display === "none",
-    "Legacy side reflection pools remain visible",
+    reflection.display === "block" &&
+      reflection.pointerEvents === "none" &&
+      reflection.opacity <= 0.22,
+    "Wide-screen reflection pools are missing or too prominent",
   );
   await desktop.screenshot({
     path: "/tmp/mcp-mirror-home-1920.png",
@@ -920,22 +828,6 @@ try {
   await desktop.setViewportSize({width: 1400, height: 1100});
   await desktop.goto(`${baseUrl}#/`, {waitUntil: "networkidle"});
   await desktop.locator("body").click({position: {x: 8, y: 400}});
-  const secondaryHeights = await desktop.evaluate(() => {
-    const height = (selector) =>
-      document.querySelector(selector).getBoundingClientRect().height;
-    return {
-      fact: height(".home-section-dyk"),
-      tools: height(".home-section-tools"),
-      frameworks: height(".home-section-scores"),
-    };
-  });
-  assert(
-    secondaryHeights.fact < secondaryHeights.frameworks &&
-      secondaryHeights.tools < secondaryHeights.frameworks &&
-      secondaryHeights.fact <= 170 &&
-      secondaryHeights.tools <= 170,
-    `Secondary homepage panels remain stretched: ${JSON.stringify(secondaryHeights)}`,
-  );
   await desktop.locator(".site-header").screenshot({
     path: "/tmp/mcp-mirror-news-crawl-1400.png",
   });
@@ -957,7 +849,15 @@ try {
   await desktop
     .getByRole("searchbox", {name: "Search MCP capabilities"})
     .fill("");
-  await desktop.goto(`${baseUrl}#/cap/destructive-hint`, {waitUntil: "networkidle"});
+  await desktop.goto(
+    `${baseUrl}?spec=2025-11-25#/cap/destructive-hint`,
+    {waitUntil: "networkidle"},
+  );
+  assert(
+    (await desktop.getByLabel("MCP specification revision").inputValue()) ===
+      "2025-11-25",
+    "Legacy version-window test did not load the 2025 snapshot",
+  );
   const desktopModule = desktop.locator(".feature-module.is-detail");
   const compactGeometry = await desktopModule.evaluate((module) => {
     const style = getComputedStyle(module);
@@ -977,8 +877,8 @@ try {
     };
   });
   assert(
-    compactGeometry.height <= 540 &&
-      compactGeometry.radius === "8px" &&
+    compactGeometry.height <= 520 &&
+      compactGeometry.radius === "0px" &&
       compactGeometry.shadow === "none" &&
       compactGeometry.backgroundImage === "none" &&
       compactGeometry.railOutside &&
@@ -1035,7 +935,7 @@ try {
       docsGeometry.target === "_blank" &&
       docsGeometry.rel.includes("noopener") &&
       (await docsControl.getAttribute("href")) ===
-        database.data["destructive-hint"].docs_url,
+        legacyDatabase.data["destructive-hint"].docs_url,
     `Docs control geometry or semantics failed: ${JSON.stringify(docsGeometry)}`,
   );
   await desktop.screenshot({
@@ -1072,7 +972,7 @@ try {
     `Browser console errors: ${consoleErrors.join(" | ")}`,
   );
   console.log(
-    `responsive smoke passed: ${widths.join(", ")}px across index, search, detail, compare, changes, and method`,
+    `responsive smoke passed: ${widths.join(", ")}px across index, search, detail, stats, changes, and method`,
   );
 } finally {
   await context.close();

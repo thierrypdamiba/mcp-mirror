@@ -18,9 +18,10 @@ function currentSummary(
     y: "present",
     a: "changed/retained",
     n: "dropped",
+    x: "revision unreachable",
     u: "unmeasured",
   };
-  return (["y", "a", "n", "u"] as SupportCode[])
+  return (["y", "a", "n", "x", "u"] as SupportCode[])
     .filter((code) => counts[code])
     .map((code) => `${counts[code]} ${labels[code]}`)
     .join(", ");

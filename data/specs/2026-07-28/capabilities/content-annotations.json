@@ -1,0 +1,65 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "content-annotations",
+  "title": "Content `annotations`",
+  "description": "The `audience`, `priority` and `lastModified` hints that content blocks, resources and prompt messages may carry.",
+  "question": "Do content annotations survive to the agent?",
+  "spec": "https://modelcontextprotocol.io/specification/2026-07-28",
+  "status": "stable",
+  "categories": [
+    "Tool results",
+    "Resources"
+  ],
+  "keywords": "annotations,audience,priority,lastModified,context filtering",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "n #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "n #4"
+    },
+    "mastra": {
+      "1.17.3": "x #5"
+    }
+  },
+  "notes": "Content annotations reach neither adapter that gets to 2026-07-28; 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "OpenAI Agents SDK 0.22.0: the `audience` and `priority` annotations on a content block are not carried onto the output item.",
+    "4": "Pydantic AI 2.40.0: content is returned as plain strings and binary objects, neither of which has a slot for annotations.",
+    "5": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "n",
+    "headline": "Destroyed by both adapters that reach 2026-07-28.",
+    "detail": "`audience` and `priority` are the server's only way to say who a piece of content is for and how much it matters. Both adapters discard them, so a UI built on either cannot honour the distinction. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/resources#annotations",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "Annotations are how a server says who a piece of content is for and how much it matters. A client that drops them cannot filter assistant-only content out of a user view, cannot prioritise what to keep when context runs short, and cannot sort by recency.",
+  "reproduce": "python scripts/measure_results.py",
+  "measured": {
+    "run_date": "2026-09-11",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2026-07-28",
+  "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/resources#annotations",
+  "docs_label": "MCP Docs"
+}

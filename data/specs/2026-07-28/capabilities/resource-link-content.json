@@ -1,0 +1,65 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "resource-link-content",
+  "title": "`resource_link`",
+  "description": "A tool result block that points at a resource URI instead of inlining its contents.",
+  "question": "Does a resource link reach the agent as a reference it can follow?",
+  "spec": "https://modelcontextprotocol.io/specification/2026-07-28",
+  "status": "stable",
+  "categories": [
+    "Tool results",
+    "Resources"
+  ],
+  "keywords": "resource_link,resource link,uri,reference,large results",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "a #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "a #4"
+    },
+    "mastra": {
+      "1.17.3": "x #5"
+    }
+  },
+  "notes": "Both adapters that reach 2026-07-28 deliver the URI but neither keeps the link as a structured reference; 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "OpenAI Agents SDK 0.22.0: the link is re-serialized as JSON inside a text item, retaining `uri`, `name` and `description`. Followable, but only after parsing text.",
+    "4": "Pydantic AI 2.40.0: only the URI is returned, as a bare string. The link is still followable, but its `name`, `description` and `mimeType` are gone.",
+    "5": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "The URI survives in both, the structure in neither.",
+    "detail": "OpenAI Agents SDK 0.22.0 preserves the whole link inside JSON text; Pydantic AI 2.40.0 reduces it to the bare URI. An agent can still follow the reference in both cases, which is why this is a change rather than a loss. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#resource-links",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "Resource links are how a large result stays out of the context window until something asks for it. A framework that flattens the link to text keeps the URI as prose and loses the ability to fetch what it points at.",
+  "reproduce": "python scripts/measure_results.py",
+  "measured": {
+    "run_date": "2026-09-11",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2026-07-28",
+  "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#resource-links",
+  "docs_label": "MCP Docs"
+}

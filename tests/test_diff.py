@@ -13,6 +13,7 @@ from mcp_mirror.models import (
     FrameworkRun,
     RendererEvidence,
     Report,
+    ScanProvenance,
     ToolRep,
 )
 from mcp_mirror.report import compare_baseline
@@ -393,6 +394,21 @@ def test_scorecard_faithful_when_no_diffs():
     assert all(cell["verdict"] == "faithful" and cell["count"] == 0 for cell in jobs.values())
 
 
+def test_scorecard_does_not_call_an_incomplete_run_faithful():
+    report = _report_with([])
+    report.runs[0].status = "unsupported"
+    report.runs[0].status_detail = "renderer is not installed"
+
+    framework = build_scorecard(report)["frameworks"]["fw"]
+
+    assert framework["status"] == "unsupported"
+    assert framework["status_detail"] == "renderer is not installed"
+    assert all(
+        cell["verdict"] == "unmeasured"
+        for cell in framework["jobs"].values()
+    )
+
+
 def test_scorecard_projects_tool_name_changes_into_identity_job():
     card = build_scorecard(
         _report_with([_diff("transformative", Dimension.NAME, "name")])
@@ -431,6 +447,73 @@ def test_baseline_drift_on_worse_category():
     assert any(m.startswith("WORSE") for m in messages)
 
 
+def test_baseline_incomplete_current_run_is_drift():
+    baseline = _report_with([])
+    current = _report_with([])
+    current.runs[0].status = "adapter_error"
+    current.runs[0].status_detail = "adapter exploded"
+
+    drift, messages = compare_baseline(current, baseline)
+
+    assert drift is True
+    assert "adapter_error" in messages[0]
+    assert "adapter exploded" in messages[0]
+
+
+def test_baseline_missing_framework_is_drift():
+    baseline = _report_with([])
+    current = _report_with([])
+    current.runs = []
+
+    drift, messages = compare_baseline(current, baseline)
+
+    assert drift is True
+    assert "missing framework" in messages[0]
+
+
+def test_baseline_runner_manifest_change_is_drift():
+    baseline = _report_with([])
+    current = _report_with([])
+    baseline.runs[0].runner_digest = "a" * 64
+    current.runs[0].runner_digest = "b" * 64
+
+    drift, messages = compare_baseline(current, baseline)
+
+    assert drift is True
+    assert "runner manifest changed" in messages[0]
+
+
+def test_baseline_source_runner_change_is_drift():
+    baseline = _report_with([])
+    current = _report_with([])
+    baseline.provenance = ScanProvenance(
+        generated_at="2026-09-06T00:00:00Z",
+        scanner_version="0.1.0",
+        runner_digest="a" * 64,
+    )
+    current.provenance = ScanProvenance(
+        generated_at="2026-09-06T00:00:00Z",
+        scanner_version="0.1.0",
+        runner_digest="b" * 64,
+    )
+
+    drift, messages = compare_baseline(current, baseline)
+
+    assert drift is True
+    assert "source runner changed" in messages[0]
+
+
+def test_baseline_framework_version_change_is_drift():
+    baseline = _report_with([])
+    current = _report_with([])
+    current.runs[0].framework_version = "2.0"
+
+    drift, messages = compare_baseline(current, baseline)
+
+    assert drift is True
+    assert "framework version changed" in messages[0]
+
+
 def test_baseline_spec_version_mismatch_is_drift():
     baseline = _report_with([])
     current = _report_with([])
@@ -460,3 +543,73 @@ def test_baseline_renderer_spec_version_mismatch_is_drift():
 
     assert drift is True
     assert "renderer MCP spec mismatch" in messages[0]
+
+
+def test_baseline_recorded_from_an_incomplete_scan_fails_closed():
+    """A framework the baseline never measured cannot anchor a comparison.
+
+    Accepting it silently reported "no drift" for a run that had nothing to
+    compare against.
+    """
+
+    baseline = _report_with([])
+    current = _report_with([])
+    baseline.runs[0].status = "adapter_error"
+
+    drift, messages = compare_baseline(current, baseline)
+
+    assert drift is True
+    assert "baseline is incomplete" in messages[0]
+
+
+def test_baseline_adapter_version_becoming_known_is_drift():
+    """An adapter version appearing or vanishing changes what produced the diff."""
+
+    baseline = _report_with([])
+    current = _report_with([])
+    current.runs[0].adapter_version = "2.0"
+
+    drift, messages = compare_baseline(current, baseline)
+
+    assert drift is True
+    assert "adapter version changed" in messages[0]
+
+
+def test_baseline_capture_boundary_change_is_drift():
+    baseline = _report_with([])
+    current = _report_with([])
+    for report, capture_object in (
+        (baseline, "OpenAI-compatible function-tool dictionary"),
+        (current, "FrameworkTool"),
+    ):
+        report.runs[0].evidence = RendererEvidence(
+            capture_api="adapter.list_tools",
+            capture_object=capture_object,
+            capture_stage="framework_tool_definition",
+            provider_request_captured=False,
+            negotiated_mcp_spec_version="2026-07-28",
+            protocol_version_evidence="initialize result",
+        )
+
+    drift, messages = compare_baseline(current, baseline)
+
+    assert drift is True
+    assert any("capture object changed" in message for message in messages)
+
+
+def test_baseline_scanner_version_change_is_drift():
+    baseline = _report_with([])
+    current = _report_with([])
+    baseline.provenance = ScanProvenance(
+        generated_at="2026-09-06T00:00:00Z",
+        scanner_version="0.1.0",
+    )
+    current.provenance = ScanProvenance(
+        generated_at="2026-09-06T00:00:00Z",
+        scanner_version="0.2.0",
+    )
+
+    drift, messages = compare_baseline(current, baseline)
+
+    assert drift is True
+    assert any("scanner version changed" in message for message in messages)

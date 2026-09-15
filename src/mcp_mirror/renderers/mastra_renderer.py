@@ -18,8 +18,10 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from ..models import RendererEvidence, ToolRep
-from ..normalize import normalize_function_tool
+from typing import Any
+
+from ..models import RendererEvidence, ResultRep, ToolRep
+from ..normalize import normalize_framework_result, normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
 
@@ -36,6 +38,16 @@ def available() -> bool:
 
 def get_renderer() -> "MastraRenderer":
     return MastraRenderer()
+
+
+def _block_of(item: Any) -> dict[str, Any]:
+    """Classify one returned item by what the agent can actually tell it is."""
+
+    if isinstance(item, dict):
+        return item
+    if isinstance(item, str):
+        return {"type": "text", "text": item}
+    return {"type": type(item).__name__}
 
 
 class MastraRenderer:
@@ -72,7 +84,86 @@ class MastraRenderer:
         )
 
     def render(self, server: ServerHandle) -> list[ToolRep]:
+        payload = self._run_worker(self._config(server))
+        reps: list[ToolRep] = []
+        for entry in payload["tools"]:
+            tool_payload = {
+                "name": entry.get("name"),
+                "description": entry.get("description"),
+                "parameters": entry.get("parameters") or {},
+            }
+            # Mastra does not carry MCP annotations onto its tools, so none are retained.
+            reps.append(normalize_function_tool(tool_payload, origin=self.id))
+        return reps
+
+    # Result capture boundary: direct tool-action execution before the surrounding
+    # agent serializes the result into a message.
+    result_capture_api = "@mastra/mcp tool action execute"
+    result_capture_object = "tool action return before agent-message serialization"
+
+    def render_result(
+        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+    ) -> ResultRep:
+        """Invoke one tool and capture the declared framework-result boundary."""
+
         config = self._config(server)
+        config["calls"] = [{"tool": tool, "arguments": arguments}]
+        payload = self._run_worker(config)
+
+        entry = next(
+            (r for r in (payload.get("results") or []) if r.get("tool") == tool), None
+        )
+        if entry is None:
+            raise RenderError(f"mastra worker returned no result for {tool!r}")
+        if not entry.get("ok"):
+            if entry.get("threw"):
+                # A tool that reported failure through `isError` may surface as a thrown
+                # error instead. That is a different contract for the agent, not a
+                # scanner failure, so it is recorded rather than propagated.
+                return normalize_framework_result(
+                    tool=tool,
+                    origin=self.id,
+                    is_error=True,
+                    text=str(entry.get("error")),
+                    raw=entry,
+                )
+            raise RenderError(f"mastra result capture failed: {entry.get('error')}")
+        return self._result_to_rep(tool, entry.get("returned"))
+
+    def _result_to_rep(self, tool: str, returned: Any) -> ResultRep:
+        """Map whatever the worker reported back onto the common result shape.
+
+        Mastra's action returns a plain JSON value, so the worker has already crossed
+        the JS/Python boundary by the time this runs. A dict that still carries MCP's
+        ``content`` list is unpacked; anything else is recorded as it arrived.
+        """
+
+        if isinstance(returned, dict):
+            content = returned.get("content")
+            if isinstance(content, list):
+                return normalize_framework_result(
+                    tool=tool,
+                    origin=self.id,
+                    blocks=[_block_of(item) for item in content],
+                    structured_content=returned.get("structuredContent"),
+                    is_error=returned.get("isError"),
+                    raw=returned,
+                )
+            return normalize_framework_result(
+                tool=tool, origin=self.id, structured_content=returned, raw=returned
+            )
+        if isinstance(returned, list):
+            return normalize_framework_result(
+                tool=tool,
+                origin=self.id,
+                blocks=[_block_of(item) for item in returned],
+                raw=returned,
+            )
+        return normalize_framework_result(
+            tool=tool, origin=self.id, text=str(returned), raw=returned
+        )
+
+    def _run_worker(self, config: dict) -> dict:
         try:
             # Run from the caller's cwd (NOT the node dir) so a stdio server given by a
             # relative command resolves correctly. Node still finds @mastra/mcp because
@@ -105,17 +196,7 @@ class MastraRenderer:
         if not isinstance(protocol_version, str) or not protocol_version:
             raise RenderError("mastra worker returned no negotiated MCP protocol version")
         self._negotiated_mcp_spec_version = protocol_version
-
-        reps: list[ToolRep] = []
-        for entry in payload["tools"]:
-            payload = {
-                "name": entry.get("name"),
-                "description": entry.get("description"),
-                "parameters": entry.get("parameters") or {},
-            }
-            # Mastra does not carry MCP annotations onto its tools, so none are retained.
-            reps.append(normalize_function_tool(payload, origin=self.id))
-        return reps
+        return payload
 
     def _config(self, server: ServerHandle) -> dict:
         if server.transport == "http":

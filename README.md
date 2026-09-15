@@ -1,12 +1,18 @@
 # mcp-mirror
 
-> An open compatibility tracker and deterministic scanner for MCP tool definitions across agent frameworks.
+> An open compatibility tracker and deterministic scanner for the Model Context Protocol across agent frameworks.
 
-An MCP server publishes a tool name, description, input schema, and optional
-annotations. An agent framework adapts that definition into its own tool object
-or provider-shaped format. `mcp-mirror` records the source and one declared
-framework boundary, then shows what stayed present, what moved to retained
-metadata, and what disappeared.
+MCP defines three server primitives, a set of client features, and a base
+protocol of transports, notifications and authorization. An agent framework
+adapts some part of that into its own objects. `mcp-mirror` records the source
+and one declared framework boundary, then shows what stayed present, what moved
+to retained metadata, and what disappeared.
+
+Coverage is published alongside the results. Each protocol snapshot carries a
+`surface.json` enumerating what that revision of the specification defines, and
+every feature in it appears as a row whether or not a scan has reached it yet.
+The site reports measured features against defined features, so the size of the
+gap is visible rather than implied by absence.
 
 The project has two public surfaces:
 
@@ -30,6 +36,9 @@ Every framework-version cell has one of four factual states:
   metadata.
 - **Dropped during adaptation**: the value is not recoverable from the adapted
   tool object.
+- **Cannot reach the revision**: the adapter cannot negotiate this MCP revision
+  at all, so it exposes none of its features. This is a measured result carrying
+  the dependency or negotiation evidence, not a gap in coverage.
 - **Not yet measured**: the release exists in PyPI or npm, but no scan has
   covered it.
 
@@ -79,11 +88,12 @@ pip install "mcp-mirror[langchain]"
 pip install "mcp-mirror[pydantic-ai]"
 pip install "mcp-mirror[crewai]"
 pip install "mcp-mirror[openai-agents]"
-pip install "mcp-mirror[all]"
 ```
 
 Renderers are optional so a scan installs only the frameworks it needs.
-Python 3.11 or newer is required.
+Python 3.11 or newer is required. Run `mcp-mirror frameworks` for the exact
+setup command for every missing renderer. Install framework extras separately
+when their MCP SDK constraints conflict.
 
 Mastra is a TypeScript framework. Its renderer drives the real `@mastra/mcp`
 client through the included Node worker:
@@ -104,13 +114,66 @@ mcp-mirror scan "python fixtures/tricky_server.py"
 # Scan an HTTP MCP server through selected frameworks.
 mcp-mirror scan https://example.com/mcp \
   --frameworks langchain,pydantic_ai \
-  --output md
+  --output md \
+  --out mcp-mirror-report.json
+
+# Run an adapter without installing it into mcp-mirror's environment.
+# Managed mode requires uv and caches a separate environment per manifest.
+mcp-mirror scan "python fixtures/tricky_server.py" \
+  --frameworks pydantic_ai,openai_agents \
+  --runner managed \
+  --spec-version 2026-07-28 \
+  --fail-on-incomplete \
+  --out mcp-mirror-report.json
 
 # Focus on parameter and authorization jobs.
 mcp-mirror scan "python fixtures/tricky_server.py" --job J2,J5
 ```
 
 `<server>` may be an HTTP(S) URL or a command string for a stdio server.
+
+## Use mcp-mirror from an agent
+
+`mcp-mirror serve` exposes the published compatibility evidence as a read-only
+MCP server. From a source checkout, add it to Cursor or another MCP client:
+
+```json
+{
+  "mcpServers": {
+    "mcp-mirror": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/path/to/mcp-mirror",
+        "run",
+        "mcp-mirror",
+        "serve"
+      ]
+    }
+  }
+}
+```
+
+After a release containing this command is published, the portable command is
+`uvx mcp-mirror serve`.
+
+The server provides five tools:
+
+- `inspect_tool_definition` identifies the capabilities used by a proposed MCP
+  tool and returns versioned adapter observations.
+- `inspect_tool_result` does the same for a proposed `CallToolResult`.
+- `lookup_capability` returns the evidence for one named feature.
+- `search_capabilities` searches the catalog.
+- `list_snapshots` lists measured revisions, versions, and coverage.
+
+For example, ask the connected agent:
+
+> Inspect this `delete_account` tool definition with mcp-mirror. Which declared
+> capture boundaries retain `destructiveHint`, and where does each framework
+> place it?
+
+The server does not execute the submitted tool, call a model, or rank
+frameworks. It reads the same versioned data published by the website.
 
 ## Jobs to be done
 
@@ -143,60 +206,103 @@ mcp-mirror scan "python fixtures/tricky_server.py" \
 mcp-mirror scan "python fixtures/tricky_server.py" \
   --frameworks langchain \
   --baseline baseline.json \
-  --fail-on-drift
+  --fail-on-drift \
+  --fail-on-incomplete
 ```
 
 Reports include the MCP protocol version negotiated by mcp-mirror's direct
 source connection. Baselines are compared only within that same protocol
 version. Each framework run also records the version negotiated by that
-adapter's own connection. Four renderers read an initialization result exposed
-by their client path; CrewAI instruments the `ClientSession.initialize` result,
-and the pinned Mastra worker reads the underlying MCP client's negotiated
-version. If one of those evidence seams disappears, the renderer fails instead
-of copying the source connection's version by assumption. Baseline comparison
-also rejects per-renderer protocol mismatches and unknown mixed-version evidence.
-A live scan exits with code `3` rather than diffing a renderer response negotiated
-under a different MCP revision from the source snapshot.
+adapter's own connection. Handshake-era source evidence comes from `initialize`;
+MCP `2026-07-28` source evidence comes from `server/discover`. If a renderer's
+evidence seam disappears, the renderer fails instead of copying the source
+connection's version by assumption. Baseline comparison also rejects
+per-renderer protocol mismatches and unknown mixed-version evidence. A live scan
+exits with code `3` rather than diffing a renderer response established under a
+different MCP revision from the source snapshot.
 
-The compatibility site is currently one explicitly tagged MCP `2025-11-25`
-snapshot. Comparing another MCP revision requires a separately measured dataset;
-the project does not merge cells from different protocol revisions.
+JSON reports use `mcp-mirror/report@2`. They keep every requested framework in
+the result, including unsupported adapters, adapter errors, and protocol
+mismatches. Source and framework observations carry stable artifact hashes, and
+the report records non-secret scan inputs plus runtime provenance. Human reports
+print a copyable reproduction command. Header names are retained, but header
+values are never written to the report. URL user info, common credential query
+parameters, and common stdio credential flags are redacted before the server
+identifier is stored.
+
+`--runner local` uses installed extras in separate subprocesses.
+`--runner managed` also separates dependencies: the direct source connection
+and each Python adapter run in disposable `uv` environments selected from
+`runner-manifests.json`. Manifest digests and the actual framework and adapter
+versions are written to the report. Managed Node runners are not implemented
+yet, so Mastra remains a local setup.
+
+The compatibility site publishes separate MCP `2025-11-25` and `2026-07-28`
+snapshots and never merges their cells. `2026-07-28` is the default. Pydantic AI
+2.40.0 and OpenAI Agents SDK 0.22.0 produced same-protocol captures. LangChain
+MCP Adapters 0.3.2 and CrewAI 1.15.1 have incompatible Python SDK constraints,
+while Mastra 1.17.3 negotiated `2025-11-25`; those rows are explicitly
+unmeasured in the 2026 snapshot.
+
+The saved same-protocol report can be reproduced without changing the locked
+2025 development environment. Failed same-protocol attempts are recorded in
+`data/specs/2026-07-28/attempts.json`.
+
+```bash
+PYTHONPATH="$PWD/src" uv run --isolated --no-project \
+  --with . --with "mcp==2.0.0" \
+  --with "pydantic-ai-slim[mcp]" --with openai-agents \
+  mcp-mirror scan "python fixtures/tricky_server.py" \
+  --frameworks pydantic_ai,openai_agents \
+  --spec-version 2026-07-28 \
+  --out data/specs/2026-07-28/report.json
+```
 
 ## CLI
 
 ```text
 mcp-mirror scan <server>
     --frameworks langchain,pydantic_ai,crewai
-    --spec-version 2025-11-25
+    --runner local|managed
+    --spec-version 2026-07-28
     --output table|json|md
     --job J1,J5
     --baseline baseline.json --fail-on-drift
+    --fail-on-incomplete
     --out report.json
 
 mcp-mirror frameworks
+mcp-mirror show report.json --output table|json|md
 mcp-mirror version
 ```
 
 Exit codes are `0` for success, `1` for detected drift, `2` for a connection or
-handshake failure, and `3` for a protocol-version mismatch.
+handshake failure, `3` for a protocol-version mismatch, and `4` when
+`--fail-on-incomplete` finds an unsupported or failed framework run. When both
+gates are on, `4` wins over `1`, because drift measured from a partial scan is
+not a signal worth acting on. A `3` still writes the report, so the failed
+assertion ships with the evidence of what the server actually negotiated.
 
 ## Data and site architecture
 
 The repository uses the same useful separation as caniuse:
 
 ```text
-data/frameworks.json
-data/capabilities/*.json
+data/frameworks.json + data/capabilities/*.json
+data/specs/2026-07-28/frameworks.json
+data/specs/2026-07-28/capabilities/*.json
         |
-        +--> data/fulldata/data-1.0.json
-        +--> site/public/data/data-1.0.json
-        +--> docs/data/data-1.0.json
-        +--> docs/standalone.html
+        +--> */data-2025-11-25.json
+        +--> */data-2026-07-28.json
+        +--> */specs.json
+        +--> */data-1.0.json       newest snapshot alias
+        +--> docs/standalone.html  both snapshots inlined
 ```
 
-Per-capability files are the source of truth, so `git log` on one file is that
-capability's changelog. `scripts/build_data.py` validates and aggregates them.
-The React site is a consumer of the generated data.
+Per-capability files remain the source of truth within each protocol snapshot.
+`scripts/build_data.py` validates and aggregates each snapshot independently.
+The React site loads one complete dataset at a time through the protocol
+snapshot selector.
 
 The site uses React 19, HeroUI v3, Tailwind CSS 4, and Vite. The production build
 is written to `docs/` for static hosting. The build also inlines the compiled

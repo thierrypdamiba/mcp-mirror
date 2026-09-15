@@ -59,6 +59,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_mirror"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"data/fulldata" = "mcp_mirror/data"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"

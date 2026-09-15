@@ -61,6 +61,41 @@ async function main() {
         annotations: {}, // Mastra does not carry MCP annotations onto the tool
       });
     }
+
+    // Result boundary: `execute` is what a Mastra agent calls, so its return value is
+    // the last thing between the tool and the model. Captured only when asked for, so
+    // the definition-only path stays a pure read.
+    const results = [];
+    for (const call of cfg.calls || []) {
+      // Mastra namespaces tools as `<server>_<tool>`; accept either form.
+      const entry =
+        tools[call.tool] ?? tools[`src_${call.tool}`] ??
+        Object.entries(tools).find(([k]) => k.endsWith(`_${call.tool}`))?.[1];
+      if (!entry || typeof entry.execute !== 'function') {
+        results.push({ tool: call.tool, ok: false, error: 'no executable tool by that name' });
+        continue;
+      }
+      try {
+        // Mastra's action takes the arguments object directly. Some versions instead
+        // expect it under `context`, and a mismatch comes back as a *returned*
+        // validation error rather than a throw, so detect that shape and retry.
+        const args = call.arguments || {};
+        let returned = await entry.execute(args);
+        if (returned && returned.error === true && returned.validationErrors) {
+          returned = await entry.execute({ context: args });
+        }
+        results.push({ tool: call.tool, ok: true, returned });
+      } catch (err) {
+        // A tool that reported `isError` may surface here as a thrown error instead,
+        // which is a different contract for the agent rather than a worker failure.
+        results.push({
+          tool: call.tool,
+          ok: false,
+          threw: true,
+          error: String((err && err.message) || err),
+        });
+      }
+    }
     // @mastra/mcp does not expose the negotiated version publicly. Its pinned MCP
     // client stores the initialize result here; fail closed if that evidence seam
     // moves rather than copying the direct source connection's version by assumption.
@@ -71,6 +106,7 @@ async function main() {
     }
     process.stdout.write(JSON.stringify({
       tools: out,
+      results,
       negotiatedMcpSpecVersion,
     }));
   } finally {

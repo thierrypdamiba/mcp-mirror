@@ -1,0 +1,68 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "title-annotation",
+  "title": "`title`",
+  "description": "A human friendly display name for the tool. Presentational, not a safety signal.",
+  "question": "Is the tool title annotation present at each capture boundary?",
+  "spec": "https://modelcontextprotocol.io/specification",
+  "status": "stable",
+  "categories": [
+    "Tool annotations"
+  ],
+  "keywords": "title,tool title,title annotation,annotations,display",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "a #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "a #4"
+    },
+    "mastra": {
+      "1.17.3": "x #5"
+    }
+  },
+  "notes": "Mixed across the 2 adapters that reach 2026-07-28; 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "OpenAI Agents SDK: retained as FunctionTool._mcp_title, outside the declared FunctionTool fields.",
+    "4": "Pydantic AI: retained in ToolDefinition.metadata['annotations']; not part of parameters_json_schema.",
+    "5": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "Mixed across the 2 adapters that reach 2026-07-28; 3 cannot reach the revision.",
+    "detail": "OpenAI Agents SDK 0.22.0 and Pydantic AI 2.40.0 change it or retain it elsewhere. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#tool",
+      "title": "MCP Docs"
+    },
+    {
+      "url": "https://platform.openai.com/docs/guides/function-calling",
+      "title": "OpenAI function calling, tool schema"
+    }
+  ],
+  "known_issues": [],
+  "why": "Low stakes. Included for completeness rather than concern.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5 --spec-version 2026-07-28",
+  "measured": {
+    "run_date": "2026-09-06",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2026-07-28",
+  "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#tool",
+  "docs_label": "MCP Docs"
+}

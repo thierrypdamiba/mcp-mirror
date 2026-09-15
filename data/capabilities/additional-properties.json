@@ -1,0 +1,63 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "additional-properties",
+  "title": "`additionalProperties`",
+  "description": "Controls whether an object accepts keys that are not declared in its properties map.",
+  "question": "Is each object's additional-properties policy preserved at the capture boundary?",
+  "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+  "status": "stable",
+  "categories": [
+    "Parameter contract",
+    "Structure"
+  ],
+  "keywords": "additionalProperties,additional properties,unknown keys,closed object,object schema",
+  "stats": {
+    "crewai": {
+      "1.15.1": "a #1"
+    },
+    "langchain": {
+      "0.3.2": "y"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "y"
+    }
+  },
+  "notes": "Four measured capture boundaries preserve the source policy. CrewAI's generated args_schema changes additionalProperties on the root and nested object schemas.",
+  "notes_by_num": {
+    "1": "CrewAI: Pydantic model generation rewrites additionalProperties on several object boundaries, changing whether undeclared keys are accepted."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "Preserved at four boundaries, changed at one.",
+    "detail": "CrewAI rewrites the policy while the other captured definitions retain it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP tool schemas declaring additionalProperties.",
+  "links": [
+    {
+      "url": "https://json-schema.org/understanding-json-schema/reference/object#additionalproperties",
+      "title": "JSON Schema Docs"
+    }
+  ],
+  "known_issues": [
+    "A changed policy can make a downstream caller reject valid extension keys or send keys the server rejects."
+  ],
+  "why": "Object openness is part of the parameter contract. Changing it can alter which calls validate before they reach the server.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2,J3",
+  "measured": {
+    "run_date": "2026-09-04",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "JSON Schema 2020-12",
+  "docs_url": "https://json-schema.org/understanding-json-schema/reference/object#additionalproperties",
+  "docs_label": "JSON Schema Docs"
+}

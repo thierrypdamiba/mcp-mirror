@@ -1,0 +1,77 @@
+{
+  "schema": "mcp-mirror/runner-manifests@1",
+  "runners": {
+    "langchain": {
+      "module": ".langchain_renderer",
+      "runtime": "python",
+      "python": "3.11",
+      "packages": [
+        "mcp==1.26.0",
+        "langchain-mcp-adapters==0.3.2"
+      ],
+      "protocols": [
+        "2025-11-25"
+      ],
+      "capture_stage": "provider_format",
+      "provider_request_captured": false
+    },
+    "pydantic_ai": {
+      "module": ".pydantic_ai_renderer",
+      "runtime": "python",
+      "python": "3.11",
+      "packages": [
+        "mcp==2.0.0",
+        "pydantic-ai-slim[mcp]==2.40.0",
+        "httpx==0.28.1"
+      ],
+      "protocols": [
+        "2026-07-28"
+      ],
+      "capture_stage": "framework_tool_definition",
+      "provider_request_captured": false
+    },
+    "crewai": {
+      "module": ".crewai_renderer",
+      "runtime": "python",
+      "python": "3.11",
+      "packages": [
+        "mcp==1.26.0",
+        "crewai-tools[mcp]==1.15.1",
+        "email-validator==2.3.0"
+      ],
+      "protocols": [
+        "2025-11-25"
+      ],
+      "capture_stage": "framework_tool_definition",
+      "provider_request_captured": false
+    },
+    "openai_agents": {
+      "module": ".openai_agents_renderer",
+      "runtime": "python",
+      "python": "3.11",
+      "packages": [
+        "mcp==2.0.0",
+        "openai-agents==0.22.0"
+      ],
+      "protocols": [
+        "2026-07-28"
+      ],
+      "capture_stage": "framework_tool_definition",
+      "provider_request_captured": false
+    },
+    "mastra": {
+      "module": ".mastra_renderer",
+      "runtime": "node",
+      "node": "24",
+      "packages": [
+        "@mastra/mcp@1.17.3",
+        "@modelcontextprotocol/sdk@1.30.0"
+      ],
+      "protocols": [
+        "2025-11-25"
+      ],
+      "capture_stage": "framework_tool_definition",
+      "provider_request_captured": false
+    }
+  }
+}

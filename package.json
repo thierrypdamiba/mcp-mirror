@@ -2,18 +2,22 @@
   "name": "mcp-mirror",
   "version": "0.1.0",
   "private": true,
-  "description": "Support tables for MCP tool-definition fidelity across agent frameworks.",
+  "description": "Support tables for Model Context Protocol feature coverage across agent frameworks.",
   "type": "module",
   "scripts": {
     "build:data": "python3 scripts/build_data.py",
     "build": "npm run build:data && npm run news:validate && npm run typecheck && vite build && node scripts/build_standalone.mjs",
+    "audit:links": "node scripts/audit_links.mjs",
     "dev": "npm run build:data && vite",
     "preview": "vite preview",
+    "news:refresh": "node scripts/refresh_news.mjs",
+    "news:test": "node --test tests/test_news_refresh.mjs",
     "news:validate": "node scripts/validate_news.mjs",
     "smoke:site": "npm run build && node scripts/smoke_site.mjs",
     "smoke:responsive": "npm run build && node scripts/smoke_responsive.mjs",
+    "talk:present": "python3 scripts/present_talk.py",
     "typecheck": "tsc --noEmit",
-    "test": "npm run typecheck"
+    "test": "npm run typecheck && npm run news:test"
   },
   "keywords": [
     "mcp",
@@ -28,8 +32,7 @@
     "@heroui/react": "^3.2.4",
     "@heroui/styles": "^3.2.4",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "simple-icons": "^16.29.0"
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

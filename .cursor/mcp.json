@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mcp-mirror": {
+      "command": "uv",
+      "args": ["--directory", ".", "run", "mcp-mirror", "serve"]
+    }
+  }
+}

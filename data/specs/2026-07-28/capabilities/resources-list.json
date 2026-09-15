@@ -1,0 +1,62 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "resources-list",
+  "title": "`resources/list`",
+  "description": "Lists the resources a server exposes, each identified by a URI and described with a name, title, MIME type and optional size.",
+  "question": "Can the agent discover the server's resources at all?",
+  "spec": "https://modelcontextprotocol.io/specification/2026-07-28",
+  "status": "stable",
+  "categories": [
+    "Resources"
+  ],
+  "keywords": "resources/list,resources,context,uri,discovery",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "x #3"
+    }
+  },
+  "notes": "Both adapters that reach 2026-07-28 expose it; 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "y",
+    "headline": "Discoverable through both adapters that reach 2026-07-28.",
+    "detail": "OpenAI Agents SDK 0.22.0 exposes `list_resources` and returns the raw `ListResourcesResult`. Pydantic AI 2.40.0 exposes `list_resources` and returns adapted `Resource` objects keeping name, title, description, MIME type and URI. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/resources#listing-resources",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "Resources are one of the three server primitives, and the only one designed for application-controlled context rather than model-controlled action. A framework that exposes tools but not resources supports one third of what MCP servers publish.",
+  "reproduce": "python scripts/probe_surface.py",
+  "measured": {
+    "run_date": "2026-09-11",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2026-07-28",
+  "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/resources#listing-resources",
+  "docs_label": "MCP Docs"
+}

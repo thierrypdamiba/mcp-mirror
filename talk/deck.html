@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Your Tool Is in Another Castle</title>
+<style>
+:root {
+  --bg: #002b36;
+  --panel: #073642;
+  --muted: #657b83;
+  --text: #93a1a1;
+  --bright: #fdf6e3;
+  --cyan: #2aa198;
+  --green: #859900;
+  --yellow: #b58900;
+  --orange: #cb4b16;
+  --red: #dc322f;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --serif: Georgia, "Times New Roman", serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--serif); }
+#deck { position: relative; width: 100vw; height: 100vh; }
+.slide { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; padding: 6vh 7vw 10vh; background:
+  radial-gradient(circle at 84% 12%, rgba(42,161,152,.08), transparent 26%),
+  linear-gradient(145deg, rgba(7,54,66,.16), transparent 48%); }
+.slide.on { display: flex; }
+.center { align-items: center; text-align: center; }
+.kicker { margin-bottom: 2.4vh; color: var(--cyan); font: 1.05vw/1.2 var(--mono); letter-spacing: .2em; text-transform: uppercase; }
+h1 { color: var(--bright); font-size: 6vw; font-weight: 400; letter-spacing: -.025em; line-height: 1.02; }
+h2 { color: var(--bright); font-size: 4.4vw; font-weight: 400; letter-spacing: -.02em; line-height: 1.1; }
+h3 { color: var(--bright); font-size: 2.5vw; font-weight: 400; line-height: 1.25; }
+.sub { margin-top: 2.6vh; color: var(--text); font-size: 2vw; line-height: 1.38; max-width: 82%; }
+.small { color: var(--muted); font: 1.15vw/1.5 var(--mono); }
+.claim { max-width: 88%; font-size: 5vw; line-height: 1.14; color: var(--bright); }
+/* Even out wrapped display text so a two-line sub or headline does not leave a
+   one-word last line. Applies only to prose blocks, never to code or payloads. */
+h1, h2, h3, .sub, .claim, .definition, .meaning { text-wrap: balance; }
+.accent { color: var(--orange); }
+.good { color: var(--green); }
+.bad { color: var(--red); }
+.mono { font-family: var(--mono); }
+pre { width: 100%; margin-top: 3vh; padding: 2.4vh 2.2vw; border-left: 4px solid var(--cyan); border-radius: 3px; background: var(--panel); color: var(--text); font: 1.55vw/1.55 var(--mono); white-space: pre-wrap; }
+pre.large { font-size: 1.9vw; }
+.key { color: var(--cyan); }
+.str { color: var(--green); }
+.err { color: var(--red); }
+.comment { color: var(--muted); }
+.pipeline { margin-top: 4vh; color: var(--bright); font: 2vw/1.8 var(--mono); text-align: center; }
+.boundary { display: inline-block; padding: .15em .7em; border: 3px solid var(--orange); color: var(--bright); }
+table { width: 100%; margin-top: 3vh; border-collapse: collapse; font-size: 1.42vw; }
+th { padding: 1vh .75vw; border-bottom: 1px solid var(--muted); color: var(--muted); font: .95vw/1.2 var(--mono); letter-spacing: .09em; text-align: left; text-transform: uppercase; }
+td { padding: 1.15vh .75vw; border-bottom: 1px solid var(--panel); vertical-align: middle; }
+td:first-child { color: var(--bright); font-family: var(--mono); }
+.c { text-align: center; }
+.chip { display: inline-grid; width: 1.8em; height: 1.8em; place-items: center; border-radius: 3px; color: var(--bg); font: 700 1.35vw/1 var(--mono); }
+.y { background: var(--green); }
+.a { background: var(--yellow); }
+.n { background: var(--red); color: var(--bright); }
+.x { background: var(--muted); color: var(--bright); }
+ul { margin-top: 3vh; list-style: none; }
+li { margin: 1.35vh 0; padding-left: 1.6em; color: var(--text); font-size: 2.05vw; line-height: 1.42; text-indent: -1.6em; }
+li::before { margin-right: .65em; color: var(--cyan); content: "→"; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 3vw; width: 100%; margin-top: 4vh; }
+.card { padding: 2.5vh 2vw; background: var(--panel); }
+.card .label { margin-bottom: 1.5vh; color: var(--muted); font: 1vw/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.card p { color: var(--bright); font-size: 2vw; line-height: 1.35; }
+.flow { display: flex; align-items: stretch; justify-content: center; gap: 1.2vw; width: 100%; margin-top: 4vh; }
+.flow.vertical { flex-direction: column; align-items: center; gap: 1vh; }
+.node { display: flex; flex: 1; min-height: 14vh; max-width: 19vw; flex-direction: column; align-items: center; justify-content: center; padding: 2vh 1.2vw; border: 1px solid rgba(147,161,161,.22); border-radius: 8px; background: rgba(7,54,66,.88); text-align: center; }
+.node strong { border: 0; color: var(--bright); font: 1.45vw/1.25 var(--mono); }
+.node span { margin-top: 1vh; color: var(--muted); font: 1.05vw/1.35 var(--mono); }
+.arrow { display: grid; flex: 0 0 auto; place-items: center; color: var(--cyan); font: 2.4vw/1 var(--mono); }
+.layer-stack { display: grid; gap: 1.2vh; width: 78%; margin: 4vh auto 0; }
+.layer { display: grid; grid-template-columns: 11vw 1fr 16vw; align-items: center; column-gap: 1.4vw; min-height: 11vh; padding: 1.5vh 2vw; border-radius: 7px; background: var(--panel); }
+.layer.outer { border: 2px solid var(--cyan); }
+.layer.inner { width: 92%; margin-left: 8%; border: 2px solid var(--orange); }
+.layer .tag { color: var(--muted); font: 1vw/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.layer .value { color: var(--bright); font: 2vw/1.2 var(--mono); }
+.layer .value.fields { font-size: 1.15vw; line-height: 1.7; white-space: pre; }
+.layer .meaning { color: var(--text); font-size: 1.35vw; line-height: 1.3; }
+.contract-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1vw; width: 100%; margin-top: 3.5vh; }
+.contract { min-height: 25vh; padding: 2vh 1.2vw; border-top: 4px solid var(--orange); border-radius: 4px; background: var(--panel); }
+.contract:nth-child(4) { border-color: var(--green); }
+.contract:nth-child(5) { border-color: var(--cyan); }
+.contract .group { color: var(--orange); font: .85vw/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.contract:nth-child(4) .group { color: var(--green); }
+.contract:nth-child(5) .group { color: var(--cyan); }
+.contract .name { margin-top: 1.4vh; color: var(--bright); font: 1.2vw/1.2 var(--mono); text-transform: uppercase; }
+.contract .shape { margin-top: 1.4vh; color: var(--bright); font: 1.4vw/1.3 var(--mono); }
+.contract .where { margin-top: 1.4vh; color: var(--muted); font-size: 1.05vw; line-height: 1.35; }
+.contract .flag { margin-top: 1.6vh; color: var(--text); font-size: 1.1vw; line-height: 1.3; }
+.timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.3vw; position: relative; width: 100%; margin-top: 5vh; }
+.timeline::before { position: absolute; top: 2.2vh; right: 8%; left: 8%; height: 2px; background: var(--cyan); content: ""; opacity: .55; }
+.moment { position: relative; padding-top: 5vh; text-align: center; }
+.moment::before { position: absolute; top: 1.25vh; left: calc(50% - .9vh); width: 1.8vh; height: 1.8vh; border: 3px solid var(--bg); border-radius: 50%; background: var(--cyan); content: ""; }
+.moment .date { color: var(--cyan); font: 1vw/1.2 var(--mono); text-transform: uppercase; }
+.moment .who { margin-top: 1.2vh; color: var(--bright); font-size: 1.8vw; }
+.moment .did { margin-top: 1vh; color: var(--text); font-size: 1.2vw; line-height: 1.35; }
+.channels { display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; width: 100%; margin-top: 3vh; }
+.channel { min-height: 37vh; padding: 2.5vh 2vw; border-radius: 8px; background: var(--panel); }
+.channel:first-child { border-top: 5px solid var(--cyan); }
+.channel:last-child { border-top: 5px solid var(--yellow); }
+.channel .kind { color: var(--muted); font: 1vw/1.2 var(--mono); letter-spacing: .15em; text-transform: uppercase; }
+.channel .definition { margin-top: 1.5vh; color: var(--bright); font-size: 1.7vw; line-height: 1.3; }
+.channel .payload { margin-top: 2.5vh; color: var(--green); font: 1.35vw/1.55 var(--mono); white-space: pre-wrap; }
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.7vw; width: 100%; margin-top: 5vh; counter-reset: step; }
+.step { position: relative; min-height: 23vh; padding: 5vh 1.4vw 2vh; border-radius: 8px; background: var(--panel); counter-increment: step; }
+.step::before { position: absolute; top: -2.1vh; left: 1.3vw; display: grid; width: 4.2vh; height: 4.2vh; place-items: center; border-radius: 50%; background: var(--cyan); color: var(--bg); content: counter(step); font: 700 1.1vw/1 var(--mono); }
+.step:not(:last-child)::after { position: absolute; top: 47%; right: -2.3vw; color: var(--cyan); content: "→"; font: 2vw/1 var(--mono); }
+.step strong { border: 0; color: var(--bright); font-size: 1.55vw; }
+.step p { margin-top: 1.5vh; color: var(--text); font-size: 1.2vw; line-height: 1.4; }
+.media-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1vw; width: 100%; margin-top: 4vh; }
+.media { display: flex; min-height: 25vh; flex-direction: column; align-items: center; justify-content: center; padding: 2vh 1vw; border: 1px solid rgba(147,161,161,.22); border-radius: 8px; background: var(--panel); text-align: center; }
+.media .glyph { color: var(--cyan); font: 3.4vw/1 var(--mono); }
+.media .type { margin-top: 2vh; color: var(--bright); font: 1.25vw/1.2 var(--mono); }
+.media .meta { margin-top: 1.2vh; color: var(--muted); font-size: 1vw; line-height: 1.3; }
+.glue-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1vw; width: 100%; margin-top: 4vh; }
+.glue { display: flex; min-height: 20vh; flex-direction: column; align-items: center; justify-content: center; padding: 2vh 1vw; border-radius: 7px; background: var(--panel); text-align: center; }
+.glue .tool { color: var(--bright); font: 1.2vw/1.3 var(--mono); }
+.glue .work { margin-top: 1.8vh; color: var(--orange); font: 1.05vw/1.35 var(--mono); }
+.quote { width: 86%; margin: 3.5vh auto 0; padding: 2.6vh 2.4vw; border-left: 4px solid var(--yellow); background: var(--panel); color: var(--bright); font-size: 2.05vw; line-height: 1.38; }
+.credit { margin-top: 1.5vh; color: var(--muted); font: 1.05vw/1.4 var(--mono); }
+.cite { display: flex; align-items: center; gap: 1.6vw; width: 100%; margin-top: 3vh; padding: 1.8vh 1.8vw; border-left: 4px solid var(--yellow); border-radius: 4px; background: rgba(7,54,66,.75); }
+.cite .mark { color: var(--yellow); font: .95vw/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+.cite strong { display: block; color: var(--bright); font-size: 1.6vw; font-weight: 400; }
+.cite span { display: block; margin-top: .7vh; color: var(--muted); font: 1.05vw/1.35 var(--mono); }
+.source-strip { display: flex; align-items: baseline; gap: 1vw; width: 100%; margin-top: 2.4vh; padding: 1.5vh 1.6vw; border: 1px dashed var(--cyan); border-radius: 7px; }
+.source-strip .tag { color: var(--cyan); font: .95vw/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.source-strip .value { color: var(--bright); font: 1.25vw/1.3 var(--mono); }
+.result-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.1vw; width: 100%; margin-top: 2.2vh; }
+.result-card { grid-column: span 2; min-height: 17vh; padding: 1.8vh 1.3vw; border-top: 4px solid var(--cyan); border-radius: 7px; background: var(--panel); }
+.result-card:nth-child(2) { border-color: var(--yellow); }
+.result-card:nth-child(3) { border-color: var(--orange); }
+.result-card:nth-child(4) { grid-column: 2 / span 2; border-color: var(--green); }
+.result-card:nth-child(5) { grid-column: 4 / span 2; border-color: var(--red); }
+.result-card .name { color: var(--bright); font: 1.15vw/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.result-card .api { margin-top: .6vh; color: var(--cyan); font: .88vw/1.3 var(--mono); }
+.result-card .kept { margin-top: 1.4vh; color: var(--bright); font-size: 1.15vw; line-height: 1.3; }
+.result-card .kept b { color: var(--green); font-weight: 400; }
+.result-card .lost { margin-top: .8vh; color: var(--muted); font-size: 1.05vw; line-height: 1.3; }
+.result-card .lost b { color: var(--orange); font-weight: 400; }
+.portable { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 2vw; width: 88%; margin-top: 5vh; }
+.portable .side { padding: 3vh 2vw; border-radius: 8px; background: var(--panel); }
+.portable .side strong { display: block; color: var(--bright); font-size: 2.3vw; font-weight: 400; }
+.portable .side span { display: block; margin-top: 1vh; color: var(--muted); font: 1.1vw/1.4 var(--mono); }
+.portable .symbol { color: var(--orange); font: 4vw/1 var(--mono); }
+#bar { position: fixed; bottom: 0; left: 0; z-index: 20; height: 3px; background: var(--cyan); transition: width .2s; }
+#hud, #clock { position: fixed; bottom: 1.4vh; z-index: 20; color: var(--muted); font: 1vw/1 var(--mono); }
+#hud { right: 1.6vw; }
+#clock { left: 1.6vw; }
+#clock.run { color: var(--green); }
+#clock.warn { color: var(--yellow); }
+#clock.over { color: var(--red); }
+#notes { position: fixed; right: 0; bottom: 0; left: 0; z-index: 30; display: none; max-height: 43vh; overflow: auto; padding: 2.2vh 4vw; border-top: 2px solid var(--cyan); background: #00212b; color: var(--text); font: 1.1vw/1.65 var(--mono); white-space: pre-wrap; }
+#notes.on { display: block; }
+body.audience #bar, body.audience #clock, body.audience #hud, body.audience #notes,
+body.preview #bar, body.preview #clock, body.preview #hud, body.preview #notes { display: none !important; }
+body.audience, body.preview { cursor: none; }
+</style>
+</head>
+<body>
+<main id="deck">
+
+<section class="slide center" data-notes="Start the timer with T. State the experiment in one sentence, then build from first principles: the intern, the note, the glue, MCP, and the one part MCP did not standardize. Five setup slides, about four minutes total. If you are behind, compress slides 3 and 4 to one sentence each.">
+  <div class="kicker">MCP Community Connect · San Francisco</div>
+  <h1>Your Tool Is in<br/>Another Castle</h1>
+  <div class="sub">MCP makes tools portable. Does their meaning survive adaptation?</div>
+  <div class="small" style="margin-top:4vh">Thierry Damiba · 14 September 2026</div>
+</section>
+
+<section class="slide" data-notes="Nate Barbettini's analogy, cited on the slide; say his name and the article title out loud. Assume no expertise. The model can read and write, and that is all. Everything it knows about your problem arrived as text somebody else prepared. The worked examples from here are yours, not his. Keep this to about forty-five seconds.">
+  <div class="kicker">Start with the model</div>
+  <h3>A model is a very capable intern in a windowless room.</h3>
+  <div class="flow">
+    <div class="node"><strong>YOU</strong><span>slide a note under the door</span></div>
+    <div class="arrow">→</div>
+    <div class="node" style="border:3px solid var(--cyan)"><strong>INTERN</strong><span>reads it, writes a reply</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><strong>YOU</strong><span>read the reply</span></div>
+  </div>
+  <ul>
+    <li>No internet, no phone, no library.</li>
+    <li>No database, no order system; only paper fits under the door.</li>
+    <li>Everything the intern knows about your problem, you wrote down first.</li>
+  </ul>
+  <div class="cite">
+    <div class="mark">Building on</div>
+    <div>
+      <strong>“Model Context Protocol in plain English”</strong>
+      <span>Nate Barbettini · 9 September 2026 · caffeinate.blog/post/mcp-in-plain-english</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-notes="The workaround. You cannot pass the order database under the door, so you pass instructions for asking. The intern requests, your code runs the query, you write the answer back. That exchange is tool calling, and running it in a loop is the agent. Note the result is a small record, not just a number; results having shape matters later.">
+  <div class="kicker">The workaround</div>
+  <h3>You cannot fit the database under the door. You can fit instructions for asking.</h3>
+  <pre><span class="comment"># your note</span>
+If you need the order system, write <span class="str">LOOKUP(order_id)</span>.
+A customer is asking where order 4417 is.
+
+<span class="comment"># the intern's note</span>
+<span class="key">LOOKUP(4417)</span>
+
+<span class="comment"># your note, after you queried the database</span>
+shipped 11 Sep · arriving 16 Sep · carrier DHL</pre>
+  <div class="sub">The model requests. Your application code executes. That pattern is tool calling.</div>
+</section>
+
+<section class="slide" data-notes="Scale the pattern. Five tools, then fifty, then other teams and other companies. Each integration needs the same two pieces: a description the model can read, and code that performs the real call. You write that pair once per integration, and the cranky engineer in your head starts shouting about repeating yourself.">
+  <div class="kicker">More tools, more problems</div>
+  <h3>Every integration needs its own hand-written glue.</h3>
+  <div class="glue-grid">
+    <div class="glue"><div class="tool">lookup_order</div><div class="work">glue you wrote</div></div>
+    <div class="glue"><div class="tool">search_docs</div><div class="work">glue you wrote</div></div>
+    <div class="glue"><div class="tool">get_calendar</div><div class="work">glue you wrote</div></div>
+    <div class="glue"><div class="tool">send_email</div><div class="work">glue you wrote</div></div>
+    <div class="glue"><div class="tool">refund_payment</div><div class="work">glue you wrote</div></div>
+  </div>
+  <div class="sub">A description the model can read, plus code that performs the call. <span class="accent">Once per integration.</span></div>
+</section>
+
+<section class="slide" data-notes="MCP is the agreement that removes that duplication. Your application holds an MCP client; any MCP server exposes its tools through the same interface. Write the integration once and reuse it. Say plainly that this is the promise the rest of the talk tests.">
+  <div class="kicker">MCP is a standard interface</div>
+  <h3>Write the integration once. Any MCP client can use it.</h3>
+  <div class="flow">
+    <div class="node"><strong>MODEL</strong><span>requests a tool</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><strong>YOUR APP</strong><span>runs the loop, holds the MCP client</span></div>
+    <div class="arrow">→</div>
+    <div class="node" style="border:3px solid var(--cyan)"><strong>MCP SERVER</strong><span>one standard interface</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><strong>REAL SERVICE</strong><span>does the work</span></div>
+  </div>
+  <div class="sub">The standardized conversation runs between your application and the MCP server.</div>
+</section>
+
+<section class="slide" data-notes="This is the hinge. Read the quote aloud. MCP standardized everything below the client. It did not standardize the note. Somebody still writes the note the model reads, and in an agent application that somebody is the framework adapter. Pause, then go straight to the experiment.">
+  <div class="kicker">The part that stayed the same</div>
+  <h3>From the model’s point of view, nothing changed.</h3>
+  <div class="quote">“The model still only sees the <span class="mono">get_weather</span> tool. The MCP conversation happens between the application and the MCP server.”</div>
+  <div class="credit">Nate Barbettini, “Model Context Protocol in plain English,” 9 September 2026 · caffeinate.blog/post/mcp-in-plain-english</div>
+  <div class="sub">Somebody still writes the note. In an agent application, that somebody is your framework. <span class="accent">MCP never standardized the note.</span></div>
+</section>
+
+<section class="slide" data-notes="So I tested the note. This is one valid CallToolResult from one server on MCP 2025-11-25. Each part carries a different test-only marker, like adding a different color of tracer dye, so its destination can be observed after conversion.">
+  <div class="kicker">So I tested the note · one server · one call</div>
+  <h3>The server returns text, image, audio, resources, and structured JSON.</h3>
+  <div class="media-grid">
+    <div class="media"><div class="glyph">T</div><div class="type">TEXT</div><div class="meta">content[]</div></div>
+    <div class="media"><div class="glyph">▧</div><div class="type">IMAGE</div><div class="meta">image/png</div></div>
+    <div class="media"><div class="glyph">♫</div><div class="type">AUDIO</div><div class="meta">audio/wav</div></div>
+    <div class="media"><div class="glyph">{ }</div><div class="type">RESOURCE</div><div class="meta">embedded + link</div></div>
+    <div class="media"><div class="glyph">[ ]</div><div class="type">JSON</div><div class="meta">structuredContent</div></div>
+  </div>
+  <div class="sub">Each part carries a different traceable marker so we can see where it lands.</div>
+</section>
+
+<section class="slide" data-notes="Say explicitly: the MCP response is identical in all five runs. These cards are what each adapter produced afterward, at the named capture API. They are not five different server responses and not equivalent final model payloads. LangChain receives the result but raises while converting the audio block.">
+  <div class="kicker">Same response in · five objects out</div>
+  <h3>Every framework received the identical MCP response.</h3>
+  <div class="source-strip">
+    <div class="tag">In</div>
+    <div class="value">text · image · audio · resource · link · structured JSON</div>
+  </div>
+  <div class="result-grid">
+    <div class="result-card"><div class="name">CrewAI</div><div class="api">BaseTool.run</div><div class="kept"><b>Out:</b> text only, as a list-shaped string</div><div class="lost"><b>Gone:</b> image, audio, resources, JSON</div></div>
+    <div class="result-card"><div class="name">LangChain</div><div class="api">StructuredTool.ainvoke</div><div class="kept"><b>Out:</b> nothing; conversion raised on audio</div><div class="lost"><b>Gone:</b> the whole result at this path</div></div>
+    <div class="result-card"><div class="name">OpenAI Agents</div><div class="api">MCPUtil.invoke_mcp_tool</div><div class="kept"><b>Out:</b> text, image; audio and resources as JSON text</div><div class="lost"><b>Gone:</b> structured JSON, text annotations</div></div>
+    <div class="result-card"><div class="name">Pydantic AI</div><div class="api">MCPToolset.direct_call_tool</div><div class="kept"><b>Out:</b> text, image, audio; resources flattened to text</div><div class="lost"><b>Gone:</b> structured JSON, resource metadata</div></div>
+    <div class="result-card"><div class="name">Mastra</div><div class="api">tool action execute</div><div class="kept"><b>Out:</b> structured JSON</div><div class="lost"><b>Gone:</b> every content block</div></div>
+  </div>
+</section>
+
+<section class="slide center" data-notes="This is the thesis. Pause after the first sentence. MCP successfully transported one valid result to every integration; the divergence appears in adaptation after that exchange. Call back to the glue: MCP removed it below the client, and above the client it is still written once per framework.">
+  <div class="kicker">The interoperability gap</div>
+  <h2 class="claim">The connection was portable.<br/><span class="accent">The agent-facing contract was not.</span></h2>
+  <div class="portable">
+    <div class="side"><strong>Protocol connectivity</strong><span>can these two programs talk?<br/>server → MCP client</span></div>
+    <div class="symbol">≠</div>
+    <div class="side"><strong>Contract portability</strong><span>do I get the same thing to work with?<br/>framework → agent runtime</span></div>
+  </div>
+  <div class="sub">MCP removed the glue between application and server. The glue between adapter and agent runtime is still written once per framework.</div>
+</section>
+
+<section class="slide appendix" data-notes="APPENDIX. The main deck makes this concrete after the reveal, on the 'what the flag was for' slide. Use this one if someone asks about structured content and error handling together. The code is illustrative: it shows normal source-level assumptions, not one program run against all frameworks.">
+  <div class="kicker">Why application developers should care</div>
+  <h3>Code written against the MCP result does not move between adapters unchanged.</h3>
+  <div class="channels">
+    <div class="channel">
+      <div class="kind">What the MCP spec teaches you to write</div>
+      <div class="payload">if result.isError:
+  retry()
+
+records = result.structuredContent["records"]</div>
+    </div>
+    <div class="channel">
+      <div class="kind">Where those meanings landed after adaptation</div>
+      <div class="payload">message status · exception · event
+artifact · framework output
+serialized text · omitted field</div>
+    </div>
+  </div>
+  <div class="sub">That changes error handling, policy inputs, parsing, and cross-framework application code.</div>
+</section>
+
+<section class="slide appendix" data-notes="APPENDIX. The main deck introduces the loop in plain English before the first result.">
+  <div class="kicker">First: what is the agent?</div>
+  <h3>The agent is the loop that lets a model use tools.</h3>
+  <div class="flow">
+    <div class="node"><strong>MODEL</strong><span>chooses an action</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><strong>FRAMEWORK</strong><span>calls the tool</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><strong>TOOL</strong><span>returns a result</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><strong>MODEL</strong><span>chooses what follows</span></div>
+  </div>
+  <div class="sub">In the five integrations tested, the framework maps MCP objects into its own tool and message types.</div>
+</section>
+
+<section class="slide appendix" data-notes="APPENDIX. The main deck now defines the envelope on the two-layers slide. Use this one if someone asks to see the wire shape beside the framework-native types available to an adapter.">
+  <div class="kicker">What actually crosses the boundary</div>
+  <h3>The model does not receive this full JSON-RPC response.</h3>
+  <div class="channels">
+    <div class="channel">
+      <div class="kind">MCP server → MCP client</div>
+      <div class="definition"><strong>JSON-RPC envelope</strong> = the outer wrapper: protocol version + request ID + result or protocol error.</div>
+      <div class="payload">{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "result": {
+    "content": [{
+      "type": "text",
+      "text": "confirm was not set"
+    }],
+    "isError": true
+  }
+}</div>
+    </div>
+    <div class="channel">
+      <div class="kind">MCP adapter → agent runtime</div>
+      <div class="definition"><strong>Framework-native types</strong> the adapter can build instead.</div>
+      <div class="payload">LangChain   ToolMessage(status="error")
+
+Pydantic AI ModelRetry("confirm was not set")
+
+OpenAI      ToolOutput = {"type": "text", ...}</div>
+    </div>
+  </div>
+  <div class="sub">These are the types an adapter could build. The reveal slide shows which ones my runs actually produced.</div>
+</section>
+
+<section class="slide center appendix" data-notes="APPENDIX. State the grounded finding. Do not say the signal simply disappears everywhere; current frameworks deliberately map it into different native channels.">
+  <div class="kicker">One source language · five runtime languages</div>
+  <h2 class="claim">MCP says <span class="mono">isError: true</span>.<br/><span class="accent">Each adapter translates that meaning into its framework’s grammar.</span></h2>
+  <div class="flow" style="margin-top:6vh">
+    <div class="node" style="border-color:var(--orange)"><strong>isError: true</strong><span>boolean in CallToolResult</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><strong>MESSAGE</strong><span>status = error</span></div>
+    <div class="node"><strong>RETRY</strong><span>special exception</span></div>
+    <div class="node"><strong>EVENT</strong><span>metadata elsewhere</span></div>
+  </div>
+</section>
+
+<section class="slide appendix" data-notes="APPENDIX. Show the real fixture, not a toy payment story. The tool declaration deliberately combines a destructive hint with an explicit confirmation argument.">
+  <div class="kicker">The test server · tool declaration</div>
+  <h3>The fixture advertises a destructive operation.</h3>
+  <pre><span class="key">Tool</span>(
+  name=<span class="str">"delete_account"</span>,
+  description=<span class="str">"Permanently deletes a user account…"</span>,
+  inputSchema={
+    <span class="str">"account_id"</span>: {<span class="str">"type"</span>: <span class="str">"string"</span>},
+    <span class="str">"confirm"</span>: {<span class="str">"type"</span>: <span class="str">"boolean"</span>}
+  },
+  annotations={
+    <span class="str">"destructiveHint"</span>: <span class="err">true</span>,
+    <span class="str">"readOnlyHint"</span>: <span class="err">false</span>
+  }
+)</pre>
+</section>
+
+<section class="slide" data-notes="This is the actual fixture logic. On the 1.x MCP SDK path the handler raises and the SDK serializes the failure as isError. On the 2.x path the handler constructs CallToolResult explicitly.">
+  <div class="kicker">The test server · delete_account handler</div>
+  <h3>Missing confirmation becomes a tool-execution error.</h3>
+  <pre class="large"><span class="key">if</span> name == <span class="str">"delete_account"</span> and not arguments.get(<span class="str">"confirm"</span>):
+    <span class="key">return</span> CallToolResult(
+        content=[TextContent(text=<span class="str">"confirm was not set"</span>)],
+        <span class="key">isError</span>=<span class="err">True</span>,
+    )</pre>
+  <div class="sub">The protocol call succeeds. The requested operation does not run.</div>
+</section>
+
+<section class="slide" data-notes="Explain both layers, and name the boolean. The outer wrapper is JSON-RPC and it reports success. Nested inside it is a CallToolResult, which has a content array holding the prose and a boolean field called isError sitting right beside it. Point at isError and say plainly: this is the field, it is a boolean, and it is the only one MCP defines for 'the tool ran and the operation failed.'">
+  <div class="kicker">Two layers report two different outcomes</div>
+  <h3>JSON-RPC says the request worked. MCP says the tool operation failed.</h3>
+  <div class="layer-stack">
+    <div class="layer outer">
+      <div class="tag">JSON-RPC</div>
+      <div class="value fields"><span class="key">"result"</span>: { … }</div>
+      <div class="meaning">The request was valid and processed.</div>
+    </div>
+    <div class="layer inner">
+      <div class="tag">CallToolResult</div>
+      <div class="value fields"><span class="key">"content"</span>: [ … <span class="str">"confirm was not set"</span> ]
+<span class="key">"isError"</span>: <span class="err">true</span></div>
+      <div class="meaning">The tool ran and refused.</div>
+    </div>
+  </div>
+  <div class="sub">A protocol success can contain a tool-execution failure.</div>
+  <div class="small" style="margin-top:2vh"><span style="color:var(--bright)">isError</span> is a boolean field on <span style="color:var(--bright)">CallToolResult</span>, sitting beside the content it explains. It is the only field MCP defines to mark a result as a tool execution error.</div>
+</section>
+
+<section class="slide center" data-notes="INTERACTIVE: ask the question and wait. Invite two or three shouted answers. Do not display choices or steer them toward the measured outcomes. Then say: there is no protocol-mandated framework answer.">
+  <div class="kicker">Your turn · design the adapter</div>
+  <h2 class="claim">The server says the operation failed.<br/><br/><span class="accent">What would you hand the agent?</span></h2>
+  <div class="sub">There is no protocol-mandated framework representation.</div>
+</section>
+
+<section class="slide" data-notes="These rows exactly match the pinned 2025-11-25 dataset and live demo. They are named integration boundaries, not equivalent final model inputs or overall framework scores. No measured row returned the unchanged CallToolResult.">
+  <div class="kicker">The reveal</div>
+  <h3>One boolean on the MCP result becomes three different integration contracts.</h3>
+  <div class="contract-grid">
+    <div class="contract"><div class="group">Plain result</div><div class="name">CrewAI</div><div class="shape">ordinary text</div><div class="where">BaseTool.run</div><div class="flag">Flag not present</div></div>
+    <div class="contract"><div class="group">Plain result</div><div class="name">LangChain</div><div class="shape">ordinary text block</div><div class="where">StructuredTool.ainvoke</div><div class="flag">Flag not present</div></div>
+    <div class="contract"><div class="group">Plain result</div><div class="name">OpenAI Agents</div><div class="shape">normal ToolOutput</div><div class="where">MCPUtil.invoke_mcp_tool</div><div class="flag">Flag not present</div></div>
+    <div class="contract"><div class="group">Retry exception</div><div class="name">Pydantic AI</div><div class="shape">ModelRetry</div><div class="where">MCPToolset.direct_call_tool</div><div class="flag">Failure as control flow</div></div>
+    <div class="contract"><div class="group">Thrown error</div><div class="name">Mastra</div><div class="shape">thrown error</div><div class="where">tool action execute</div><div class="flag">Failure as control flow</div></div>
+  </div>
+  <div class="sub">No measured path returned the unchanged MCP result.</div>
+</section>
+
+<section class="slide" data-notes="This answers 'so what.' The specification singles out tool execution errors as a distinct class carrying actionable feedback, and puts a normative SHOULD on clients. In the three plain-result captures the explanatory text survives but no typed field marks the result as a failure. In the other two the signal survives as control flow. So one question, did this call fail, needs a different implementation per contract, and at three captures it has no typed answer at all. Say clearly that the prose still reaches the model; what is not portable is the machine-readable marking.">
+  <div class="kicker">What the flag was for</div>
+  <h3>The explanation survived everywhere. The machine-readable marking did not.</h3>
+  <div class="channels">
+    <div class="channel">
+      <div class="kind">MCP specification · error handling</div>
+      <div class="definition">“Clients <strong>SHOULD</strong> provide tool execution errors to language models to enable self-correction.”</div>
+      <div class="payload">tool execution error
+  actionable feedback the model
+  can use to self-correct
+
+  marked by  isError: true</div>
+    </div>
+    <div class="channel">
+      <div class="kind">Answering “did this call fail?” afterward</div>
+      <div class="definition">One question. A different implementation per contract.</div>
+      <div class="payload">Plain result     no typed field
+                 3 of 5 captures
+
+Retry exception  except ModelRetry
+
+Thrown error     try / catch</div>
+    </div>
+  </div>
+  <div class="sub">The text still reaches the model. What moved is whether surrounding code can identify the class of result the specification singles out.</div>
+</section>
+
+<section class="slide center appendix" data-notes="APPENDIX. MCP specifies the protocol between server and client. Framework-native messages, exceptions, events, and provider serialization after that point are outside that shared contract.">
+  <div class="kicker">The missing contract</div>
+  <h2 class="claim">MCP standardizes<br/><span class="good">server → client.</span><br/><br/>It does not standardize<br/><span class="accent">framework → agent.</span></h2>
+  <div class="sub">“Supports MCP” confirms the connection, not the contract the agent runtime receives.</div>
+</section>
+
+<section class="slide" data-notes="Do not argue significance; show it. These are merged commit titles from four independent maintainer teams, verified against the public repositories. Read the Mastra one aloud: failed MCP tool calls were being recorded as successes. Then make the fair point both ways. This predates the project, so claim no discovery. And each fix lands at a boundary that team chose, which is exactly why the location of the failure signal is not portable.">
+  <div class="kicker">Does it matter? Four teams already answered</div>
+  <h3>Merged fixes, in their maintainers’ own words.</h3>
+  <div class="timeline">
+    <div class="moment"><div class="date">25 Mar 2026</div><div class="who">Claude Agent SDK</div><div class="did">“propagate <span class="mono">is_error</span> flag from SDK MCP tool results”</div></div>
+    <div class="moment"><div class="date">10 Jun 2026</div><div class="who">LangChain</div><div class="did">“surface MCP tool execution errors as failed tool output”</div></div>
+    <div class="moment"><div class="date">1 Jul 2026</div><div class="who">Mastra</div><div class="did">“honor <span class="mono">isError</span> … so failed MCP tool calls <span class="accent">aren’t recorded as successes</span>”</div></div>
+    <div class="moment"><div class="date">5 Aug 2026</div><div class="who">OpenAI Agents</div><div class="did">“keep MCP error content when structured output is enabled”</div></div>
+  </div>
+  <div class="sub">Each fix lands at a boundary that team chose. That is the finding: where the failure signal lives is a per-framework decision, not a protocol guarantee.</div>
+</section>
+
+<section class="slide center appendix" data-notes="APPENDIX. Point to the adapter. The protocol is not the entire application path.">
+  <div class="kicker">The path</div>
+  <div class="flow">
+    <div class="node"><strong>MCP SERVER</strong><span>source object</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><strong>JSON-RPC</strong><span>wire message</span></div>
+    <div class="arrow">→</div>
+    <div class="node" style="border:3px solid var(--orange)"><strong>ADAPTER</strong><span>translation happens here</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><strong>AGENT LOOP</strong><span>framework-native object</span></div>
+  </div>
+</section>
+
+<section class="slide center appendix" data-notes="APPENDIX. The main deck folds this into the method slide. Use it if someone challenges what 'reaches the agent' means: a rigorous result must identify whether it captures a tool return, message, event, exception, provider request, or model input.">
+  <div class="kicker">The capture boundary must be named</div>
+  <h2>A fidelity claim is only as precise<br/>as its capture boundary.</h2>
+  <div class="sub">“What reaches the agent” is meaningful only when the exact framework boundary is stated.</div>
+</section>
+
+<section class="slide" data-notes="Be transparent: the project captures deterministic framework objects at declared boundaries. It does not yet capture one equivalent end-to-end model input across all five frameworks.">
+  <div class="kicker">Method</div>
+  <h3>One test server. One protocol version. And I say exactly where I looked.</h3>
+  <ul>
+    <li>MCP 2025-11-25, because all five frameworks speak it</li>
+    <li>One server, handing every framework the same awkward tools and results</li>
+    <li>Each framework’s own conversion code, not my imitation of it</li>
+    <li>Every field carries its own marker, so I can find where it went</li>
+    <li>I read one object per framework. I did not follow it to the model</li>
+  </ul>
+  <div class="small" style="margin-top:2.5vh">“Where I looked” has a name here: the <span style="color:var(--bright)">capture boundary</span>, meaning the exact function I called and the exact object it handed back. Every published result is stamped with one.</div>
+</section>
+
+<section class="slide" data-notes="LIVE DEMO. Let the room choose. Run `uv run python scripts/demo_mcp_server.py --first result` or replace result with definition. The script connects to mcp-mirror serve over stdio and prints published evidence. If the terminal fails, jump back to the five-boundary-objects slide; those captures are the visual fallback.">
+  <div class="kicker">Use it while you build</div>
+  <h3>mcp-mirror is now a read-only MCP server.</h3>
+  <pre class="large"><span class="comment"># Connect from Cursor</span>
+uv run mcp-mirror serve
+
+<span class="comment"># Then ask</span>
+Inspect this <span class="str">delete_account</span> tool.
+Where does <span class="key">destructiveHint</span> land,
+and what happens to an <span class="key">isError</span> result?</pre>
+</section>
+
+<section class="slide" data-notes="These are what I saw at the versions I ran, not scores. The two metadata paths are still reachable by application code; they just are not in the part of the tool definition that gets sent to the model.">
+  <div class="kicker">A second translation · tool annotations</div>
+  <h3>The same hint lands in different framework layers.</h3>
+  <div class="small" style="margin-top:1.5vh">TEST: send the same Tool with <span class="mono">destructiveHint: true</span>, capture each adapted definition, then locate that exact boolean.</div>
+  <table>
+    <tr><th>Framework</th><th>Observed destination of <span class="mono">destructiveHint</span></th></tr>
+    <tr><td>CrewAI</td><td>Not attached to the adapted tool object</td></tr>
+    <tr><td>LangChain</td><td>Retained in <span class="mono">StructuredTool.metadata</span>; absent from converted provider schema</td></tr>
+    <tr><td>OpenAI Agents</td><td><span class="mono">FunctionTool</span> retains MCP title, not behavioral hints</td></tr>
+    <tr><td>Pydantic AI</td><td>Retained in <span class="mono">ToolDefinition.metadata</span>; outside parameter schema</td></tr>
+    <tr><td>Mastra</td><td><span class="mono">mcpMetadata</span> carries server identity, not annotations</td></tr>
+  </table>
+</section>
+
+<section class="slide center appendix" data-notes="APPENDIX. Do not imply annotations are an authorization mechanism. The factual point is that a consumer of the model-facing schema cannot use fields it never receives.">
+  <h2 class="claim">If your safety check only reads what gets sent to the model, <span class="accent">it never sees these hints.</span></h2>
+</section>
+
+<section class="slide appendix" data-notes="APPENDIX. Define both result channels before comparing frameworks. These are the exact unique values used by the fixture, so an adapter cannot accidentally reconstruct one from the other.">
+  <div class="kicker">What is structured content?</div>
+  <h3>One tool result can carry unstructured blocks and machine-readable JSON.</h3>
+  <div class="channels">
+    <div class="channel">
+      <div class="kind">content[] · unstructured blocks</div>
+      <div class="definition">Text, image, audio, or resources</div>
+      <div class="payload">type: "text"<br/>text: "SENTINEL_TEXT_BLOCK"</div>
+    </div>
+    <div class="channel">
+      <div class="kind">structuredContent · JSON value</div>
+      <div class="definition">Machine-readable result data</div>
+      <div class="payload">count: 2<br/>records: [{ id: "rec_1" }]<br/>note: "SENTINEL_STRUCTURED_CONTENT"</div>
+    </div>
+  </div>
+  <div class="sub">The markers differ deliberately, so preservation can be observed without guessing.</div>
+</section>
+
+<section class="slide appendix" data-notes="APPENDIX. Explain the test procedure, not only the verdict. Source observation records the original CallToolResult. Each renderer invokes search_records through its declared result API. Normalization records structured JSON separately from content blocks, then diff_result compares the two.">
+  <div class="kicker">How we test structured content</div>
+  <h3>Call once. Capture both channels. Search for the unique markers.</h3>
+  <div class="steps">
+    <div class="step"><strong>RETURN</strong><p>Fixture emits distinct text and JSON markers.</p></div>
+    <div class="step"><strong>INVOKE</strong><p>Adapter calls the same <span class="mono">search_records</span> tool.</p></div>
+    <div class="step"><strong>CAPTURE</strong><p>Record the declared framework-result object.</p></div>
+    <div class="step"><strong>DIFF</strong><p>Locate each marker and its resulting structure.</p></div>
+  </div>
+</section>
+
+<section class="slide" data-notes="Describe destinations, not winners. Current LangChain documentation explicitly stores structured content as an artifact separate from model-visible content. Other rows remain scoped to the measured or documented path.">
+  <div class="kicker">A third translation · structured content</div>
+  <h3>Typed results can become content, artifacts, or framework output.</h3>
+  <table>
+    <tr><th>Framework</th><th>Where the JSON goes</th><th>Evidence</th></tr>
+    <tr><td>CrewAI</td><td>Returned as human-readable text</td><td>Measured</td></tr>
+    <tr><td>LangChain</td><td><span class="mono">ToolMessage.artifact</span>, separate from model-visible content</td><td>Documented</td></tr>
+    <tr><td>OpenAI Agents</td><td>Model-visible JSON and custom-data context</td><td>Documented option</td></tr>
+    <tr><td>Pydantic AI</td><td>Depends on the surrounding content-part types</td><td>Measured</td></tr>
+    <tr><td>Mastra</td><td>Framework output value; content blocks omitted</td><td>Measured</td></tr>
+  </table>
+</section>
+
+<section class="slide appendix" data-notes="APPENDIX. Define the rich-content fixture. It uses one invocation so every adapter sees the exact same result. Each block carries a unique type or marker; content annotations are attached to the text block.">
+  <div class="kicker">How we test rich results</div>
+  <h3>One valid result contains every MCP content-block type.</h3>
+  <div class="media-grid">
+    <div class="media"><div class="glyph">T</div><div class="type">TEXT</div><div class="meta">audience + priority</div></div>
+    <div class="media"><div class="glyph">▧</div><div class="type">IMAGE</div><div class="meta">PNG + MIME type</div></div>
+    <div class="media"><div class="glyph">♫</div><div class="type">AUDIO</div><div class="meta">WAV + MIME type</div></div>
+    <div class="media"><div class="glyph">{ }</div><div class="type">RESOURCE</div><div class="meta">URI + embedded text</div></div>
+    <div class="media"><div class="glyph">↗</div><div class="type">LINK</div><div class="meta">URI + description</div></div>
+  </div>
+  <div class="sub">We compare block type, payload, URI, MIME type, and annotations after adaptation.</div>
+</section>
+
+<section class="slide appendix" data-notes="APPENDIX. This slide contains the detailed pinned observations used in the opening reveal.">
+  <div class="kicker">Pinned capture · rich content</div>
+  <h3>One mixed-content result produces five different boundary objects.</h3>
+  <table>
+    <tr><th>Framework</th><th>Text + image + audio + resource + resource link</th></tr>
+    <tr><td>CrewAI</td><td>Content structure omitted; text represented as a Python list string</td></tr>
+    <tr><td>LangChain</td><td>Call raises on unsupported audio conversion</td></tr>
+    <tr><td>OpenAI Agents</td><td>Text and image preserved; other blocks serialized into text</td></tr>
+    <tr><td>Pydantic AI</td><td>Text, image, and audio preserved; resource metadata omitted</td></tr>
+    <tr><td>Mastra</td><td>Content blocks omitted; structured content preserved</td></tr>
+  </table>
+</section>
+
+<section class="slide" data-notes="This is the fairness slide. Say every sentence.">
+  <div class="kicker">Interpretation</div>
+  <h3>This is a record of where things landed, not a scoreboard.</h3>
+  <ul>
+    <li>Each framework exposes a different agent abstraction.</li>
+    <li>Transformation is sometimes intentional and sometimes configurable.</li>
+    <li>A changed field is not automatically a bug.</li>
+    <li>The operational question is whether applications know what changed.</li>
+  </ul>
+</section>
+
+<section class="slide" data-notes="Preempt the obvious objection: isn't the ecosystem already fixing this? Name the three things people are thinking of. MCP standardizes application to server. A2A standardizes agent to agent. ACP, the Zed and JetBrains editor protocol, standardizes editor to coding agent. All three are wire protocols between processes, and the boundary measured in this talk is inside one process. Then read the A2A line aloud, because A2A itself declines to cover this and points at framework native primitives, which is the exact thing that turned out not to be portable. Forty seconds. Do not linger and do not editorialize about any of these projects.">
+  <div class="kicker">What about the other protocols</div>
+  <h3>The newer standards cover different boundaries. Not this one.</h3>
+  <div class="flow">
+    <div class="node"><strong>MCP</strong><span>application ↔ server</span></div>
+    <div class="node"><strong>A2A</strong><span>agent ↔ agent</span></div>
+    <div class="node"><strong>ACP</strong><span>editor ↔ coding agent</span></div>
+    <div class="node"><strong style="color:var(--orange)">adapter → runtime</strong><span>inside one process</span></div>
+  </div>
+  <div class="quote">“A2A does not specify how an agent talks to its own sub-agents or how it invokes tools.” Its guidance instead: <span class="accent">“use your framework’s native primitives.”</span></div>
+  <div class="credit">A2A Protocol specification, “What A2A is not” · a2a-protocol.org · verified 14 September 2026</div>
+</section>
+
+<section class="slide appendix" data-notes="APPENDIX. Be explicit about the study's limits. This prevents the audience from inferring model eval claims.">
+  <div class="kicker">What this study does not claim</div>
+  <ul>
+    <li>It does not measure whether a model understands the resulting text.</li>
+    <li>It does not measure overall framework quality.</li>
+    <li>It does not treat MCP annotations as sufficient authorization controls.</li>
+    <li>It does not generalize beyond the named package versions and capture boundaries.</li>
+  </ul>
+</section>
+
+<section class="slide appendix" data-notes="APPENDIX. Treat conformance as complementary. Avoid saying it is insufficient in general.">
+  <div class="kicker">Two complementary tests</div>
+  <div class="cols">
+    <div class="card">
+      <div class="label">Protocol conformance</div>
+      <p>Did the endpoint exchange valid MCP messages?</p>
+    </div>
+    <div class="card">
+      <div class="label">Boundary fidelity</div>
+      <p>What representation did the framework expose afterward?</p>
+    </div>
+  </div>
+  <div class="sub">A system can pass the first test and still transform fields before the agent boundary.</div>
+</section>
+
+<section class="slide" data-notes="These are conservative engineering recommendations supported by the observations.">
+  <div class="kicker">What developers can do now</div>
+  <h3>Five checks make adapter behavior explicit.</h3>
+  <ul>
+    <li>Test the framework object, not only the MCP server response.</li>
+    <li>Include failure meaning in text while also setting <span class="mono">isError</span>.</li>
+    <li>Verify safety policy inputs independently of advisory tool annotations.</li>
+    <li>Exercise mixed text, image, audio, and resource results in integration tests.</li>
+    <li>Pin the adapter and MCP SDK versions used by those tests.</li>
+  </ul>
+</section>
+
+<section class="slide appendix" data-notes="APPENDIX. The denominator is useful only as project transparency. Do not dwell on the score.">
+  <div class="kicker">Open evidence</div>
+  <h3>The captures, fixtures, versions, and unmeasured rows are published.</h3>
+  <ul>
+    <li>29 of 64 catalogued features measured on MCP 2025-11-25</li>
+    <li>36 of 66 catalogued features measured on MCP 2026-07-28</li>
+    <li>Unknowns remain visible instead of being inferred as support or failure</li>
+    <li>Every published verdict identifies its capture boundary</li>
+  </ul>
+</section>
+
+<section class="slide center" data-notes="End on the transferable question. No accusation and no framework callout.">
+  <div class="kicker">The question to add to every MCP integration test</div>
+  <h2 class="claim">Not only: “What did the server send?”<br/><br/><span class="accent">Also: “What reached the agent?”</span></h2>
+</section>
+
+</main>
+<div id="bar"></div>
+<div id="clock">⏱ 00:00</div>
+<div id="hud"></div>
+<div id="notes"></div>
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  const mode = params.get("mode") || "deck";
+  document.body.classList.add(mode);
+  const allSlides = [...document.querySelectorAll(".slide")];
+  let includeAppendix = false;
+  let slides = allSlides.filter((slide) => !slide.classList.contains("appendix"));
+  const hud = document.querySelector("#hud");
+  const bar = document.querySelector("#bar");
+  const notes = document.querySelector("#notes");
+  const clock = document.querySelector("#clock");
+  const target = 28 * 60;
+  let index = 0;
+  let elapsed = 0;
+  let running = false;
+  let timer;
+  const channel = "BroadcastChannel" in window ? new BroadcastChannel("mcp-mirror-talk") : null;
+
+  function show(next) {
+    index = Math.max(0, Math.min(slides.length - 1, next));
+    allSlides.forEach((slide) => slide.classList.remove("on"));
+    slides[index].classList.add("on");
+    hud.textContent = `${index + 1} / ${slides.length} · N notes · T timer · A appendix · F fullscreen`;
+    bar.style.width = `${((index + 1) / slides.length) * 100}%`;
+    notes.textContent = slides[index].dataset.notes || "(no notes)";
+    history.replaceState(null, "", `${location.pathname}${location.search}#${index + 1}`);
+  }
+
+  function paintClock() {
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    clock.textContent = `⏱ ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    clock.className = !running ? "" : elapsed > target ? "over" : elapsed > target - 180 ? "warn" : "run";
+  }
+
+  function toggleTimer() {
+    running = !running;
+    clearInterval(timer);
+    if (running) timer = setInterval(() => { elapsed += 1; paintClock(); }, 1000);
+    paintClock();
+  }
+
+  if (mode === "deck") document.addEventListener("keydown", (event) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (["ArrowRight", " ", "PageDown"].includes(event.key)) {
+      event.preventDefault();
+      show(index + 1);
+    } else if (["ArrowLeft", "PageUp"].includes(event.key)) {
+      event.preventDefault();
+      show(index - 1);
+    } else if (event.key.toLowerCase() === "n") {
+      notes.classList.toggle("on");
+    } else if (event.key.toLowerCase() === "t") {
+      toggleTimer();
+    } else if (event.key.toLowerCase() === "r") {
+      elapsed = 0;
+      if (running) toggleTimer();
+      paintClock();
+    } else if (event.key.toLowerCase() === "a") {
+      const current = slides[index];
+      includeAppendix = !includeAppendix;
+      slides = includeAppendix ? allSlides : allSlides.filter((slide) => !slide.classList.contains("appendix"));
+      const currentIndex = slides.indexOf(current);
+      show(currentIndex >= 0 ? currentIndex : 0);
+    } else if (event.key.toLowerCase() === "f") {
+      document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+    } else if (event.key.toLowerCase() === "p") {
+      location.href = "present.html";
+    } else if (event.key === "Home") {
+      show(0);
+    } else if (event.key === "End") {
+      show(slides.length - 1);
+    }
+  });
+
+  if (mode === "deck") document.addEventListener("click", (event) => {
+    if (event.target.closest("#notes")) return;
+    show(event.clientX < innerWidth * 0.25 ? index - 1 : index + 1);
+  });
+
+  if (mode === "audience" && channel) {
+    channel.addEventListener("message", (event) => {
+      if (event.data?.type === "slide") show(event.data.index);
+    });
+    try {
+      const saved = JSON.parse(localStorage.getItem("mcp-mirror-talk-state") || "null");
+      if (Number.isInteger(saved?.index)) index = saved.index;
+    } catch {}
+    channel.postMessage({ type: "audience-ready" });
+  }
+
+  if (mode === "preview") {
+    window.addEventListener("message", (event) => {
+      if (event.data?.type === "talk-slide") show(event.data.index);
+    });
+    window.parent.postMessage({ type: "talk-preview-ready" }, "*");
+  }
+
+  const requested = Number.parseInt(location.hash.slice(1), 10);
+  show(mode === "audience" ? index : Number.isNaN(requested) ? 0 : requested - 1);
+  paintClock();
+})();
+</script>
+</body>
+</html>

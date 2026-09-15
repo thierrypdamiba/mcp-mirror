@@ -1,0 +1,64 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "null-acceptance",
+  "title": "Null Acceptance",
+  "description": "Distinguishes an optional parameter that may be omitted from a parameter that explicitly accepts null.",
+  "question": "Does adaptation preserve whether each parameter accepts null?",
+  "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+  "status": "stable",
+  "categories": [
+    "Parameter contract"
+  ],
+  "keywords": "null,nullable,optional,anyOf,type union,parameter",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "x #3"
+    }
+  },
+  "notes": "Exposed by both adapters that reach 2026-07-28; 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "y",
+    "headline": "Exposed by both adapters that reach 2026-07-28; 3 cannot reach the revision.",
+    "detail": "OpenAI Agents SDK 0.22.0 and Pydantic AI 2.40.0 expose it at the declared capture boundary. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP tool schemas distinguishing omission from null.",
+  "links": [
+    {
+      "url": "https://json-schema.org/understanding-json-schema/reference/null",
+      "title": "JSON Schema Docs"
+    }
+  ],
+  "known_issues": [
+    "Three framework adapters could not be measured against 2026-07-28, so missing evidence is not a support result."
+  ],
+  "why": "Optional and nullable are different contracts. Conflating them lets a downstream caller express values the source never accepted.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2 --spec-version 2026-07-28",
+  "measured": {
+    "run_date": "2026-09-06",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "JSON Schema 2020-12",
+  "docs_url": "https://json-schema.org/understanding-json-schema/reference/null",
+  "docs_label": "JSON Schema Docs"
+}

@@ -1,0 +1,52 @@
+name: Refresh MCP news
+
+on:
+  schedule:
+    - cron: "17 14 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Refresh approved MCP sources
+        run: npm run news:refresh
+
+      - name: Validate generated news
+        run: |
+          npm run news:test
+          npm run news:validate
+
+      - name: Open draft update pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/mcp-news
+          delete-branch: true
+          draft: always
+          commit-message: "chore: refresh MCP news"
+          title: "chore: refresh MCP news"
+          body: |
+            Automated refresh from the approved source list.
+
+            - Source titles and descriptions are preserved without LLM rewriting.
+            - Links and freshness metadata passed validation.
+            - This pull request intentionally remains a draft for human review.
+          labels: automated,news

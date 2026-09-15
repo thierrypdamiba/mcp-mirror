@@ -4,7 +4,6 @@ import {useEffect, useMemo, useState} from "react";
 import {SearchHero} from "./components/SearchHero";
 import {SiteHeader} from "./components/SiteHeader";
 import type {GridMode} from "./components/CapabilityGrid";
-import {FeatureStrip} from "./components/FeatureStrip";
 import {ArrowUpRightIcon} from "./components/Icons";
 import {
   matchesCapability,
@@ -13,12 +12,9 @@ import {
 } from "./lib/data";
 import {CapabilityPage} from "./pages/CapabilityPage";
 import {IndexPage, type ResultsMode} from "./pages/IndexPage";
-import {
-  ChangesPage,
-  ComparePage,
-  MethodPage,
-} from "./pages/ReferencePages";
-import type {MirrorDatabase, Route} from "./types";
+import {ChangesPage, MethodPage} from "./pages/ReferencePages";
+import {StatsPage} from "./pages/StatsPage";
+import type {MirrorDatabase, Route, SpecIndex} from "./types";
 
 const STAR_STORAGE_KEY = "mcpMirrorStars";
 
@@ -50,7 +46,7 @@ function SiteFooter({database}: {database: MirrorDatabase}) {
     <footer className="site-footer">
       <div className="site-shell footer-inner">
         <section>
-          <h2>MCP Mirror</h2>
+          <h2>Can AI use</h2>
           <p>Support tables for MCP tool-definition fidelity across agent frameworks.</p>
           <p>
             Created and maintained by{" "}
@@ -106,8 +102,8 @@ function SiteFooter({database}: {database: MirrorDatabase}) {
           <h2>Site links</h2>
           <nav aria-label="Footer navigation">
             <Link href="#/">Home</Link>
+            <Link href="#/stats">Capability statistics</Link>
             <Link href="#/changes">Measurement changes</Link>
-            <Link href="#/compare">Compare frameworks</Link>
             <Link href="#/method">Method and defaults</Link>
           </nav>
         </section>
@@ -118,6 +114,7 @@ function SiteFooter({database}: {database: MirrorDatabase}) {
             <li><i className="support-y" /> Present at capture boundary</li>
             <li><i className="support-n" /> Dropped during adaptation</li>
             <li><i className="support-a" /> Changed or retained elsewhere</li>
+            <li><i className="support-x" /> Adapter cannot negotiate this revision</li>
             <li><i className="support-u" /> Not yet measured</li>
           </ul>
         </section>
@@ -127,24 +124,79 @@ function SiteFooter({database}: {database: MirrorDatabase}) {
 }
 
 export default function App() {
+  const inlineSpecIndex = window.__MCP_MIRROR_SPEC_INDEX__ ?? null;
+  const requestedSpec = new URLSearchParams(window.location.search).get("spec");
+  const initialSpec =
+    (requestedSpec &&
+    inlineSpecIndex?.specs.some((entry) => entry.id === requestedSpec)
+      ? requestedSpec
+      : inlineSpecIndex?.default_spec) ??
+    window.__MCP_MIRROR_DATA__?.mcp_spec ??
+    requestedSpec ??
+    "";
+  const [specIndex, setSpecIndex] = useState<SpecIndex | null>(inlineSpecIndex);
+  const [selectedSpec, setSelectedSpec] = useState(initialSpec);
   const [database, setDatabase] = useState<MirrorDatabase | null>(
-    () => window.__MCP_MIRROR_DATA__ ?? null,
+    () =>
+      window.__MCP_MIRROR_DATASETS__?.[initialSpec] ??
+      window.__MCP_MIRROR_DATA__ ??
+      null,
   );
   const [loadError, setLoadError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [resultsMode, setResultsMode] = useState<ResultsMode>("tables");
   const [gridMode, setGridMode] = useState<GridMode>("support");
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [stars, setStars] = useState<string[]>(readStars);
   const route = useRoute();
 
   useEffect(() => {
-    if (window.__MCP_MIRROR_DATA__) {
+    if (specIndex) {
       return;
     }
     const controller = new AbortController();
-    fetch("./data/data-1.0.json", {signal: controller.signal})
+    fetch("./data/specs.json", {signal: controller.signal})
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Protocol index returned HTTP ${response.status}`);
+        }
+        return response.json() as Promise<SpecIndex>;
+      })
+      .then((index) => {
+        const requested = new URLSearchParams(window.location.search).get("spec");
+        const nextSpec =
+          requested && index.specs.some((entry) => entry.id === requested)
+            ? requested
+            : index.default_spec;
+        setSpecIndex(index);
+        setSelectedSpec(nextSpec);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        setLoadError(error instanceof Error ? error.message : "Unknown error");
+      });
+    return () => controller.abort();
+  }, [specIndex]);
+
+  useEffect(() => {
+    if (!specIndex || !selectedSpec || database?.mcp_spec === selectedSpec) {
+      return;
+    }
+    const entry = specIndex.specs.find((candidate) => candidate.id === selectedSpec);
+    if (!entry) {
+      setSelectedSpec(specIndex.default_spec);
+      return;
+    }
+    const inline = window.__MCP_MIRROR_DATASETS__?.[entry.id];
+    if (inline) {
+      setDatabase(inline);
+      return;
+    }
+
+    const controller = new AbortController();
+    setLoadError(null);
+    fetch(`./data/${entry.file}`, {signal: controller.signal})
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Support data returned HTTP ${response.status}`);
@@ -159,7 +211,7 @@ export default function App() {
         setLoadError(error instanceof Error ? error.message : "Unknown error");
       });
     return () => controller.abort();
-  }, []);
+  }, [database?.mcp_spec, selectedSpec, specIndex]);
 
   useEffect(() => {
     if (!database) {
@@ -170,8 +222,14 @@ export default function App() {
         ? database.data[route.capabilityId]
         : undefined;
     document.title = capability
-      ? `${capability.title.replaceAll("`", "")} | MCP Mirror`
-      : `${route.name === "index" ? "MCP capability support" : route.name} | MCP Mirror`;
+      ? `${capability.title.replaceAll("`", "")} | Can AI use`
+      : `${
+          route.name === "index"
+            ? "MCP capability support"
+            : route.name === "stats"
+              ? "Capability statistics"
+              : route.name
+        } | Can AI use`;
   }, [database, route]);
 
   const allCapabilities = useMemo(
@@ -180,15 +238,10 @@ export default function App() {
   );
   const filteredCapabilities = useMemo(
     () =>
-      allCapabilities.filter(
-        (capability) =>
-          matchesCapability(capability, query) &&
-          (!selectedCategories.length ||
-            capability.categories?.some((category) =>
-              selectedCategories.includes(category),
-            )),
+      allCapabilities.filter((capability) =>
+        matchesCapability(capability, query),
       ),
-    [allCapabilities, query, selectedCategories],
+    [allCapabilities, query],
   );
 
   if (loadError) {
@@ -243,13 +296,31 @@ export default function App() {
 
   const resetHome = () => {
     setQuery("");
-    setSelectedCategories([]);
-    setIsFilterOpen(false);
     if (window.location.hash !== "#/") {
       window.location.hash = "#/";
     } else {
       window.scrollTo({top: 0, behavior: "instant"});
     }
+  };
+
+  const changeSpec = (value: string) => {
+    if (!specIndex?.specs.some((entry) => entry.id === value)) {
+      return;
+    }
+    const url = new URL(window.location.href);
+    if (value === specIndex.default_spec) {
+      url.searchParams.delete("spec");
+    } else {
+      url.searchParams.set("spec", value);
+    }
+    window.history.replaceState(
+      null,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+    setSelectedSpec(value);
+    setDatabase(window.__MCP_MIRROR_DATASETS__?.[value] ?? null);
+    setLoadError(null);
   };
 
   return (
@@ -263,29 +334,16 @@ export default function App() {
         resultCount={filteredCapabilities.length}
         onChange={onSearchChange}
         onHomeReset={resetHome}
+        specIndex={specIndex}
+        selectedSpec={selectedSpec}
+        onSpecChange={changeSpec}
+        gridMode={gridMode}
+        onGridModeChange={setGridMode}
       />
-      {route.name === "index" ? (
-        <FeatureStrip
-          database={database}
-          route={route}
-          query={query}
-          resultCount={filteredCapabilities.length}
-          isFilterOpen={isFilterOpen}
-          selectedCategories={selectedCategories}
-          onFilterOpenChange={setIsFilterOpen}
-          onCategoryChange={(category, selected) => {
-            setSelectedCategories((current) =>
-              selected
-                ? [...new Set([...current, category])]
-                : current.filter((value) => value !== category),
-            );
-          }}
-          onClearFilters={() => setSelectedCategories([])}
-        />
-      ) : null}
 
       {route.name === "index" ? (
         <IndexPage
+          key={database.mcp_spec}
           capabilities={filteredCapabilities}
           database={database}
           query={query}
@@ -300,6 +358,7 @@ export default function App() {
 
       {route.name === "capability" && capability ? (
         <CapabilityPage
+          key={database.mcp_spec}
           capability={capability}
           database={database}
           starred={stars.includes(capability.id)}
@@ -327,18 +386,20 @@ export default function App() {
 
       {route.name === "changes" ? (
         <ChangesPage
+          key={database.mcp_spec}
           capabilities={allCapabilities}
           database={database}
         />
       ) : null}
-      {route.name === "compare" ? (
-        <ComparePage
+      {route.name === "stats" ? (
+        <StatsPage
+          key={database.mcp_spec}
           capabilities={allCapabilities}
           database={database}
         />
       ) : null}
       {route.name === "method" ? (
-        <MethodPage database={database} />
+        <MethodPage key={database.mcp_spec} database={database} />
       ) : null}
 
       <SiteFooter database={database} />

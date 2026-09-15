@@ -1,0 +1,65 @@
+# Tool-result boundary, MCP 2025-11-25, all five frameworks
+# captured 2026-09-13 23:40 PDT
+
+capturing source results ...
+running renderers in their manifest environments ...
+  crewai @ 1.15.1
+  langchain @ 0.3.2
+  openai_agents @ 0.22.0
+  pydantic_ai @ 2.40.0
+
+=== search_records ===
+  source        kinds=['text', 'image', 'audio', 'resource', 'resource_link'] structured=True isError=False
+  crewai        kinds=[] structured=False isError=None
+         (text only) -> "['SENTINEL_TEXT_BLOCK']"
+      [lossy] content blocks dropped from the result: audio, image, resource, resource_link
+      [lossy] structuredContent dropped; only the text mirror reaches the agent
+  langchain     kinds=[] structured=False isError=True
+         (text only) -> 'NotImplementedError: AudioContent conversion to LangChain content blocks is not yet supported. Received audio with mime type: audio/wav'
+      [lossy] content blocks dropped from the result: audio, image, resource, resource_link
+      [lossy] structuredContent dropped; only the text mirror reaches the agent
+  openai_agents kinds=['text', 'image', 'text', 'text', 'text'] structured=False isError=None
+                text -> {"type": "text", "text": "SENTINEL_TEXT_BLOCK"}
+               image -> {"type": "image"}
+               audio -> {"type": "text", "text": "{\"type\":\"audio\",\"data\":\"UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=\",\"mime_type\":\"audio/wav\",\"
+            resource -> {"type": "text", "text": "{\"type\":\"resource\",\"resource\":{\"uri\":\"file:///fixtures/embedded.txt\",\"mime_type\":\"text/plain\",\"meta\":null,\"
+       resource_link -> {"type": "text", "text": "{\"name\":\"linked.txt\",\"title\":null,\"uri\":\"file:///fixtures/linked.txt\",\"description\":\"SENTINEL_RESOURCE_LINK\",\
+      [lossy] content blocks dropped from the result: audio, resource, resource_link
+      [lossy] structuredContent dropped; only the text mirror reaches the agent
+      [lossy] annotations dropped from the text block
+  pydantic_ai   kinds=['text', 'image', 'audio', 'text', 'text'] structured=False isError=None
+                text -> {"type": "text", "text": "SENTINEL_TEXT_BLOCK"}
+               image -> {"type": "image", "mimeType": "image/png"}
+               audio -> {"type": "audio", "mimeType": "audio/wav"}
+            resource -> {"type": "text", "text": "SENTINEL_EMBEDDED_RESOURCE"}
+       resource_link -> {"type": "text", "text": "file:///fixtures/linked.txt"}
+      [lossy] content blocks dropped from the result: resource, resource_link
+      [lossy] structuredContent dropped; only the text mirror reaches the agent
+      [lossy] annotations dropped from the text block
+
+=== delete_account ===
+  source        kinds=['text'] structured=False isError=True
+  crewai        kinds=[] structured=False isError=None
+         (text only) -> 'SENTINEL_TOOL_ERROR: confirm was not set'
+      [lossy] the failure flag did not survive; the agent cannot tell this call failed
+  langchain     kinds=['text'] structured=False isError=None
+                text -> {"type": "text", "text": "SENTINEL_TOOL_ERROR: confirm was not set", "id": "lc_465b1d63-41be-4067-a757-a9284d6ace80"}
+      [lossy] the failure flag did not survive; the agent cannot tell this call failed
+  openai_agents kinds=['text'] structured=False isError=None
+                text -> {"type": "text", "text": "SENTINEL_TOOL_ERROR: confirm was not set"}
+      [lossy] the failure flag did not survive; the agent cannot tell this call failed
+  pydantic_ai   kinds=[] structured=False isError=True
+         (text only) -> 'ModelRetry: SENTINEL_TOOL_ERROR: confirm was not set'
+
+--- mastra (runs locally, not via managed runner) ---
+mastra @ 1.17.3
+
+=== search_records ===
+  source  kinds=['text', 'image', 'audio', 'resource', 'resource_link'] structured=True isError=False
+  mastra  kinds=[] structured=True isError=None
+      [lossy] content blocks dropped from the result: audio, image, resource, resource_link, text
+
+=== delete_account ===
+  source  kinds=['text'] structured=False isError=True
+  mastra  kinds=[] structured=False isError=True
+         (text only) -> 'SENTINEL_TOOL_ERROR: confirm was not set'

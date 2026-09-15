@@ -64,9 +64,13 @@ listed with status `u` rather than left out, so the gaps are visible.
 These are enforced in CI by `data/validator/validate.py`:
 
 - Statuses are `y` (present unchanged at the declared boundary), `a`
-  (transformed, partly preserved, or retained elsewhere), `n` (dropped), or
+  (transformed, partly preserved, or retained elsewhere), `n` (dropped), `x`
+  (the adapter cannot negotiate this revision, so it reaches nothing in it), or
   `u` (not yet measured).
-- **Every `a` and `n` cell must cite a note that names the exact mechanism.** A
+- `x` is a result, not a gap. Use it when the adapter's SDK pin or negotiated
+  version rules the revision out, and cite the evidence recorded in
+  `attempts.json`. Never leave such a cell `u`, which claims we did not look.
+- **Every `a`, `n` and `x` cell must cite a note that names the exact mechanism.** A
   status has to be checkable, not trusted, "dropped" alone is an opinion,
   "the adapted tool object exposes no annotations field" is a fact someone can verify.
 - Framework ids must exist in `data/frameworks.json`.

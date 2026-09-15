@@ -57,44 +57,100 @@ EXPECTED_BOUNDARIES = {
 
 PUBLISHED_CODE_OVERRIDES = {
     "crewai": {
+        "tool-icons": "n",
+        "additional-properties": "a",
         "description-fidelity": "a",
         "format": "a",
+        "null-acceptance": "a",
         "one-of-any-of": "a",
+        "property-descriptions": "a",
         "destructive-hint": "n",
         "idempotent-hint": "n",
         "open-world-hint": "n",
         "read-only-hint": "n",
         "title-annotation": "n",
+        # Tool results: everything but text is dropped, and the text is stringified.
+        "tool-text-content": "a",
+        "tool-image-content": "n",
+        "tool-audio-content": "n",
+        "embedded-resource-content": "n",
+        "resource-link-content": "n",
+        "content-annotations": "n",
+        "structured-content": "n",
+        "tool-execution-errors": "n",
     },
     "langchain": {
+        "tool-icons": "n",
         "destructive-hint": "a",
         "idempotent-hint": "a",
         "open-world-hint": "a",
         "read-only-hint": "a",
         "title-annotation": "a",
+        # Audio conversion raises and aborts the call, which both answers the audio
+        # question and prevents the sibling blocks from being observed at all.
+        "tool-audio-content": "n",
+        "tool-image-content": "u",
+        "embedded-resource-content": "u",
+        "resource-link-content": "u",
+        "content-annotations": "u",
+        "structured-content": "n",
+        "tool-execution-errors": "n",
     },
     "openai-agents": {
+        "tool-icons": "n",
         "destructive-hint": "n",
         "idempotent-hint": "n",
         "open-world-hint": "n",
         "read-only-hint": "n",
         "title-annotation": "a",
+        # Text and images survive; everything else is serialized into text.
+        "tool-audio-content": "a",
+        "embedded-resource-content": "a",
+        "resource-link-content": "a",
+        "content-annotations": "n",
+        "structured-content": "n",
+        "tool-execution-errors": "n",
     },
     "pydantic-ai": {
+        "tool-icons": "n",
         "destructive-hint": "a",
         "idempotent-hint": "a",
         "open-world-hint": "a",
         "read-only-hint": "a",
         "title-annotation": "a",
+        # Native media survives; resources are reduced to bare strings.
+        "embedded-resource-content": "n",
+        "resource-link-content": "a",
+        "content-annotations": "n",
+        "structured-content": "n",
+        "tool-execution-errors": "a",
     },
     "mastra": {
+        "tool-icons": "n",
         "destructive-hint": "n",
         "idempotent-hint": "n",
         "open-world-hint": "n",
         "read-only-hint": "n",
         "title-annotation": "n",
         "tool-name": "a",
+        # The only adapter that keeps structuredContent, and the only one that keeps it
+        # by discarding every content block in the same result.
+        "structured-content": "y",
+        "tool-text-content": "n",
+        "tool-image-content": "n",
+        "tool-audio-content": "n",
+        "embedded-resource-content": "n",
+        "resource-link-content": "n",
+        "content-annotations": "n",
+        "tool-execution-errors": "a",
     },
+}
+
+DEEP_SCHEMA_CAPABILITIES = {
+    "additional-properties",
+    "default-value",
+    "null-acceptance",
+    "property-descriptions",
 }
 
 
@@ -176,21 +232,51 @@ def test_isolated_worker_returns_renderer_evidence():
     assert reps
 
 
-@pytest.mark.skipif(not RENDERERS, reason="no framework renderers installed")
-def test_published_framework_versions_and_boundaries_match_installed_renderers():
+PUBLISHED_IDS = {
+    "langchain": "langchain",
+    "pydantic_ai": "pydantic-ai",
+    "crewai": "crewai",
+    "openai_agents": "openai-agents",
+    "mastra": "mastra",
+}
+
+
+def _manifest_pin(renderer_id: str, package: str) -> str:
+    """The version of ``package`` that the managed runner for ``renderer_id`` installs.
+
+    Published cells come from managed runs, so the manifest is what the site is making
+    a claim about. A developer's local environment drifts freely and says nothing about
+    whether the published number is right.
+    """
+
+    manifest = json.loads(
+        (Path(__file__).resolve().parent.parent / "src" / "mcp_mirror" / "runner-manifests.json").read_text()
+    )["runners"][renderer_id]
+    for requirement in manifest["packages"]:
+        name, separator, version = requirement.rpartition("@" if package.startswith("@") else "==")
+        if name.partition("[")[0] == package and separator:
+            return version
+    raise AssertionError(f"{renderer_id}: manifest installs no pin for {package}")
+
+
+def test_published_framework_versions_match_the_managed_runner_pins():
     published = json.loads(FRAMEWORK_DATA.read_text())["agents"]
-    published_ids = {
-        "langchain": "langchain",
-        "pydantic_ai": "pydantic-ai",
-        "crewai": "crewai",
-        "openai_agents": "openai-agents",
-        "mastra": "mastra",
-    }
+
+    for renderer_id, published_id in PUBLISHED_IDS.items():
+        record = published[published_id]
+        assert record["current_version"] == _manifest_pin(renderer_id, record["package"]), (
+            f"{published_id}: the site publishes {record['current_version']} but the "
+            f"managed runner measures {_manifest_pin(renderer_id, record['package'])}"
+        )
+
+
+@pytest.mark.skipif(not RENDERERS, reason="no framework renderers installed")
+def test_published_boundaries_match_installed_renderers():
+    published = json.loads(FRAMEWORK_DATA.read_text())["agents"]
 
     for renderer_id, renderer in RENDERERS.items():
         renderer.render(_handle())
-        record = published[published_ids[renderer_id]]
-        assert record["current_version"] == renderer.versions()["framework"]
+        record = published[PUBLISHED_IDS[renderer_id]]
         assert record["capture_boundary"] == renderer.evidence().model_dump(
             mode="json",
             exclude={"limitation"},
@@ -215,6 +301,21 @@ def test_published_current_cells_match_fixture_goldens():
                 f"{capability_id} / {framework_id} {current_version}: "
                 f"expected {expected!r}, found {raw_code!r}"
             )
+
+
+def test_published_census_covers_every_measured_deep_schema_semantic():
+    capability_dir = FRAMEWORK_DATA.parent / "capabilities"
+    published = {
+        path.stem: json.loads(path.read_text())
+        for path in capability_dir.glob("*.json")
+    }
+
+    assert DEEP_SCHEMA_CAPABILITIES <= set(published)
+    for capability_id in DEEP_SCHEMA_CAPABILITIES:
+        capability = published[capability_id]
+        assert capability["measured"]["fixture"] == "fixtures/tricky_server.py"
+        assert capability["question"]
+        assert capability["docs_url"].startswith("https://json-schema.org/")
 
 
 @pytest.mark.skipif(not RENDERERS, reason="no framework renderers installed")

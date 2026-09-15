@@ -1,0 +1,66 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "required",
+  "title": "`required`",
+  "description": "Which parameters must be supplied for the call to be valid.",
+  "question": "Is the required parameter set present at each capture boundary?",
+  "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+  "status": "stable",
+  "categories": [
+    "Parameter contract"
+  ],
+  "keywords": "required,required properties,parameters,contract",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "x #3"
+    }
+  },
+  "notes": "Exposed by both adapters that reach 2026-07-28; 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "y",
+    "headline": "Exposed by both adapters that reach 2026-07-28; 3 cannot reach the revision.",
+    "detail": "OpenAI Agents SDK 0.22.0 and Pydantic AI 2.40.0 expose it at the declared capture boundary. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://json-schema.org/understanding-json-schema/reference/object#required",
+      "title": "JSON Schema Docs"
+    },
+    {
+      "url": "https://platform.openai.com/docs/guides/function-calling",
+      "title": "OpenAI function calling, tool schema"
+    }
+  ],
+  "known_issues": [],
+  "why": "If the required list shrank, a downstream model could omit parameters your server depends on.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2 --spec-version 2026-07-28",
+  "measured": {
+    "run_date": "2026-09-06",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "JSON Schema 2020-12",
+  "docs_url": "https://json-schema.org/understanding-json-schema/reference/object#required",
+  "docs_label": "JSON Schema Docs"
+}

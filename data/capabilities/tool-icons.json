@@ -1,0 +1,64 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "tool-icons",
+  "title": "`icons`",
+  "description": "An optional array of display icons on a tool definition, each with a source URL, MIME type and size list.",
+  "question": "Does the tool's icon set reach the agent's tool definition?",
+  "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+  "status": "stable",
+  "categories": [
+    "Tool definition"
+  ],
+  "keywords": "icons,icon,src,mimeType,sizes,tool display,branding",
+  "stats": {
+    "crewai": {
+      "1.15.1": "n #1"
+    },
+    "langchain": {
+      "0.3.2": "n #2"
+    },
+    "openai-agents": {
+      "0.22.0": "n #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "n #4"
+    },
+    "mastra": {
+      "1.17.3": "n #5"
+    }
+  },
+  "notes": "Unanimous: a two-entry icon set declared on the fixture's `search_records` tool reaches none of the five capture boundaries, and no framework retains it in metadata either. Two frameworks do model `icons`, but only on resources, never on a tool.",
+  "notes_by_num": {
+    "1": "CrewAI: `crewai_tools` contains no reference to `icons` anywhere in the package, so the field has nowhere to survive adaptation.",
+    "2": "LangChain: `langchain_mcp_adapters` contains no reference to `icons`. `StructuredTool.metadata` carries annotations but no icon set.",
+    "3": "OpenAI Agents SDK: the `agents` package contains no reference to `icons`. `FunctionTool` keeps `_mcp_title` only.",
+    "4": "Pydantic AI: `pydantic_ai.mcp` declares `icons: list[Icon] | None` on its resource type only. `ToolDefinition` has no icon field, so tool icons are dropped.",
+    "5": "Mastra: `@mastra/mcp` types `icons` under resource and configuration shapes. No tool type carries it, and `mcpMetadata` holds only the server name and version."
+  },
+  "verdict": {
+    "code": "n",
+    "headline": "Destroyed by all five frameworks.",
+    "detail": "No adapter exposes an icon set to the agent, and none retains one out of band. Pydantic AI and Mastra model icons for resources but not for tools, so the omission is specific to the tool definition rather than a gap in their MCP typing."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers declaring tool icons. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "Icons are the one part of a tool definition aimed at a human rather than a model. A framework that drops them removes the server's only way to identify its tools visually in any UI built on top of the adapter.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+  "measured": {
+    "run_date": "2026-09-11",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2025-11-25",
+  "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool",
+  "docs_label": "MCP Docs"
+}

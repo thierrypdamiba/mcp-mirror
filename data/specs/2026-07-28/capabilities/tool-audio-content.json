@@ -1,0 +1,63 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "tool-audio-content",
+  "title": "Audio content",
+  "description": "The `audio` content block, carrying base64-encoded audio data and its MIME type.",
+  "question": "Does an audio result survive adaptation?",
+  "spec": "https://modelcontextprotocol.io/specification/2026-07-28",
+  "status": "stable",
+  "categories": [
+    "Tool results"
+  ],
+  "keywords": "audio content,AudioContent,base64,mimeType,multimodal",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "a #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "x #4"
+    }
+  },
+  "notes": "Pydantic AI keeps audio as audio; the OpenAI Agents SDK re-serializes it into text. 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "OpenAI Agents SDK 0.22.0: the audio block is re-serialized as JSON inside a text output item. The base64 payload and `audio/wav` MIME type are all still present, but the agent receives them as characters rather than as audio content.",
+    "4": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "Kept by Pydantic AI, flattened into JSON text by the OpenAI Agents SDK.",
+    "detail": "Pydantic AI 2.40.0 returns a `BinaryContent` carrying the `audio/wav` media type. OpenAI Agents SDK 0.22.0 preserves the bytes but not the kind, so anything downstream must recognise a JSON blob inside a text item to find the audio. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#audio-content",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "Audio is the least-implemented content type in the union, which makes it the sharpest test of whether a framework handles the content list generically or only the cases it happened to code for.",
+  "reproduce": "python scripts/measure_results.py",
+  "measured": {
+    "run_date": "2026-09-11",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2026-07-28",
+  "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#audio-content",
+  "docs_label": "MCP Docs"
+}

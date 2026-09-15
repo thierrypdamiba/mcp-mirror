@@ -1,0 +1,62 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "resource-templates",
+  "title": "`resources/templates/list`",
+  "description": "Lists parameterised resources as RFC 6570 URI templates whose arguments can be completed through the completion API.",
+  "question": "Does the framework expose resource templates as templates, or not at all?",
+  "spec": "https://modelcontextprotocol.io/specification/2026-07-28",
+  "status": "stable",
+  "categories": [
+    "Resources"
+  ],
+  "keywords": "resource templates,uriTemplate,RFC 6570,parameterised resources",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "x #3"
+    }
+  },
+  "notes": "Both adapters that reach 2026-07-28 expose it; 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "y",
+    "headline": "Exposed as templates by both adapters that reach 2026-07-28.",
+    "detail": "OpenAI Agents SDK 0.22.0 returns `ListResourceTemplatesResult` and Pydantic AI 2.40.0 returns `ResourceTemplate` objects retaining the `uriTemplate`. Neither collapses a template into a concrete resource. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/resources#resource-templates",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "Templates are how a server exposes an unbounded resource space without enumerating it. A framework that only handles the concrete list sees an empty server whenever the interesting content is parameterised.",
+  "reproduce": "python scripts/probe_surface.py",
+  "measured": {
+    "run_date": "2026-09-11",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2026-07-28",
+  "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/resources#resource-templates",
+  "docs_label": "MCP Docs"
+}

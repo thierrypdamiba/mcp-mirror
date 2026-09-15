@@ -12,16 +12,16 @@
   "keywords": "readOnlyHint,read only hint,annotations,safety,authorization",
   "stats": {
     "crewai": {
-      "1.14.7": "n #1"
+      "1.15.1": "n #1"
     },
     "langchain": {
-      "0.3.0": "a #2"
+      "0.3.2": "a #2"
     },
     "openai-agents": {
-      "0.20.0": "n #3"
+      "0.22.0": "n #3"
     },
     "pydantic-ai": {
-      "1.107.0": "a #4"
+      "2.40.0": "a #4"
     },
     "mastra": {
       "1.17.3": "n #5"

@@ -14,8 +14,8 @@ from typing import Any
 
 import anyio
 
-from ..models import RendererEvidence, ToolRep
-from ..normalize import normalize_function_tool
+from ..models import RendererEvidence, ResultRep, ToolRep
+from ..normalize import normalize_framework_result, normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
 from ._common import dist_version
@@ -42,18 +42,21 @@ class PydanticAIRenderer:
         return {"framework": version, "adapter": version}
 
     def evidence(self) -> RendererEvidence:
+        negotiated_version = getattr(
+            self,
+            "_negotiated_mcp_spec_version",
+            None,
+        )
         return RendererEvidence(
             capture_api="pydantic_ai.mcp.MCPToolset.get_tools",
             capture_object="pydantic_ai.tools.ToolDefinition",
             capture_stage="framework_tool_definition",
             provider_request_captured=False,
-            negotiated_mcp_spec_version=getattr(
-                self,
-                "_negotiated_mcp_spec_version",
-                None,
-            ),
+            negotiated_mcp_spec_version=negotiated_version,
             protocol_version_evidence=(
-                "protocolVersion exposed by MCPToolset.client.initialize_result"
+                "protocol version exposed by MCPToolset.client"
+                if negotiated_version and negotiated_version >= "2026-07-28"
+                else "protocolVersion exposed by MCPToolset.client.initialize_result"
             ),
             limitation=(
                 "No Pydantic AI model adapter or serialized provider request was captured."
@@ -72,9 +75,93 @@ class PydanticAIRenderer:
         toolset = self._build_server(server)
         async with toolset:
             tools = await self._list_tools(toolset)
-            initialize_result = toolset.client.initialize_result
-            self._negotiated_mcp_spec_version = initialize_result.protocolVersion
+            client = toolset.client
+            initialize_result = getattr(client, "initialize_result", None)
+            self._negotiated_mcp_spec_version = (
+                getattr(initialize_result, "protocolVersion", None)
+                or getattr(client, "protocol_version", None)
+            )
+            if not self._negotiated_mcp_spec_version:
+                raise RenderError(
+                    "pydantic_ai renderer could not establish the negotiated "
+                    "MCP protocol version"
+                )
         return [self._to_rep(t) for t in tools]
+
+    # Result capture boundary: direct MCPToolset invocation before the surrounding
+    # agent serializes a model request. The exact API is recorded so this is not
+    # confused with provider-payload capture.
+    result_capture_api = "pydantic_ai.mcp.MCPToolset.direct_call_tool"
+    result_capture_object = "direct toolset result before model-request serialization"
+
+    def render_result(
+        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+    ) -> ResultRep:
+        """Invoke one tool and capture the declared framework-result boundary."""
+
+        return anyio.run(self._render_result_async, server, tool, arguments)
+
+    async def _render_result_async(
+        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+    ) -> ResultRep:
+        toolset = self._build_server(server)
+        try:
+            returned = await toolset.direct_call_tool(tool, arguments)
+        except Exception as exc:  # noqa: BLE001 - the failure mode is the observation
+            # A tool that reported failure through `isError` may surface here as a
+            # raised exception instead, which is a different contract for the agent
+            # rather than a scanner error, so it is recorded rather than propagated.
+            return normalize_framework_result(
+                tool=tool,
+                origin=self.id,
+                is_error=True,
+                text=f"{type(exc).__name__}: {exc}",
+                raw=repr(exc),
+            )
+        return self._result_to_rep(tool, returned)
+
+    def _result_to_rep(self, tool: str, returned: Any) -> ResultRep:
+        """Map whatever the adapter returned onto the common result shape.
+
+        Pydantic AI returns the structured content when every content part is text and
+        the mapped content blocks otherwise, so the same tool can hand the agent either
+        a typed value or a list. Both shapes are recorded rather than normalized away.
+        """
+
+        if isinstance(returned, list):
+            return normalize_framework_result(
+                tool=tool,
+                origin=self.id,
+                blocks=[self._block_of(item) for item in returned],
+                raw=repr(returned)[:2000],
+            )
+        if isinstance(returned, dict):
+            return normalize_framework_result(
+                tool=tool, origin=self.id, structured_content=returned, raw=returned
+            )
+        return normalize_framework_result(
+            tool=tool, origin=self.id, text=str(returned), raw=repr(returned)[:2000]
+        )
+
+    @staticmethod
+    def _block_of(item: Any) -> dict[str, Any]:
+        """Classify one returned item by what the agent can actually tell it is.
+
+        Pydantic AI maps several MCP content kinds onto a bare ``str``. Recording those
+        as ``text`` is not a guess about the adapter's intent, it is the agent's view:
+        nothing in a plain string distinguishes an embedded resource or a resource link
+        from an ordinary text block, so the original kind is genuinely gone.
+        """
+
+        if isinstance(item, str):
+            return {"type": "text", "text": item}
+
+        media_type = getattr(item, "media_type", None) or ""
+        if media_type.startswith("image/") or type(item).__name__ == "BinaryImage":
+            return {"type": "image", "mimeType": media_type or None}
+        if media_type.startswith("audio/"):
+            return {"type": "audio", "mimeType": media_type}
+        return {"type": type(item).__name__, "mimeType": media_type or None}
 
     def _build_server(self, server: ServerHandle):
         from fastmcp.client.transports import StdioTransport, StreamableHttpTransport

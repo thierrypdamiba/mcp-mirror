@@ -1,0 +1,145 @@
+{
+  "schema": "mcp-mirror/spec-index@1",
+  "default_spec": "2026-07-28",
+  "specs": [
+    {
+      "id": "2026-07-28",
+      "label": "MCP 2026-07-28",
+      "file": "data-2026-07-28.json",
+      "updated": "2026-09-06",
+      "measured_frameworks": 2,
+      "total_frameworks": 5,
+      "coverage": {
+        "revision": "2026-07-28",
+        "catalogued": true,
+        "source": "https://modelcontextprotocol.io/specification/2026-07-28",
+        "measured": 36,
+        "total": 66,
+        "by_area": [
+          {
+            "area": "Tool definition",
+            "measured": 20,
+            "total": 21
+          },
+          {
+            "area": "Tool results",
+            "measured": 9,
+            "total": 11
+          },
+          {
+            "area": "Resources",
+            "measured": 4,
+            "total": 6
+          },
+          {
+            "area": "Prompts",
+            "measured": 3,
+            "total": 4
+          },
+          {
+            "area": "Client features",
+            "measured": 0,
+            "total": 5
+          },
+          {
+            "area": "Server utilities",
+            "measured": 0,
+            "total": 4
+          },
+          {
+            "area": "Base protocol",
+            "measured": 0,
+            "total": 8
+          },
+          {
+            "area": "Transports",
+            "measured": 0,
+            "total": 2
+          },
+          {
+            "area": "Authorization",
+            "measured": 0,
+            "total": 2
+          },
+          {
+            "area": "Extensions",
+            "measured": 0,
+            "total": 3
+          }
+        ],
+        "note": "The feature surface of MCP 2026-07-28, enumerated from the released specification. This file is the denominator: it is what the protocol defines, independent of what we have measured. A feature with a hand-authored file in capabilities/ is measured; every other feature is published as a row whose cells are all 'u'. Coverage is therefore a fact the build computes, not a claim the site makes.",
+        "omissions": [
+          "Skills over MCP is not listed. The spec index advertises it, but /extensions/skills/overview 404s and the only published material is a working-group charter, so there is no wire contract to measure against.",
+          "Features removed in this revision (initialize, ping, logging/setLevel, resources/subscribe, notifications/roots/list_changed, Mcp-Session-Id, SSE resumability) are absent by design. They belong to the 2025-11-25 snapshot, not this one."
+        ]
+      }
+    },
+    {
+      "id": "2025-11-25",
+      "label": "MCP 2025-11-25",
+      "file": "data-2025-11-25.json",
+      "updated": "2026-09-04",
+      "measured_frameworks": 5,
+      "total_frameworks": 5,
+      "coverage": {
+        "revision": "2025-11-25",
+        "catalogued": true,
+        "source": "https://modelcontextprotocol.io/specification/2025-11-25",
+        "measured": 29,
+        "total": 64,
+        "by_area": [
+          {
+            "area": "Tool definition",
+            "measured": 20,
+            "total": 20
+          },
+          {
+            "area": "Tool results",
+            "measured": 9,
+            "total": 11
+          },
+          {
+            "area": "Resources",
+            "measured": 0,
+            "total": 6
+          },
+          {
+            "area": "Prompts",
+            "measured": 0,
+            "total": 4
+          },
+          {
+            "area": "Client features",
+            "measured": 0,
+            "total": 6
+          },
+          {
+            "area": "Server utilities",
+            "measured": 0,
+            "total": 5
+          },
+          {
+            "area": "Base protocol",
+            "measured": 0,
+            "total": 5
+          },
+          {
+            "area": "Transports",
+            "measured": 0,
+            "total": 5
+          },
+          {
+            "area": "Authorization",
+            "measured": 0,
+            "total": 2
+          }
+        ],
+        "note": "The feature surface of MCP 2025-11-25. Derived from the 2026-07-28 catalogue and that revision's official changelog, which enumerates every addition, removal and deprecation relative to this revision. This file is the denominator: what the protocol defines, independent of what we have measured.",
+        "omissions": [
+          "Skills over MCP is not listed. The spec index advertises it, but /extensions/skills/overview 404s and the only published material is a working-group charter, so there is no wire contract to measure against.",
+          "Features removed in this revision (initialize, ping, logging/setLevel, resources/subscribe, notifications/roots/list_changed, Mcp-Session-Id, SSE resumability) are absent by design. They belong to the 2025-11-25 snapshot, not this one."
+        ]
+      }
+    }
+  ]
+}

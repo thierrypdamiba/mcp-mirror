@@ -96,6 +96,9 @@ jobs:
       - name: Validate compatibility data
         run: python3 data/validator/validate.py data
 
+      - name: Test news feed parsing
+        run: npm run news:test
+
       - name: Build compatibility site
         run: npm run build
 

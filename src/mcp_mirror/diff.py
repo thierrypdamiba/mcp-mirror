@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from .models import Difference, Dimension, ToolRep
+from .models import Difference, Dimension, ResultRep, ToolRep
 from .schema import effective_schema, resolve_ref
 
 # Keywords that, when present in a source description and absent from the rendered
@@ -95,6 +95,7 @@ def diff_tool(source: ToolRep, rendered: ToolRep | None) -> list[Difference]:
         source.params, rendered.params,
     )
     _diff_annotations(source, rendered, tool, framework, diffs)
+    _diff_icons(source, rendered, tool, framework, diffs)
     return diffs
 
 
@@ -311,6 +312,146 @@ def _diff_annotations(s: ToolRep, r: ToolRep, tool: str, fw: str, diffs: list[Di
                     source_value=value, rendered_value=None,
                 )
             )
+
+
+def diff_result(source: ResultRep, rendered: ResultRep | None) -> list[Difference]:
+    """Diff one source tool-call result against one framework's rendering of it.
+
+    Separate from ``diff_tool`` because the question is different: not "was the agent
+    told the truth about this tool" but "did what came back survive the trip". A
+    framework that renders the definition perfectly can still hand the model a string.
+    """
+
+    tool = source.tool
+    if rendered is None:
+        return [
+            _d(
+                tool, "?", "result", "lossy", Dimension.RESULT,
+                "the framework exposes no way to invoke this tool and read its result",
+                source.block_kinds, None,
+            )
+        ]
+
+    fw = rendered.origin
+    diffs: list[Difference] = []
+
+    # A framework that hands back a bare string has still delivered the text, just not
+    # as a block, so text is only "dropped" when it is nowhere to be found.
+    reached = set(rendered.block_kinds)
+    if rendered.text:
+        reached.add("text")
+    lost = [kind for kind in source.block_kinds if kind not in reached]
+    if lost:
+        diffs.append(
+            _d(
+                tool, fw, "result.content", "lossy", Dimension.RESULT,
+                "content blocks dropped from the result: " + ", ".join(sorted(set(lost))),
+                source.block_kinds, rendered.block_kinds,
+            )
+        )
+
+    if source.structured_content is not None:
+        if rendered.structured_content is None:
+            # The text mirror is not a substitute: the agent gets characters where the
+            # server offered a typed value, so anything downstream must re-parse it.
+            detail = (
+                "structuredContent dropped; only the text mirror reaches the agent"
+                if rendered.text
+                else "structuredContent dropped"
+            )
+            diffs.append(
+                _d(
+                    tool, fw, "result.structuredContent", "lossy", Dimension.RESULT,
+                    detail, source.structured_content, None,
+                )
+            )
+        elif rendered.structured_content != source.structured_content:
+            diffs.append(
+                _d(
+                    tool, fw, "result.structuredContent", "transformative", Dimension.RESULT,
+                    "structuredContent changed in the rendering",
+                    source.structured_content, rendered.structured_content,
+                )
+            )
+
+    if source.is_error and not rendered.is_error:
+        diffs.append(
+            _d(
+                tool, fw, "result.isError", "lossy", Dimension.RESULT,
+                "the failure flag did not survive; the agent cannot tell this call failed"
+                if rendered.is_error is None
+                else "the failure flag was rendered as success",
+                source.is_error, rendered.is_error,
+            )
+        )
+
+    for index, (source_block, rendered_block) in enumerate(
+        zip(source.blocks, rendered.blocks)
+    ):
+        if source_block.get("type") != rendered_block.get("type"):
+            continue
+        lost_annotations = source_block.get("annotations")
+        if lost_annotations and not rendered_block.get("annotations"):
+            diffs.append(
+                _d(
+                    tool, fw, f"result.content[{index}].annotations", "lossy",
+                    Dimension.RESULT,
+                    f"annotations dropped from the {source_block.get('type')} block",
+                    lost_annotations, None,
+                )
+            )
+
+    return diffs
+
+
+def _diff_icons(s: ToolRep, r: ToolRep, tool: str, fw: str, diffs: list[Difference]) -> None:
+    """Compare a tool's display icons across the same three outcomes as annotations.
+
+    The function-tool shape most adapters target has no slot for icons, so the
+    interesting distinction is between a framework that keeps them somewhere reachable
+    and one that discards them. Icons are compared as a whole list: their order is the
+    server's stated preference, so a reordering is a change, not a match.
+    """
+
+    source_icons = s.icons or []
+    if not source_icons:
+        return
+
+    captured = r.icons or []
+    retained = (r.framework_metadata or {}).get("icons") or []
+
+    if captured == source_icons:
+        return
+
+    if captured:
+        diffs.append(
+            _d(
+                tool, fw, "icons", "transformative", Dimension.ICONS,
+                f"icon set changed at the capture boundary "
+                f"({len(source_icons)} declared, {len(captured)} rendered)",
+                source_icons, captured,
+            )
+        )
+        return
+
+    if retained:
+        diffs.append(
+            _d(
+                tool, fw, "icons", "transformative", Dimension.ICONS,
+                "icons retained in framework metadata but absent from the captured "
+                "tool definition",
+                source_icons, retained,
+            )
+        )
+        return
+
+    diffs.append(
+        _d(
+            tool, fw, "icons", "lossy", Dimension.ICONS,
+            "icons destroyed (not retained by the framework)",
+            source_icons, None,
+        )
+    )
 
 
 def _walk_schema(

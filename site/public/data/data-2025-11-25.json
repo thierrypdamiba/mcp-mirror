@@ -1,0 +1,4736 @@
+{
+  "schema": "mcp-mirror/data@1.0",
+  "updated": "2026-09-04",
+  "mcp_spec": "2025-11-25",
+  "repo": "https://github.com/thierrypdamiba/mcp-mirror",
+  "eras": {
+    "e-3": "3 release(s) before current",
+    "e-2": "2 release(s) before current",
+    "e-1": "1 release(s) before current",
+    "e0": "current release",
+    "e1": "1 release(s) after current",
+    "e2": "2 release(s) after current"
+  },
+  "agents": {
+    "crewai": {
+      "name": "CrewAI",
+      "abbr": "Crew",
+      "type": "python",
+      "package": "crewai-tools",
+      "registry": "pypi",
+      "adapter": "crewai_tools.MCPServerAdapter",
+      "renderer": "src/mcp_mirror/renderers/crewai_renderer.py",
+      "capture_boundary": {
+        "capture_api": "crewai_tools.MCPServerAdapter",
+        "capture_object": "CrewAI BaseTool name, description, and args_schema",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion instrumented from ClientSession.initialize inside MCPServerAdapter"
+      },
+      "current_version": "1.15.1",
+      "stable_version": "1.15.3",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "1.14.6",
+          "release_date": "2026-05-28T17:05:44Z",
+          "era": -3,
+          "release_date_unix": 1779987944
+        },
+        {
+          "version": "1.14.7",
+          "release_date": "2026-06-11T17:14:49Z",
+          "era": -2,
+          "release_date_unix": 1781198089
+        },
+        {
+          "version": "1.15.0",
+          "release_date": "2026-06-25T23:18:37Z",
+          "era": -1,
+          "release_date_unix": 1782429517
+        },
+        {
+          "version": "1.15.1",
+          "release_date": "2026-06-27T06:51:32Z",
+          "era": 0,
+          "release_date_unix": 1782543092
+        },
+        {
+          "version": "1.15.2",
+          "release_date": "2026-07-08T02:06:14Z",
+          "era": 1,
+          "release_date_unix": 1783476374
+        },
+        {
+          "version": "1.15.3",
+          "release_date": "2026-07-16T19:43:55Z",
+          "era": 2,
+          "release_date_unix": 1784231035
+        }
+      ]
+    },
+    "langchain": {
+      "name": "LangChain",
+      "abbr": "LC",
+      "type": "python",
+      "package": "langchain-mcp-adapters",
+      "registry": "pypi",
+      "adapter": "langchain_mcp_adapters with convert_to_openai_tool",
+      "renderer": "src/mcp_mirror/renderers/langchain_renderer.py",
+      "capture_boundary": {
+        "capture_api": "langchain_core.utils.function_calling.convert_to_openai_tool",
+        "capture_object": "OpenAI-compatible function-tool dictionary",
+        "capture_stage": "provider_format",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion returned by ClientSession.initialize inside the langchain-mcp-adapters session"
+      },
+      "current_version": "0.3.2",
+      "stable_version": "0.3.2",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "0.2.2",
+          "release_date": "2026-03-16T17:13:29Z",
+          "era": -3,
+          "release_date_unix": 1773681209
+        },
+        {
+          "version": "0.3.0",
+          "release_date": "2026-06-10T01:10:27Z",
+          "era": -2,
+          "release_date_unix": 1781053827
+        },
+        {
+          "version": "0.3.1",
+          "release_date": "2026-07-27T18:36:44Z",
+          "era": -1,
+          "release_date_unix": 1785177404
+        },
+        {
+          "version": "0.3.2",
+          "release_date": "2026-08-06T06:15:02Z",
+          "era": 0,
+          "release_date_unix": 1785996902
+        }
+      ]
+    },
+    "openai-agents": {
+      "name": "OpenAI Agents SDK",
+      "abbr": "OAI",
+      "type": "python",
+      "package": "openai-agents",
+      "registry": "pypi",
+      "adapter": "agents.mcp.util.MCPUtil.to_function_tool",
+      "renderer": "src/mcp_mirror/renderers/openai_agents_renderer.py",
+      "capture_boundary": {
+        "capture_api": "agents.mcp.util.MCPUtil.to_function_tool",
+        "capture_object": "agents.tool.FunctionTool",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion exposed by MCPServer.server_initialize_result"
+      },
+      "current_version": "0.22.0",
+      "stable_version": "0.22.2",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "0.20.0",
+          "release_date": "2026-08-11T03:12:47Z",
+          "era": -3,
+          "release_date_unix": 1786417967
+        },
+        {
+          "version": "0.21.0",
+          "release_date": "2026-08-15T02:50:08Z",
+          "era": -2,
+          "release_date_unix": 1786762208
+        },
+        {
+          "version": "0.21.1",
+          "release_date": "2026-08-16T22:29:33Z",
+          "era": -1,
+          "release_date_unix": 1786919373
+        },
+        {
+          "version": "0.22.0",
+          "release_date": "2026-08-19T13:45:19Z",
+          "era": 0,
+          "release_date_unix": 1787147119
+        },
+        {
+          "version": "0.22.1",
+          "release_date": "2026-09-08T09:22:16Z",
+          "era": 1,
+          "release_date_unix": 1788859336
+        },
+        {
+          "version": "0.22.2",
+          "release_date": "2026-09-09T12:37:23Z",
+          "era": 2,
+          "release_date_unix": 1788957443
+        }
+      ]
+    },
+    "pydantic-ai": {
+      "name": "Pydantic AI",
+      "abbr": "PAI",
+      "type": "python",
+      "package": "pydantic-ai-slim",
+      "registry": "pypi",
+      "adapter": "pydantic_ai.mcp toolset ToolDefinition",
+      "renderer": "src/mcp_mirror/renderers/pydantic_ai_renderer.py",
+      "capture_boundary": {
+        "capture_api": "pydantic_ai.mcp.MCPToolset.get_tools",
+        "capture_object": "pydantic_ai.tools.ToolDefinition",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion exposed by MCPToolset.client.initialize_result"
+      },
+      "current_version": "2.40.0",
+      "stable_version": "2.42.0",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "2.37.0",
+          "release_date": "2026-09-01T02:07:31Z",
+          "era": -3,
+          "release_date_unix": 1788228451
+        },
+        {
+          "version": "2.38.0",
+          "release_date": "2026-09-03T07:57:21Z",
+          "era": -2,
+          "release_date_unix": 1788422241
+        },
+        {
+          "version": "2.39.0",
+          "release_date": "2026-09-04T04:30:14Z",
+          "era": -1,
+          "release_date_unix": 1788496214
+        },
+        {
+          "version": "2.40.0",
+          "release_date": "2026-09-05T00:19:00Z",
+          "era": 0,
+          "release_date_unix": 1788567540
+        },
+        {
+          "version": "2.41.0",
+          "release_date": "2026-09-08T04:25:57Z",
+          "era": 1,
+          "release_date_unix": 1788841557
+        },
+        {
+          "version": "2.42.0",
+          "release_date": "2026-09-09T03:48:43Z",
+          "era": 2,
+          "release_date_unix": 1788925723
+        }
+      ]
+    },
+    "mastra": {
+      "name": "Mastra",
+      "abbr": "Mas",
+      "type": "typescript",
+      "package": "@mastra/mcp",
+      "registry": "npm",
+      "adapter": "@mastra/mcp MCPClient.listTools",
+      "renderer": "src/mcp_mirror/renderers/mastra_renderer.py",
+      "capture_boundary": {
+        "capture_api": "@mastra/mcp MCPClient.listTools",
+        "capture_object": "Mastra Tool action returned by listTools",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion observed from the pinned @modelcontextprotocol/client instance used by MCPClient.listTools"
+      },
+      "current_version": "1.17.3",
+      "stable_version": "1.17.3",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "1.17.0",
+          "release_date": "2026-08-19T04:09:11Z",
+          "era": -3,
+          "release_date_unix": 1787112551
+        },
+        {
+          "version": "1.17.1",
+          "release_date": "2026-08-21T01:17:44Z",
+          "era": -2,
+          "release_date_unix": 1787275064
+        },
+        {
+          "version": "1.17.2",
+          "release_date": "2026-08-26T10:55:03Z",
+          "era": -1,
+          "release_date_unix": 1787741703
+        },
+        {
+          "version": "1.17.3",
+          "release_date": "2026-09-03T04:14:30Z",
+          "era": 0,
+          "release_date_unix": 1788408870
+        }
+      ]
+    }
+  },
+  "statuses": {
+    "stable": {
+      "short": "MCP 2025-11-25",
+      "label": "Defined in the released MCP specification"
+    },
+    "draft": {
+      "short": "MCP draft",
+      "label": "Defined only in a draft revision of the MCP specification"
+    },
+    "proposed": {
+      "short": "proposed",
+      "label": "Proposed, not yet in any published specification"
+    },
+    "deprecated": {
+      "short": "deprecated",
+      "label": "Defined in the released MCP specification but deprecated in this revision, and scheduled for removal in a later one"
+    }
+  },
+  "support_codes": {
+    "y": "present at the declared capture boundary",
+    "a": "changed at the boundary or retained elsewhere",
+    "n": "dropped during adaptation",
+    "u": "not yet measured"
+  },
+  "defaults": {
+    "inclusion_rule": "A framework is listed if it ships a first-party or officially documented MCP adapter. Nothing is excluded on quality grounds.",
+    "order_rule": "Alphabetical within language group. No ranking is implied or computed.",
+    "version_policy": "Era 0 is the release actually measured. Surrounding releases come from the package registry (PyPI, npm) and are shown as not yet measured until a scan covers them.",
+    "green_rule": "A cell is 'y' only if the value is present in the tool definition at that framework's declared capture boundary. Nothing else counts.",
+    "partial_rule": "'a' means the capability is not present unchanged: the note must say whether it was transformed at the boundary, only partly preserved, or retained elsewhere by the framework.",
+    "note_rule": "Every 'a' and 'n' cell must carry a #n note reference naming the exact mechanism, so a status can be checked rather than trusted.",
+    "usage_rule": "No adoption weighting is published. We have no defensible source yet, and an invented percentage would be the least trustworthy number on the page."
+  },
+  "popularity": {
+    "schema": "mcp-mirror/popularity@1",
+    "mode": "mock",
+    "generated_at": "2026-09-04T00:00:00Z",
+    "windows": [
+      "hour",
+      "day",
+      "week",
+      "month",
+      "quarter",
+      "year",
+      "all_time"
+    ],
+    "entries": [
+      {
+        "capability_id": "tool-name",
+        "counts": {
+          "hour": [
+            12,
+            11
+          ],
+          "day": [
+            100,
+            90
+          ],
+          "week": [
+            800,
+            700
+          ],
+          "month": [
+            3300,
+            3000
+          ],
+          "quarter": [
+            9800,
+            9000
+          ],
+          "year": [
+            39000,
+            35000
+          ],
+          "all_time": [
+            82000,
+            76000
+          ]
+        }
+      },
+      {
+        "capability_id": "required",
+        "counts": {
+          "hour": [
+            40,
+            20
+          ],
+          "day": [
+            50,
+            100
+          ],
+          "week": [
+            650,
+            500
+          ],
+          "month": [
+            2900,
+            2700
+          ],
+          "quarter": [
+            8700,
+            8200
+          ],
+          "year": [
+            35000,
+            33000
+          ],
+          "all_time": [
+            76000,
+            71000
+          ]
+        }
+      },
+      {
+        "capability_id": "nested-objects",
+        "counts": {
+          "hour": [
+            18,
+            30
+          ],
+          "day": [
+            140,
+            70
+          ],
+          "week": [
+            560,
+            600
+          ],
+          "month": [
+            3100,
+            2400
+          ],
+          "quarter": [
+            7400,
+            7900
+          ],
+          "year": [
+            32000,
+            28000
+          ],
+          "all_time": [
+            69000,
+            65000
+          ]
+        }
+      },
+      {
+        "capability_id": "description-fidelity",
+        "counts": {
+          "hour": [
+            22,
+            21
+          ],
+          "day": [
+            90,
+            120
+          ],
+          "week": [
+            900,
+            450
+          ],
+          "month": [
+            2500,
+            2600
+          ],
+          "quarter": [
+            9100,
+            7000
+          ],
+          "year": [
+            30000,
+            31000
+          ],
+          "all_time": [
+            64000,
+            60000
+          ]
+        }
+      },
+      {
+        "capability_id": "arrays-of-objects",
+        "counts": {
+          "hour": [
+            30,
+            10
+          ],
+          "day": [
+            80,
+            70
+          ],
+          "week": [
+            400,
+            300
+          ],
+          "month": [
+            3500,
+            1800
+          ],
+          "quarter": [
+            6900,
+            6200
+          ],
+          "year": [
+            28000,
+            23000
+          ],
+          "all_time": [
+            59000,
+            54000
+          ]
+        }
+      },
+      {
+        "capability_id": "enum",
+        "counts": {
+          "hour": [
+            15,
+            12
+          ],
+          "day": [
+            160,
+            80
+          ],
+          "week": [
+            500,
+            480
+          ],
+          "month": [
+            2100,
+            1700
+          ],
+          "quarter": [
+            10000,
+            5000
+          ],
+          "year": [
+            26000,
+            25000
+          ],
+          "all_time": [
+            52000,
+            49000
+          ]
+        }
+      },
+      {
+        "capability_id": "format",
+        "counts": {
+          "hour": [
+            10,
+            25
+          ],
+          "day": [
+            110,
+            105
+          ],
+          "week": [
+            750,
+            500
+          ],
+          "month": [
+            2000,
+            2200
+          ],
+          "quarter": [
+            6100,
+            5900
+          ],
+          "year": [
+            34000,
+            17000
+          ],
+          "all_time": [
+            47000,
+            45000
+          ]
+        }
+      },
+      {
+        "capability_id": "destructive-hint",
+        "counts": {
+          "hour": [
+            11,
+            10
+          ],
+          "day": [
+            70,
+            65
+          ],
+          "week": [
+            300,
+            290
+          ],
+          "month": [
+            1800,
+            1700
+          ],
+          "quarter": [
+            5200,
+            5000
+          ],
+          "year": [
+            21000,
+            20000
+          ],
+          "all_time": [
+            41000,
+            39000
+          ]
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "revision": "2025-11-25",
+    "catalogued": true,
+    "source": "https://modelcontextprotocol.io/specification/2025-11-25",
+    "measured": 29,
+    "total": 64,
+    "by_area": [
+      {
+        "area": "Tool definition",
+        "measured": 20,
+        "total": 20
+      },
+      {
+        "area": "Tool results",
+        "measured": 9,
+        "total": 11
+      },
+      {
+        "area": "Resources",
+        "measured": 0,
+        "total": 6
+      },
+      {
+        "area": "Prompts",
+        "measured": 0,
+        "total": 4
+      },
+      {
+        "area": "Client features",
+        "measured": 0,
+        "total": 6
+      },
+      {
+        "area": "Server utilities",
+        "measured": 0,
+        "total": 5
+      },
+      {
+        "area": "Base protocol",
+        "measured": 0,
+        "total": 5
+      },
+      {
+        "area": "Transports",
+        "measured": 0,
+        "total": 5
+      },
+      {
+        "area": "Authorization",
+        "measured": 0,
+        "total": 2
+      }
+    ],
+    "note": "The feature surface of MCP 2025-11-25. Derived from the 2026-07-28 catalogue and that revision's official changelog, which enumerates every addition, removal and deprecation relative to this revision. This file is the denominator: what the protocol defines, independent of what we have measured.",
+    "omissions": [
+      "Skills over MCP is not listed. The spec index advertises it, but /extensions/skills/overview 404s and the only published material is a working-group charter, so there is no wire contract to measure against.",
+      "Features removed in this revision (initialize, ping, logging/setLevel, resources/subscribe, notifications/roots/list_changed, Mcp-Session-Id, SSE resumability) are absent by design. They belong to the 2025-11-25 snapshot, not this one."
+    ]
+  },
+  "cats": {
+    "Parameter contract": [
+      "additional-properties",
+      "default-value",
+      "enum",
+      "format",
+      "null-acceptance",
+      "numeric-range",
+      "property-descriptions",
+      "required"
+    ],
+    "Structure": [
+      "additional-properties",
+      "arrays-of-objects",
+      "nested-objects",
+      "one-of-any-of"
+    ],
+    "Identity and text": [
+      "description-fidelity",
+      "long-descriptions",
+      "tool-name"
+    ],
+    "Tool annotations": [
+      "destructive-hint",
+      "idempotent-hint",
+      "open-world-hint",
+      "read-only-hint",
+      "title-annotation"
+    ],
+    "Descriptions": [
+      "property-descriptions"
+    ],
+    "Tool definition": [
+      "tool-icons",
+      "json-schema-dialect"
+    ],
+    "Tool results": [
+      "content-annotations",
+      "embedded-resource-content",
+      "resource-link-content",
+      "structured-content",
+      "tool-audio-content",
+      "tool-execution-errors",
+      "tool-image-content",
+      "tool-output-schema",
+      "tool-text-content",
+      "tools-call",
+      "tools-list-changed"
+    ],
+    "Resources": [
+      "content-annotations",
+      "embedded-resource-content",
+      "resource-link-content",
+      "resource-binary-contents",
+      "resource-subscriptions",
+      "resource-templates",
+      "resources-list",
+      "resources-list-changed",
+      "resources-read"
+    ],
+    "Prompts": [
+      "prompt-arguments",
+      "prompts-get",
+      "prompts-list",
+      "prompts-list-changed"
+    ],
+    "Client features": [
+      "elicitation-form-mode",
+      "elicitation-url-mode",
+      "roots-list",
+      "roots-list-changed",
+      "sampling-create-message",
+      "sampling-tools"
+    ],
+    "Server utilities": [
+      "completion-complete",
+      "logging-notifications",
+      "logging-set-level",
+      "pagination-cursor",
+      "tasks-experimental"
+    ],
+    "Base protocol": [
+      "cancellation",
+      "initialize-handshake",
+      "json-schema-dialect",
+      "ping",
+      "progress-notifications"
+    ],
+    "Transports": [
+      "session-identifier",
+      "sse-resumability",
+      "transport-http-sse",
+      "transport-stdio",
+      "transport-streamable-http"
+    ],
+    "Authorization": [
+      "authorization-oauth",
+      "authorization-resource-metadata"
+    ]
+  },
+  "data": {
+    "additional-properties": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "additional-properties",
+      "title": "`additionalProperties`",
+      "description": "Controls whether an object accepts keys that are not declared in its properties map.",
+      "question": "Is each object's additional-properties policy preserved at the capture boundary?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Parameter contract",
+        "Structure"
+      ],
+      "keywords": "additionalProperties,additional properties,unknown keys,closed object,object schema",
+      "stats": {
+        "crewai": {
+          "1.15.1": "a #1"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Four measured capture boundaries preserve the source policy. CrewAI's generated args_schema changes additionalProperties on the root and nested object schemas.",
+      "notes_by_num": {
+        "1": "CrewAI: Pydantic model generation rewrites additionalProperties on several object boundaries, changing whether undeclared keys are accepted."
+      },
+      "verdict": {
+        "code": "a",
+        "headline": "Preserved at four boundaries, changed at one.",
+        "detail": "CrewAI rewrites the policy while the other captured definitions retain it."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP tool schemas declaring additionalProperties.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/object#additionalproperties",
+          "title": "JSON Schema Docs"
+        }
+      ],
+      "known_issues": [
+        "A changed policy can make a downstream caller reject valid extension keys or send keys the server rejects."
+      ],
+      "why": "Object openness is part of the parameter contract. Changing it can alter which calls validate before they reach the server.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2,J3",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/object#additionalproperties",
+      "docs_label": "JSON Schema Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "arrays-of-objects": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "arrays-of-objects",
+      "title": "Arrays of Objects",
+      "description": "A list parameter whose items are structured objects.",
+      "question": "Do arrays of structured items survive to each capture boundary?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Structure"
+      ],
+      "keywords": "array,items,list,structure",
+      "stats": {
+        "crewai": {
+          "1.15.1": "y"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Measured as present at every declared framework capture boundary.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "y",
+        "headline": "Survives to all five declared capture boundaries.",
+        "detail": "Item schemas remain intact in every captured tool definition."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/array#items",
+          "title": "JSON Schema Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "Item schema loss can let a downstream model produce malformed list entries.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/array#items",
+      "docs_label": "JSON Schema Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "default-value": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "default-value",
+      "title": "`default`",
+      "description": "Documents the value a server or client should assume when an optional parameter is omitted.",
+      "question": "Is the declared default value preserved at each capture boundary?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Parameter contract"
+      ],
+      "keywords": "default,default value,optional parameter,schema annotation",
+      "stats": {
+        "crewai": {
+          "1.15.1": "y"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Every adapter now hands the agent the source default of 20. CrewAI rewrote it as recently as crewai-tools 1.14.7; the generated args_schema preserves it at 1.15.1.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "y",
+        "headline": "Preserved at all five boundaries.",
+        "detail": "The default survives every adaptation measured here. This row changed when CrewAI moved from 1.14.7 to 1.15.1, which is the kind of silent repair that only shows up if you keep re-measuring."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP tool schemas declaring default values.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/annotations#default",
+          "title": "JSON Schema Docs"
+        }
+      ],
+      "known_issues": [
+        "A changed default can cause a caller and server to assume different behavior for the same omitted argument."
+      ],
+      "why": "Defaults communicate omission behavior. Losing or changing one can alter calls without changing the visible parameter type.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "measured": {
+        "run_date": "2026-09-14",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/annotations#default",
+      "docs_label": "JSON Schema Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "description-fidelity": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "description-fidelity",
+      "title": "`description`",
+      "description": "The natural-language description an MCP server publishes to explain what a tool does.",
+      "question": "Is the full tool description present at each capture boundary?",
+      "spec": "https://modelcontextprotocol.io/specification",
+      "status": "stable",
+      "categories": [
+        "Identity and text"
+      ],
+      "keywords": "description,description fidelity,tool description,prose,injection,tokens",
+      "stats": {
+        "crewai": {
+          "1.15.1": "a #1"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Four frameworks pass the description through byte for byte. One rewrites it into a longer template.",
+      "notes_by_num": {
+        "1": "CrewAI: the captured description is rebuilt as `Tool Name: ... Tool Arguments: {schema} Tool Description: ...`, duplicating the schema as prose and parameters."
+      },
+      "verdict": {
+        "code": "a",
+        "headline": "Verbatim in four frameworks, rewritten in one.",
+        "detail": "One framework rebuilds the description to include the tool name and the full argument schema."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool",
+          "title": "MCP Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "example": {
+        "before_label": "server sends",
+        "before": [
+          "\"description\": \"Search records with optional filters.\""
+        ],
+        "after_label": "captured CrewAI BaseTool",
+        "after": [
+          "\"description\": \"Tool Name: search_records",
+          "Tool Arguments: {'properties': {...}}",
+          "Tool Description: Search records with optional filters.\""
+        ]
+      },
+      "why": "If passed downstream, injected text spends context tokens and can steer a model in ways the tool author did not write.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J4",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool",
+      "docs_label": "MCP Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "destructive-hint": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "destructive-hint",
+      "title": "`destructiveHint`",
+      "description": "An MCP tool annotation the author sets to declare that a tool is destructive, it deletes data, is irreversible, or has a large blast radius. It lives in the tool's `annotations` object alongside readOnlyHint, idempotentHint and openWorldHint.",
+      "question": "Is the destructive marker present at each capture boundary?",
+      "spec": "https://modelcontextprotocol.io/specification",
+      "status": "stable",
+      "categories": [
+        "Tool annotations"
+      ],
+      "keywords": "destructiveHint,destructive hint,annotations,safety,authorization,delete,irreversible",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "a #2"
+        },
+        "openai-agents": {
+          "0.22.0": "n #3"
+        },
+        "pydantic-ai": {
+          "2.40.0": "a #4"
+        },
+        "mastra": {
+          "1.17.3": "n #5"
+        }
+      },
+      "notes": "The annotation is absent from all five declared capture objects. LangChain and Pydantic AI retain it elsewhere in framework metadata; CrewAI, OpenAI Agents SDK, and Mastra drop it. No v0.1 renderer captures a serialized provider request.",
+      "notes_by_num": {
+        "1": "CrewAI: the adapted tool object exposes no annotations field, so the value is not recoverable after adaptation.",
+        "2": "LangChain: retained on `StructuredTool.metadata`, but absent from the OpenAI-compatible dictionary produced by `convert_to_openai_tool`.",
+        "3": "OpenAI Agents SDK: `FunctionTool` keeps `_mcp_title` only; the behavioural hints are not carried.",
+        "4": "Pydantic AI: retained in `ToolDefinition.metadata['annotations']`; not part of `parameters_json_schema`.",
+        "5": "Mastra, `mcpMetadata` carries the server name and version only; annotations are not attached to the tool."
+      },
+      "verdict": {
+        "code": "n",
+        "headline": "Absent at all five declared capture boundaries.",
+        "detail": "Two frameworks retain it elsewhere; three drop it during adaptation. Final provider requests were not captured."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers declaring this annotation. Not estimated, the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations",
+          "title": "MCP Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        },
+        {
+          "url": "https://docs.anthropic.com/en/docs/build-with-claude/tool-use",
+          "title": "Anthropic tool use, tool definition"
+        }
+      ],
+      "known_issues": [
+        "A policy layer reading retained metadata in LangChain or Pydantic AI sees a value absent from the captured tool definition; those two integration surfaces can disagree.",
+        "Because the annotation is absent rather than false, a consumer cannot distinguish \"not destructive\" from \"never told\"."
+      ],
+      "example": {
+        "before_label": "server sends (tools/list)",
+        "before": [
+          "{ \"name\": \"delete_account\",",
+          "  \"description\": \"Permanently deletes an account\u2026\",",
+          "  \"annotations\": { \"destructiveHint\": true } }"
+        ],
+        "after_label": "captured definition (all five frameworks)",
+        "after": [
+          "{ \"name\": \"delete_account\",",
+          "  \"description\": \"Permanently deletes an account\u2026\",",
+          "  \"parameters\": { \u2026 } }",
+          ": no annotations field exists in this format"
+        ]
+      },
+      "why": "A guardrail reading only the captured tool definition receives no structured destructive signal. Two frameworks still hold the value where an application policy layer can read it; three do not. This measurement does not claim what a later provider request contains.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations",
+      "docs_label": "MCP Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "enum": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "enum",
+      "title": "`enum`",
+      "description": "Restricts a parameter to a fixed set of allowed values, for example status: active, archived, deleted.",
+      "question": "Are the allowed enum values present at each capture boundary?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Parameter contract"
+      ],
+      "keywords": "enum,enum values,constraint,values,parameters",
+      "stats": {
+        "crewai": {
+          "1.15.1": "y #1"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Measured as present at every declared framework capture boundary. Where a framework builds its schema from a model class, optional parameters are wrapped, but the constraint remains inside the wrapper.",
+      "notes_by_num": {
+        "1": "CrewAI: preserved inside the `anyOf` wrapper emitted for optional fields, so the constraint sits one level down rather than being lost."
+      },
+      "verdict": {
+        "code": "y",
+        "headline": "Present at all five declared capture boundaries.",
+        "detail": "The constraint remains intact in every captured tool definition."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/enum",
+          "title": "JSON Schema Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "If it were lost, a downstream model could pass values your server rejects, producing a failed call the agent must recover from.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/enum",
+      "docs_label": "JSON Schema Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "format": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "format",
+      "title": "`format`",
+      "description": "A semantic format hint on a string parameter.",
+      "question": "Is the format constraint present at each capture boundary?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Parameter contract"
+      ],
+      "keywords": "format,email,date-time,uri,constraint",
+      "stats": {
+        "crewai": {
+          "1.15.1": "a #1"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "All measured `format` values survive at four capture boundaries. CrewAI preserves `email` and `date-time` inside optional wrappers but drops `uri` from the string branch of the destination `anyOf`.",
+      "notes_by_num": {
+        "1": "CrewAI: `email` and `date-time` remain inside generated optional wrappers; `destination.anyOf[0].format: uri` is absent from the generated `args_schema`."
+      },
+      "verdict": {
+        "code": "a",
+        "headline": "Fully preserved at four boundaries, partly preserved at one.",
+        "detail": "CrewAI keeps two measured formats but drops `uri` inside a union branch."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/type#format",
+          "title": "JSON Schema Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "Losing it can allow malformed emails, timestamps, or URIs to reach your server.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/type#format",
+      "docs_label": "JSON Schema Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "idempotent-hint": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "idempotent-hint",
+      "title": "`idempotentHint`",
+      "description": "Marks repeated calls as safe: calling twice has no additional effect.",
+      "question": "Is the idempotentHint annotation present at each capture boundary?",
+      "spec": "https://modelcontextprotocol.io/specification",
+      "status": "stable",
+      "categories": [
+        "Tool annotations"
+      ],
+      "keywords": "idempotentHint,idempotent hint,annotations,safety,authorization",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "a #2"
+        },
+        "openai-agents": {
+          "0.22.0": "n #3"
+        },
+        "pydantic-ai": {
+          "2.40.0": "a #4"
+        },
+        "mastra": {
+          "1.17.3": "n #5"
+        }
+      },
+      "notes": "The annotation is absent from all five declared capture objects. LangChain and Pydantic AI retain it elsewhere in framework metadata; CrewAI, OpenAI Agents SDK, and Mastra drop it. No v0.1 renderer captures a serialized provider request.",
+      "notes_by_num": {
+        "1": "CrewAI: the adapted tool object exposes no annotations field, so the value is not recoverable after adaptation.",
+        "2": "LangChain: retained on `StructuredTool.metadata`, but absent from the OpenAI-compatible dictionary produced by `convert_to_openai_tool`.",
+        "3": "OpenAI Agents SDK: `FunctionTool` keeps `_mcp_title` only. The behavioural hints are not carried.",
+        "4": "Pydantic AI: retained in `ToolDefinition.metadata['annotations']`. Not part of `parameters_json_schema`.",
+        "5": "Mastra: `mcpMetadata` carries the server name and version only. Annotations are not attached to the tool."
+      },
+      "verdict": {
+        "code": "n",
+        "headline": "Absent at all five declared capture boundaries.",
+        "detail": "Two frameworks retain it elsewhere; three drop it during adaptation. Final provider requests were not captured."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations",
+          "title": "MCP Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "Retry behavior relying only on the captured tool definition has no structured idempotency signal to key on.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations",
+      "docs_label": "MCP Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "long-descriptions": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "long-descriptions",
+      "title": "Long Descriptions",
+      "description": "Whether a long description survives without being cut. Tested with 1,300 characters including Unicode.",
+      "question": "Do long descriptions survive without truncation?",
+      "spec": "https://modelcontextprotocol.io/specification",
+      "status": "stable",
+      "categories": [
+        "Identity and text"
+      ],
+      "keywords": "truncation,length,unicode,description",
+      "stats": {
+        "crewai": {
+          "1.15.1": "y #1"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "A 1,300 character Unicode description arrived intact everywhere measured.",
+      "notes_by_num": {
+        "1": "CrewAI: arrives intact, then augmented. See description fidelity."
+      },
+      "verdict": {
+        "code": "y",
+        "headline": "No truncation observed in any listed framework.",
+        "detail": "Worth rechecking as framework and provider description limits change."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool",
+          "title": "MCP Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "Silent truncation would remove exactly the caveats authors tend to put at the end of a description.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J1",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool",
+      "docs_label": "MCP Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "nested-objects": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "nested-objects",
+      "title": "Nested Objects",
+      "description": "An object typed parameter carrying its own nested properties.",
+      "question": "Does nested structure survive to each capture boundary?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Structure"
+      ],
+      "keywords": "nested,object,structure,schema",
+      "stats": {
+        "crewai": {
+          "1.15.1": "y #1"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Nested input survives everywhere measured. A reference based encoding is an equivalent representation, not a loss.",
+      "notes_by_num": {
+        "1": "CrewAI: nested types are re expressed via `$defs` and `$ref`. Semantically equivalent, so mcp-mirror resolves the reference before comparing rather than reporting it as flattening."
+      },
+      "verdict": {
+        "code": "y",
+        "headline": "Survives to all five declared capture boundaries.",
+        "detail": "One framework re expresses nesting by reference. The structure is preserved either way."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/object#properties",
+          "title": "JSON Schema Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "If nested structure were flattened or dropped, complex calls would silently degrade.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/object#properties",
+      "docs_label": "JSON Schema Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "null-acceptance": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "null-acceptance",
+      "title": "Null Acceptance",
+      "description": "Distinguishes an optional parameter that may be omitted from a parameter that explicitly accepts null.",
+      "question": "Does adaptation preserve whether each parameter accepts null?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Parameter contract"
+      ],
+      "keywords": "null,nullable,optional,anyOf,type union,parameter",
+      "stats": {
+        "crewai": {
+          "1.15.1": "a #1"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Four capture boundaries preserve the source nullability. CrewAI wraps optional fields in unions that newly accept null.",
+      "notes_by_num": {
+        "1": "CrewAI: optional fields are emitted through nullable anyOf wrappers, broadening the accepted values beyond omission alone."
+      },
+      "verdict": {
+        "code": "a",
+        "headline": "Preserved at four boundaries, broadened at one.",
+        "detail": "CrewAI adds null acceptance to optional fields that the source schema does not declare nullable."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP tool schemas distinguishing omission from null.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/null",
+          "title": "JSON Schema Docs"
+        }
+      ],
+      "known_issues": [
+        "A server may reject explicit null even when omission is valid, creating avoidable validation failures."
+      ],
+      "why": "Optional and nullable are different contracts. Conflating them lets a downstream caller express values the source never accepted.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/null",
+      "docs_label": "JSON Schema Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "numeric-range": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "numeric-range",
+      "title": "Numeric Ranges",
+      "description": "Bounds on a numeric parameter.",
+      "question": "Is the numeric range constraint present at each capture boundary?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Parameter contract"
+      ],
+      "keywords": "minimum,maximum,range,bounds,constraint",
+      "stats": {
+        "crewai": {
+          "1.15.1": "y #1"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Measured as present at every declared framework capture boundary. Where a framework builds its schema from a model class, optional parameters are wrapped, but the constraint remains inside the wrapper.",
+      "notes_by_num": {
+        "1": "CrewAI: preserved inside the `anyOf` wrapper emitted for optional fields, so the constraint sits one level down rather than being lost."
+      },
+      "verdict": {
+        "code": "y",
+        "headline": "Present at all five declared capture boundaries.",
+        "detail": "The constraint remains intact in every captured tool definition."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/numeric#range",
+          "title": "JSON Schema Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "Without bounds a downstream model may request out-of-range values.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/numeric#range",
+      "docs_label": "JSON Schema Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "one-of-any-of": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "one-of-any-of",
+      "title": "`oneOf` / `anyOf`",
+      "description": "A parameter that accepts one of several shapes, using JSON Schema 2020-12 combinators.",
+      "question": "Do both union combinators survive to each capture boundary?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Structure"
+      ],
+      "keywords": "oneOf,anyOf,one of,any of,union,combinator,2020-12",
+      "stats": {
+        "crewai": {
+          "1.15.1": "a #1"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Both combinators remain present in four captured definitions. CrewAI preserves the fixture's destination `anyOf` but collapses its mode `oneOf`.",
+      "notes_by_num": {
+        "1": "CrewAI: `destination.anyOf` survives, while `mode.oneOf` is collapsed by the generated `args_schema`; the combined capability is therefore only partly preserved."
+      },
+      "verdict": {
+        "code": "a",
+        "headline": "Fully preserved at four boundaries, partly preserved at one.",
+        "detail": "CrewAI keeps `anyOf` but collapses the fixture's `oneOf`; the other captured definitions keep both."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/combining",
+          "title": "JSON Schema Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "Collapse would silently narrow what the agent is able to express.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/combining",
+      "docs_label": "JSON Schema Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "open-world-hint": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "open-world-hint",
+      "title": "`openWorldHint`",
+      "description": "Marks a tool as touching the open world: external, non deterministic effects.",
+      "question": "Is the openWorldHint annotation present at each capture boundary?",
+      "spec": "https://modelcontextprotocol.io/specification",
+      "status": "stable",
+      "categories": [
+        "Tool annotations"
+      ],
+      "keywords": "openWorldHint,open world hint,annotations,safety,authorization",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "a #2"
+        },
+        "openai-agents": {
+          "0.22.0": "n #3"
+        },
+        "pydantic-ai": {
+          "2.40.0": "a #4"
+        },
+        "mastra": {
+          "1.17.3": "n #5"
+        }
+      },
+      "notes": "The annotation is absent from all five declared capture objects. LangChain and Pydantic AI retain it elsewhere in framework metadata; CrewAI, OpenAI Agents SDK, and Mastra drop it. No v0.1 renderer captures a serialized provider request.",
+      "notes_by_num": {
+        "1": "CrewAI: the adapted tool object exposes no annotations field, so the value is not recoverable after adaptation.",
+        "2": "LangChain: retained on `StructuredTool.metadata`, but absent from the OpenAI-compatible dictionary produced by `convert_to_openai_tool`.",
+        "3": "OpenAI Agents SDK: `FunctionTool` keeps `_mcp_title` only. The behavioural hints are not carried.",
+        "4": "Pydantic AI: retained in `ToolDefinition.metadata['annotations']`. Not part of `parameters_json_schema`.",
+        "5": "Mastra: `mcpMetadata` carries the server name and version only. Annotations are not attached to the tool."
+      },
+      "verdict": {
+        "code": "n",
+        "headline": "Absent at all five declared capture boundaries.",
+        "detail": "Two frameworks retain it elsewhere; three drop it during adaptation. Final provider requests were not captured."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations",
+          "title": "MCP Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "The captured tool definitions contain no structured signal that a call escapes the local system.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations",
+      "docs_label": "MCP Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "property-descriptions": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "property-descriptions",
+      "title": "Property Descriptions",
+      "description": "Natural-language guidance attached to individual parameters and nested properties.",
+      "question": "Do property-level descriptions survive at each capture boundary?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Descriptions",
+        "Parameter contract"
+      ],
+      "keywords": "description,property description,parameter description,nested property,schema annotation",
+      "stats": {
+        "crewai": {
+          "1.15.1": "a #1"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Four capture boundaries preserve all measured property descriptions. CrewAI drops descriptions from branches inside the fixture's destination union.",
+      "notes_by_num": {
+        "1": "CrewAI: descriptions on the URI and object branches of destination.anyOf are absent from the generated args_schema."
+      },
+      "verdict": {
+        "code": "a",
+        "headline": "Preserved at four boundaries, partly preserved at one.",
+        "detail": "CrewAI loses descriptions inside union branches while retaining the surrounding parameter guidance."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP tools documenting individual parameters.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/annotations#description",
+          "title": "JSON Schema Docs"
+        }
+      ],
+      "known_issues": [
+        "A retained type without its property description can still leave a model unable to choose the intended value."
+      ],
+      "why": "Property descriptions carry the author's parameter-level intent. Losing them can make a structurally valid tool call semantically wrong.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/annotations#description",
+      "docs_label": "JSON Schema Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "read-only-hint": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "read-only-hint",
+      "title": "`readOnlyHint`",
+      "description": "Marks a tool as read only: safe to call, no side effects.",
+      "question": "Is the readOnlyHint annotation present at each capture boundary?",
+      "spec": "https://modelcontextprotocol.io/specification",
+      "status": "stable",
+      "categories": [
+        "Tool annotations"
+      ],
+      "keywords": "readOnlyHint,read only hint,annotations,safety,authorization",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "a #2"
+        },
+        "openai-agents": {
+          "0.22.0": "n #3"
+        },
+        "pydantic-ai": {
+          "2.40.0": "a #4"
+        },
+        "mastra": {
+          "1.17.3": "n #5"
+        }
+      },
+      "notes": "The annotation is absent from all five declared capture objects. LangChain and Pydantic AI retain it elsewhere in framework metadata; CrewAI, OpenAI Agents SDK, and Mastra drop it. No v0.1 renderer captures a serialized provider request.",
+      "notes_by_num": {
+        "1": "CrewAI: the adapted tool object exposes no annotations field, so the value is not recoverable after adaptation.",
+        "2": "LangChain: retained on `StructuredTool.metadata`, but absent from the OpenAI-compatible dictionary produced by `convert_to_openai_tool`.",
+        "3": "OpenAI Agents SDK: `FunctionTool` keeps `_mcp_title` only. The behavioural hints are not carried.",
+        "4": "Pydantic AI: retained in `ToolDefinition.metadata['annotations']`. Not part of `parameters_json_schema`.",
+        "5": "Mastra: `mcpMetadata` carries the server name and version only. Annotations are not attached to the tool."
+      },
+      "verdict": {
+        "code": "n",
+        "headline": "Absent at all five declared capture boundaries.",
+        "detail": "Two frameworks retain it elsewhere; three drop it during adaptation. Final provider requests were not captured."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations",
+          "title": "MCP Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "A downstream consumer relying only on the captured tool definition cannot use this structured hint to distinguish a safe read from a risky write.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations",
+      "docs_label": "MCP Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "required": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "required",
+      "title": "`required`",
+      "description": "Which parameters must be supplied for the call to be valid.",
+      "question": "Is the required parameter set present at each capture boundary?",
+      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "status": "stable",
+      "categories": [
+        "Parameter contract"
+      ],
+      "keywords": "required,required properties,parameters,contract",
+      "stats": {
+        "crewai": {
+          "1.15.1": "y"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Measured as present at every declared framework capture boundary. Where a framework builds its schema from a model class, optional parameters are wrapped, but the constraint remains inside the wrapper.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "y",
+        "headline": "Present at all five declared capture boundaries.",
+        "detail": "The constraint remains intact in every captured tool definition."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://json-schema.org/understanding-json-schema/reference/object#required",
+          "title": "JSON Schema Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "If the required list shrank, a downstream model could omit parameters your server depends on.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "JSON Schema 2020-12",
+      "docs_url": "https://json-schema.org/understanding-json-schema/reference/object#required",
+      "docs_label": "JSON Schema Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "title-annotation": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "title-annotation",
+      "title": "`title`",
+      "description": "A human friendly display name for the tool. Presentational, not a safety signal.",
+      "question": "Is the tool title annotation present at each capture boundary?",
+      "spec": "https://modelcontextprotocol.io/specification",
+      "status": "stable",
+      "categories": [
+        "Tool annotations"
+      ],
+      "keywords": "title,tool title,title annotation,annotations,display",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "a #2"
+        },
+        "openai-agents": {
+          "0.22.0": "a #3"
+        },
+        "pydantic-ai": {
+          "2.40.0": "a #4"
+        },
+        "mastra": {
+          "1.17.3": "n #5"
+        }
+      },
+      "notes": "The title is absent from all five declared capture definitions. LangChain, Pydantic AI, and OpenAI Agents SDK retain it elsewhere on their adapted tool objects; CrewAI and Mastra drop it. No v0.1 renderer captures a serialized provider request.",
+      "notes_by_num": {
+        "1": "CrewAI: the adapted tool object exposes no annotations field, so the value is not recoverable after adaptation.",
+        "2": "LangChain: retained on `StructuredTool.metadata`, but absent from the OpenAI-compatible dictionary produced by `convert_to_openai_tool`.",
+        "3": "OpenAI Agents SDK: `FunctionTool` keeps `_mcp_title` only. The behavioural hints are not carried.",
+        "4": "Pydantic AI: retained in `ToolDefinition.metadata['annotations']`. Not part of `parameters_json_schema`.",
+        "5": "Mastra: `mcpMetadata` carries the server name and version only. Annotations are not attached to the tool."
+      },
+      "verdict": {
+        "code": "a",
+        "headline": "Retained elsewhere by three frameworks, dropped by two.",
+        "detail": "The title is absent from every captured tool definition. Final provider requests were not captured."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool",
+          "title": "MCP Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [],
+      "why": "Low stakes. Included for completeness rather than concern.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool",
+      "docs_label": "MCP Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "tool-icons": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "tool-icons",
+      "title": "`icons`",
+      "description": "An optional array of display icons on a tool definition, each with a source URL, MIME type and size list.",
+      "question": "Does the tool's icon set reach the agent's tool definition?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool definition"
+      ],
+      "keywords": "icons,icon,src,mimeType,sizes,tool display,branding",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "n #2"
+        },
+        "openai-agents": {
+          "0.22.0": "n #3"
+        },
+        "pydantic-ai": {
+          "2.40.0": "n #4"
+        },
+        "mastra": {
+          "1.17.3": "n #5"
+        }
+      },
+      "notes": "Unanimous: a two-entry icon set declared on the fixture's `search_records` tool reaches none of the five capture boundaries, and no framework retains it in metadata either. Two frameworks do model `icons`, but only on resources, never on a tool.",
+      "notes_by_num": {
+        "1": "CrewAI: `crewai_tools` contains no reference to `icons` anywhere in the package, so the field has nowhere to survive adaptation.",
+        "2": "LangChain: `langchain_mcp_adapters` contains no reference to `icons`. `StructuredTool.metadata` carries annotations but no icon set.",
+        "3": "OpenAI Agents SDK: the `agents` package contains no reference to `icons`. `FunctionTool` keeps `_mcp_title` only.",
+        "4": "Pydantic AI: `pydantic_ai.mcp` declares `icons: list[Icon] | None` on its resource type only. `ToolDefinition` has no icon field, so tool icons are dropped.",
+        "5": "Mastra: `@mastra/mcp` types `icons` under resource and configuration shapes. No tool type carries it, and `mcpMetadata` holds only the server name and version."
+      },
+      "verdict": {
+        "code": "n",
+        "headline": "Destroyed by all five frameworks.",
+        "detail": "No adapter exposes an icon set to the agent, and none retains one out of band. Pydantic AI and Mastra model icons for resources but not for tools, so the omission is specific to the tool definition rather than a gap in their MCP typing."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers declaring tool icons. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool",
+          "title": "MCP Docs"
+        }
+      ],
+      "known_issues": [],
+      "why": "Icons are the one part of a tool definition aimed at a human rather than a model. A framework that drops them removes the server's only way to identify its tools visually in any UI built on top of the adapter.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "measured": {
+        "run_date": "2026-09-11",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool",
+      "docs_label": "MCP Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured",
+      "wire": [
+        "tools/list"
+      ]
+    },
+    "tool-name": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "tool-name",
+      "title": "`name`",
+      "description": "The identifier a downstream consumer uses to invoke the tool.",
+      "question": "Is the tool name unchanged at each capture boundary?",
+      "spec": "https://modelcontextprotocol.io/specification",
+      "status": "stable",
+      "categories": [
+        "Identity and text"
+      ],
+      "keywords": "name,tool name,namespace,prefix,identifier",
+      "stats": {
+        "crewai": {
+          "1.15.1": "y"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "a #1"
+        }
+      },
+      "notes": "Four frameworks pass the tool name through untouched. One namespaces it with the server key.",
+      "notes_by_num": {
+        "1": "Mastra: captured tool actions are namespaced as `<serverKey>_<toolName>`, so `delete_account` becomes `src_delete_account`."
+      },
+      "verdict": {
+        "code": "a",
+        "headline": "Unchanged in four frameworks, namespaced in one.",
+        "detail": "Prefixing is a transformation rather than a loss, but it changes the exact invocation identifier."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool-names",
+          "title": "MCP Docs"
+        },
+        {
+          "url": "https://platform.openai.com/docs/guides/function-calling",
+          "title": "OpenAI function calling, tool schema"
+        }
+      ],
+      "known_issues": [
+        "A prefixed name changes between server configurations, so a hard coded allowlist can silently stop matching."
+      ],
+      "why": "Name based routing, allowlists, and eval fixtures that match exact tool names break under prefixing.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J1",
+      "measured": {
+        "run_date": "2026-09-04",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool-names",
+      "docs_label": "MCP Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
+    },
+    "content-annotations": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "content-annotations",
+      "title": "Content `annotations`",
+      "description": "The `audience`, `priority` and `lastModified` hints that content blocks, resources and prompt messages may carry.",
+      "question": "Do content annotations survive to the agent?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool results",
+        "Resources"
+      ],
+      "keywords": "annotations,audience,priority,lastModified,context filtering",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "n #2"
+        },
+        "pydantic-ai": {
+          "2.40.0": "n #3"
+        },
+        "mastra": {
+          "1.17.3": "n #4"
+        }
+      },
+      "notes": "Annotations say who a block is for and how much it matters. No adapter that delivered the block delivered its annotations. LangChain is unmeasured here: its audio conversion raises on the same result, so the call aborts before this block can be observed. Isolating it needs a fixture that returns one block at a time.",
+      "notes_by_num": {
+        "1": "CrewAI: every content block is dropped, annotations with them.",
+        "2": "OpenAI Agents: the text block survives; its annotations do not.",
+        "3": "Pydantic AI: the text block survives; its annotations do not.",
+        "4": "Mastra: every content block is dropped, annotations with them."
+      },
+      "verdict": {
+        "code": "n",
+        "headline": "Absent at every boundary where the block itself survived.",
+        "detail": "audience and priority are the server's only way to say 'this part is for the model, this part is for the user'. Nothing downstream can recover them."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#annotations",
+          "title": "MCP Docs"
+        }
+      ],
+      "known_issues": [],
+      "why": "Annotations are how a server says who a piece of content is for and how much it matters. A client that drops them cannot filter assistant-only content out of a user view, cannot prioritise what to keep when context runs short, and cannot sort by recency.",
+      "reproduce": "uv run python scripts/measure_2025_results.py",
+      "measured": {
+        "run_date": "2026-09-14",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#annotations",
+      "docs_label": "MCP Docs",
+      "area": "Tool results",
+      "measurement_state": "measured",
+      "wire": [
+        "tools/call",
+        "resources/read",
+        "prompts/get"
+      ]
+    },
+    "embedded-resource-content": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "embedded-resource-content",
+      "title": "Embedded resources",
+      "description": "A tool result block that inlines a resource's contents together with its URI and MIME type.",
+      "question": "Does an embedded resource keep its identity, or arrive as anonymous text?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool results",
+        "Resources"
+      ],
+      "keywords": "embedded resource,resource content block,inline resource,uri,mimeType",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "a #2"
+        },
+        "pydantic-ai": {
+          "2.40.0": "n #3"
+        },
+        "mastra": {
+          "1.17.3": "n #4"
+        }
+      },
+      "notes": "An embedded resource carries its own identity: a uri, a mime type, and contents. No adapter delivers it as a resource. One preserves the fields by stringifying them, one keeps the contents and discards the identity, two drop it. LangChain is unmeasured here: its audio conversion raises on the same result, so the call aborts before this block can be observed. Isolating it needs a fixture that returns one block at a time.",
+      "notes_by_num": {
+        "1": "CrewAI: the embedded resource is dropped from the result.",
+        "2": "OpenAI Agents: serialized into a text block holding the resource's JSON, so uri and mimeType survive as characters rather than as fields.",
+        "3": "Pydantic AI: reduced to a bare text block containing the resource's text. The uri and mimeType that identify it are gone.",
+        "4": "Mastra: all content blocks are dropped, embedded resources included."
+      },
+      "verdict": {
+        "code": "n",
+        "headline": "Delivered as a resource by none of the five.",
+        "detail": "Once the uri is gone the agent cannot cite, re-read, or refer to what it was given."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#embedded-resources",
+          "title": "MCP Docs"
+        }
+      ],
+      "known_issues": [],
+      "why": "The URI and MIME type are what let a caller cite, cache or re-read the content. Stripping them to the inner text leaves the agent holding data it cannot attribute to a source.",
+      "reproduce": "uv run python scripts/measure_2025_results.py",
+      "measured": {
+        "run_date": "2026-09-14",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#embedded-resources",
+      "docs_label": "MCP Docs",
+      "area": "Tool results",
+      "measurement_state": "measured",
+      "wire": [
+        "tools/call"
+      ]
+    },
+    "resource-link-content": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "resource-link-content",
+      "title": "`resource_link`",
+      "description": "A tool result block that points at a resource URI instead of inlining its contents.",
+      "question": "Does a resource link reach the agent as a reference it can follow?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool results",
+        "Resources"
+      ],
+      "keywords": "resource_link,resource link,uri,reference,large results",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "a #2"
+        },
+        "pydantic-ai": {
+          "2.40.0": "a #3"
+        },
+        "mastra": {
+          "1.17.3": "n #4"
+        }
+      },
+      "notes": "A resource_link is a pointer the agent is meant to be able to follow. Two adapters keep the pointer but not its type, one of them shedding the name and description on the way. Two drop it entirely. LangChain is unmeasured here: its audio conversion raises on the same result, so the call aborts before this block can be observed. Isolating it needs a fixture that returns one block at a time.",
+      "notes_by_num": {
+        "1": "CrewAI: the resource link is dropped from the result.",
+        "2": "OpenAI Agents: serialized into a text block holding the link's JSON, so name, uri and description survive as characters rather than as fields.",
+        "3": "Pydantic AI: reduced to a bare text block containing only the uri. The link's name and description are gone.",
+        "4": "Mastra: all content blocks are dropped, resource links included."
+      },
+      "verdict": {
+        "code": "a",
+        "headline": "Survives as text at two boundaries, dropped at two.",
+        "detail": "A link flattened into prose still tells the agent where to look, which is more than the alternatives here manage."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#resource-links",
+          "title": "MCP Docs"
+        }
+      ],
+      "known_issues": [],
+      "why": "Resource links are how a large result stays out of the context window until something asks for it. A framework that flattens the link to text keeps the URI as prose and loses the ability to fetch what it points at.",
+      "reproduce": "uv run python scripts/measure_2025_results.py",
+      "measured": {
+        "run_date": "2026-09-14",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#resource-links",
+      "docs_label": "MCP Docs",
+      "area": "Tool results",
+      "measurement_state": "measured",
+      "wire": [
+        "tools/call"
+      ]
+    },
+    "structured-content": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "structured-content",
+      "title": "`structuredContent`",
+      "description": "A JSON result value returned alongside `content`, conforming to the tool's `outputSchema` when one is declared.",
+      "question": "Does the agent receive the structured value, or only its text rendering?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "keywords": "structuredContent,structured content,json result,typed result",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "n #2"
+        },
+        "openai-agents": {
+          "0.22.0": "n #3"
+        },
+        "pydantic-ai": {
+          "2.40.0": "n #4"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Four of five drop the typed value and pass the agent the text mirror the server sent alongside it, which is the copy meant for humans. Mastra is the exception and keeps structuredContent intact, but it does so by dropping every content block in the same result, so no adapter delivers both halves of the response.",
+      "notes_by_num": {
+        "1": "CrewAI: structuredContent is dropped; only the text mirror reaches the agent.",
+        "2": "LangChain: structuredContent is dropped; only the text mirror reaches the agent.",
+        "3": "OpenAI Agents: structuredContent is dropped; only the text mirror reaches the agent.",
+        "4": "Pydantic AI: structuredContent is dropped; only the text mirror reaches the agent."
+      },
+      "verdict": {
+        "code": "n",
+        "headline": "Reaches the agent at one boundary of five, and there by dropping all other content.",
+        "detail": "structuredContent exists so an agent can consume a result without parsing prose. Where it is dropped, the typed value a server carefully produced is replaced by its own human-readable summary."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#structured-content",
+          "title": "MCP Docs"
+        }
+      ],
+      "known_issues": [],
+      "why": "The spec asks servers to mirror structured results into a text block for backwards compatibility. That mirror makes a dropped `structuredContent` invisible: the call still looks successful, and typed data quietly becomes a string the model has to re-parse.",
+      "reproduce": "uv run python scripts/measure_2025_results.py",
+      "measured": {
+        "run_date": "2026-09-14",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#structured-content",
+      "docs_label": "MCP Docs",
+      "area": "Tool results",
+      "measurement_state": "measured",
+      "wire": [
+        "tools/call"
+      ]
+    },
+    "tool-audio-content": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "tool-audio-content",
+      "title": "Audio content",
+      "description": "The `audio` content block, carrying base64-encoded audio data and its MIME type.",
+      "question": "Does an audio result survive adaptation?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "keywords": "audio content,AudioContent,base64,mimeType,multimodal",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "n #2"
+        },
+        "openai-agents": {
+          "0.22.0": "a #3"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "n #4"
+        }
+      },
+      "notes": "The least survivable content type measured. One adapter passes it through as audio. One turns it into a JSON string. Two drop it. LangChain does something worse than dropping it: it raises, and the exception takes the rest of the result with it, so a server that returns audio alongside text returns nothing usable at all.",
+      "notes_by_num": {
+        "1": "CrewAI: the audio block is dropped from the result.",
+        "2": "LangChain: raises NotImplementedError -- 'AudioContent conversion to LangChain content blocks is not yet supported' -- which aborts the whole call, so no part of the result reaches the agent.",
+        "3": "OpenAI Agents: the block is serialized into a text block containing its JSON, base64 payload and all, so the audio reaches the agent only as characters.",
+        "4": "Mastra: all content blocks are dropped, audio included."
+      },
+      "verdict": {
+        "code": "n",
+        "headline": "Delivered as audio by one of five; fatal at one.",
+        "detail": "An unsupported content type that raises rather than degrades turns a partially supported result into a failed call."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#audio-content",
+          "title": "MCP Docs"
+        }
+      ],
+      "known_issues": [],
+      "why": "Audio is the least-implemented content type in the union, which makes it the sharpest test of whether a framework handles the content list generically or only the cases it happened to code for.",
+      "reproduce": "uv run python scripts/measure_2025_results.py",
+      "measured": {
+        "run_date": "2026-09-14",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#audio-content",
+      "docs_label": "MCP Docs",
+      "area": "Tool results",
+      "measurement_state": "measured",
+      "wire": [
+        "tools/call"
+      ]
+    },
+    "tool-execution-errors": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "tool-execution-errors",
+      "title": "`isError`",
+      "description": "The in-band flag marking a tool result as a tool execution error, which the spec expects clients to pass to the model so it can correct itself.",
+      "question": "Can the agent tell a tool execution error from a successful result?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "keywords": "isError,tool execution error,protocol error,self-correction,retry",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "n #2"
+        },
+        "openai-agents": {
+          "0.22.0": "n #3"
+        },
+        "pydantic-ai": {
+          "2.40.0": "a #4"
+        },
+        "mastra": {
+          "1.17.3": "a #5"
+        }
+      },
+      "notes": "Not one of the five hands the agent the boolean the specification defines. Three return the failure as ordinary text, so an agent reading the result cannot tell a failed call from a successful one. Two convert it into an exception, which preserves the fact of failure but moves it out of the result and into control flow.",
+      "notes_by_num": {
+        "1": "CrewAI: the failed call returns its text like any other result. Nothing marks it as a failure.",
+        "2": "LangChain: the error text arrives as an ordinary text block with a generated lc_ id. The flag is gone.",
+        "3": "OpenAI Agents: the error text is returned as normal tool output, indistinguishable from success.",
+        "4": "Pydantic AI: converted into a raised ModelRetry rather than a flag on the result. The failure is reachable, but as control flow.",
+        "5": "Mastra: converted into a thrown error rather than a flag on the result."
+      },
+      "verdict": {
+        "code": "n",
+        "headline": "Delivered by none of the five; two convert it into an exception.",
+        "detail": "isError is how a tool says 'this did not work' without the agent having to read prose. Three frameworks erase that distinction entirely."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling",
+          "title": "MCP Docs"
+        }
+      ],
+      "known_issues": [],
+      "why": "MCP separates protocol errors from tool execution errors precisely so a model can retry the second kind with better arguments. A framework that raises both as exceptions, or reports both as success, collapses that distinction and removes the recovery path the spec designed.",
+      "reproduce": "uv run python scripts/measure_2025_results.py",
+      "measured": {
+        "run_date": "2026-09-14",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling",
+      "docs_label": "MCP Docs",
+      "area": "Tool results",
+      "measurement_state": "measured",
+      "wire": [
+        "tools/call"
+      ]
+    },
+    "tool-image-content": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "tool-image-content",
+      "title": "Image content",
+      "description": "The `image` content block, carrying base64-encoded data and its MIME type.",
+      "question": "Does an image result survive adaptation, or is it dropped or flattened to text?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "keywords": "image content,ImageContent,base64,mimeType,multimodal",
+      "stats": {
+        "crewai": {
+          "1.15.1": "n #1"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "n #2"
+        }
+      },
+      "notes": "The two adapters built around multimodal model APIs pass images through; the two that flatten results to text or to structured data drop them. LangChain is unmeasured here: its audio conversion raises on the same result, so the call aborts before this block can be observed. Isolating it needs a fixture that returns one block at a time.",
+      "notes_by_num": {
+        "1": "CrewAI: the image block is dropped from the result.",
+        "2": "Mastra: all content blocks are dropped, images included."
+      },
+      "verdict": {
+        "code": "a",
+        "headline": "Delivered by two, dropped by two, unmeasured at one.",
+        "detail": "A tool that returns a chart or a screenshot is only useful if the image reaches a model that can see it."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#image-content",
+          "title": "MCP Docs"
+        }
+      ],
+      "known_issues": [],
+      "why": "A dropped image block is a silent failure: the call succeeds, the result arrives, and the payload the tool existed to return is simply gone.",
+      "reproduce": "uv run python scripts/measure_2025_results.py",
+      "measured": {
+        "run_date": "2026-09-14",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#image-content",
+      "docs_label": "MCP Docs",
+      "area": "Tool results",
+      "measurement_state": "measured",
+      "wire": [
+        "tools/call"
+      ]
+    },
+    "tool-output-schema": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "tool-output-schema",
+      "title": "`outputSchema`",
+      "description": "An optional JSON Schema on the tool definition describing the shape of the tool's structured result.",
+      "question": "Does the output schema survive to the agent's tool definition?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "keywords": "outputSchema,output schema,result schema,typed results,validation",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Declare `outputSchema` on a fixture tool and look for it in each framework's captured tool definition."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Without it a caller cannot validate a tool result or generate types for it, and the model is given no advance description of what the tool returns. The spec asks clients to validate structured results against this schema; a client that never received it cannot.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#output-schema",
+      "docs_label": "MCP Docs",
+      "area": "Tool results",
+      "measurement_state": "not_measured",
+      "probe": "Declare `outputSchema` on a fixture tool and look for it in each framework's captured tool definition.",
+      "wire": [
+        "tools/list"
+      ]
+    },
+    "tool-text-content": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "tool-text-content",
+      "title": "Text content",
+      "description": "The `text` content block, the baseline result type that every tool result may carry.",
+      "question": "Does text content reach the agent unchanged?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "keywords": "text content,TextContent,result text,content block",
+      "stats": {
+        "crewai": {
+          "1.15.1": "a #1"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "n #2"
+        }
+      },
+      "notes": "The one content type almost everything survives. Three adapters pass it through unchanged. CrewAI delivers the characters but wraps them in the repr of the list that held them, so the agent reads brackets and quotes as part of the text. Mastra drops it.",
+      "notes_by_num": {
+        "1": "CrewAI: the text arrives stringified inside a Python list repr, as \"['SENTINEL_TEXT_BLOCK']\" rather than the block's text.",
+        "2": "Mastra: all content blocks are dropped, text included; only structuredContent reaches the agent."
+      },
+      "verdict": {
+        "code": "a",
+        "headline": "Unchanged at three boundaries, reshaped at one, dropped at one.",
+        "detail": "Plain text is the floor. Two of five do not clear it cleanly."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#text-content",
+          "title": "MCP Docs"
+        }
+      ],
+      "known_issues": [],
+      "why": "This is the one content type every framework is expected to handle, so it is the control row: the other content types can only be read as losses against a text block that survives.",
+      "reproduce": "uv run python scripts/measure_2025_results.py",
+      "measured": {
+        "run_date": "2026-09-14",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#text-content",
+      "docs_label": "MCP Docs",
+      "area": "Tool results",
+      "measurement_state": "measured",
+      "wire": [
+        "tools/call"
+      ]
+    },
+    "tools-call": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "tools-call",
+      "title": "`tools/call`",
+      "description": "The request that invokes a tool by name with an arguments object and returns its result.",
+      "question": "Can the framework invoke an MCP tool and hand the result back to the agent?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "keywords": "tools/call,invoke,execute,call tool,arguments",
+      "stats": {
+        "crewai": {
+          "1.15.1": "y"
+        },
+        "langchain": {
+          "0.3.2": "y"
+        },
+        "openai-agents": {
+          "0.22.0": "y"
+        },
+        "pydantic-ai": {
+          "2.40.0": "y"
+        },
+        "mastra": {
+          "1.17.3": "y"
+        }
+      },
+      "notes": "Every adapter can invoke a tool and return something to the agent. What arrives varies enormously, and the rest of this category is where that shows up: the call mechanism works everywhere, the result contract does not.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "y",
+        "headline": "Supported by all five.",
+        "detail": "Invocation is the part of the tool-result surface that every adapter gets right."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+      "links": [
+        {
+          "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#calling-tools",
+          "title": "MCP Docs"
+        }
+      ],
+      "known_issues": [],
+      "why": "Every tool-definition row in this table is inert if the adapter never reaches this call. This is the floor of MCP support: a framework that renders a tool definition but cannot invoke it has integrated a catalogue, not a protocol.",
+      "reproduce": "uv run python scripts/measure_2025_results.py",
+      "measured": {
+        "run_date": "2026-09-14",
+        "mcp_spec": "2025-11-25",
+        "fixture": "fixtures/tricky_server.py"
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#calling-tools",
+      "docs_label": "MCP Docs",
+      "area": "Tool results",
+      "measurement_state": "measured",
+      "wire": [
+        "tools/call"
+      ]
+    },
+    "tools-list-changed": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "tools-list-changed",
+      "title": "`notifications/tools/list_changed`",
+      "description": "The notification a server sends when its tool list changes, delivered on a subscription stream the client opted into with `toolsListChanged`.",
+      "question": "Does the framework refresh its tool list when the server says it changed?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "keywords": "list_changed,listChanged,tool list,refresh,invalidation",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Change the fixture server's tool list mid-session, emit the notification, and check whether each adapter's tool list follows."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Adapters cache the tool list at startup. Without this, an agent keeps offering tools the server has withdrawn and never sees the ones it added, and the mismatch only shows up as a failed call much later.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#list-changed-notification",
+      "docs_label": "MCP Docs",
+      "area": "Tool results",
+      "measurement_state": "not_measured",
+      "probe": "Change the fixture server's tool list mid-session, emit the notification, and check whether each adapter's tool list follows.",
+      "wire": [
+        "notifications/tools/list_changed"
+      ]
+    },
+    "resource-binary-contents": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "resource-binary-contents",
+      "title": "`blob` contents",
+      "description": "The base64 `blob` form of resource contents, used for anything that is not text.",
+      "question": "Can the agent read a binary resource without corrupting it?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "keywords": "blob,binary,base64,resource contents,mimeType",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Serve a binary fixture resource and compare the bytes each adapter returns with the source."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Text and binary contents are different fields, not different encodings of one field. A framework that assumes `text` either drops binary resources or turns them into mojibake, and both failures look like a successful read.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#binary-content",
+      "docs_label": "MCP Docs",
+      "area": "Resources",
+      "measurement_state": "not_measured",
+      "probe": "Serve a binary fixture resource and compare the bytes each adapter returns with the source.",
+      "wire": [
+        "resources/read"
+      ]
+    },
+    "resource-subscriptions": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "resource-subscriptions",
+      "title": "`notifications/resources/updated`",
+      "description": "Per-resource change notifications, opted into by listing URIs in a `subscriptions/listen` request and delivered as `notifications/resources/updated`.",
+      "question": "Can the agent watch a single resource for changes?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "keywords": "resource subscription,updated,watch,resourceSubscriptions,subscriptions/listen",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Subscribe to a fixture resource, mutate it, and check whether each adapter delivers the update."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "This is the difference between an agent that re-reads everything on a timer and one that reacts when a specific thing changes. In 2026-07-28 it also requires the new subscription stream, so a framework still written against `resources/subscribe` cannot do it at all.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#subscriptions",
+      "docs_label": "MCP Docs",
+      "area": "Resources",
+      "measurement_state": "not_measured",
+      "probe": "Subscribe to a fixture resource, mutate it, and check whether each adapter delivers the update.",
+      "wire": [
+        "subscriptions/listen",
+        "notifications/resources/updated"
+      ]
+    },
+    "resource-templates": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "resource-templates",
+      "title": "`resources/templates/list`",
+      "description": "Lists parameterised resources as RFC 6570 URI templates whose arguments can be completed through the completion API.",
+      "question": "Does the framework expose resource templates as templates, or not at all?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "keywords": "resource templates,uriTemplate,RFC 6570,parameterised resources",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Serve a URI template from the fixture and check whether each adapter enumerates it and can expand it with arguments."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Templates are how a server exposes an unbounded resource space without enumerating it. A framework that only handles the concrete list sees an empty server whenever the interesting content is parameterised.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#resource-templates",
+      "docs_label": "MCP Docs",
+      "area": "Resources",
+      "measurement_state": "not_measured",
+      "probe": "Serve a URI template from the fixture and check whether each adapter enumerates it and can expand it with arguments.",
+      "wire": [
+        "resources/templates/list"
+      ]
+    },
+    "resources-list": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "resources-list",
+      "title": "`resources/list`",
+      "description": "Lists the resources a server exposes, each identified by a URI and described with a name, title, MIME type and optional size.",
+      "question": "Can the agent discover the server's resources at all?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "keywords": "resources/list,resources,context,uri,discovery",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Serve resources from the fixture and check whether each adapter offers any path to enumerate them."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Resources are one of the three server primitives, and the only one designed for application-controlled context rather than model-controlled action. A framework that exposes tools but not resources supports one third of what MCP servers publish.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#listing-resources",
+      "docs_label": "MCP Docs",
+      "area": "Resources",
+      "measurement_state": "not_measured",
+      "probe": "Serve resources from the fixture and check whether each adapter offers any path to enumerate them.",
+      "wire": [
+        "resources/list"
+      ]
+    },
+    "resources-list-changed": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "resources-list-changed",
+      "title": "`notifications/resources/list_changed`",
+      "description": "The notification a server sends when the set of available resources changes.",
+      "question": "Does the framework notice when the resource list changes?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "keywords": "list_changed,listChanged,resource list,refresh",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Add and remove fixture resources mid-session and check whether each adapter's list follows."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Resource sets change far more often than tool sets, because they track real files and records. A stale list means the agent offers context that no longer exists.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#list-changed-notification",
+      "docs_label": "MCP Docs",
+      "area": "Resources",
+      "measurement_state": "not_measured",
+      "probe": "Add and remove fixture resources mid-session and check whether each adapter's list follows.",
+      "wire": [
+        "notifications/resources/list_changed"
+      ]
+    },
+    "resources-read": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "resources-read",
+      "title": "`resources/read`",
+      "description": "Reads the contents behind a resource URI, which may return several contents for one request.",
+      "question": "Can the agent read a resource's contents through the framework?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "keywords": "resources/read,read resource,contents,text,blob",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Read a fixture resource that returns multiple contents and check what each adapter returns."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Listing resources without reading them is a catalogue with no way to open anything. This row is where the primitive becomes usable, and it is also where a framework that returns only the first of several contents starts losing data.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#reading-resources",
+      "docs_label": "MCP Docs",
+      "area": "Resources",
+      "measurement_state": "not_measured",
+      "probe": "Read a fixture resource that returns multiple contents and check what each adapter returns.",
+      "wire": [
+        "resources/read"
+      ]
+    },
+    "prompt-arguments": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "prompt-arguments",
+      "title": "Prompt `arguments`",
+      "description": "The declared arguments of a prompt, each with a name, description and required flag.",
+      "question": "Does the argument contract of a prompt survive to the agent?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Prompts"
+      ],
+      "keywords": "prompt arguments,required,argument description,completion",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Declare required and optional arguments on a fixture prompt and check which parts of the contract each adapter preserves."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Without the argument list a host cannot build a form, cannot validate before calling, and cannot offer completion. The prompt degrades from a parameterised template to a fixed string.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/prompts#prompt",
+      "docs_label": "MCP Docs",
+      "area": "Prompts",
+      "measurement_state": "not_measured",
+      "probe": "Declare required and optional arguments on a fixture prompt and check which parts of the contract each adapter preserves.",
+      "wire": [
+        "prompts/list",
+        "prompts/get"
+      ]
+    },
+    "prompts-get": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "prompts-get",
+      "title": "`prompts/get`",
+      "description": "Resolves one prompt with arguments into a list of messages, each with a role and a content block.",
+      "question": "Can the agent resolve a prompt into messages it can actually send?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Prompts"
+      ],
+      "keywords": "prompts/get,resolve prompt,messages,role,content",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Resolve a fixture prompt with arguments and compare the messages each adapter produces with the server's response."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "A prompt is only useful once it is expanded. This row is where a framework either produces messages in its own conversation format or hands back a structure the caller has to translate by hand.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/prompts#getting-a-prompt",
+      "docs_label": "MCP Docs",
+      "area": "Prompts",
+      "measurement_state": "not_measured",
+      "probe": "Resolve a fixture prompt with arguments and compare the messages each adapter produces with the server's response.",
+      "wire": [
+        "prompts/get"
+      ]
+    },
+    "prompts-list": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "prompts-list",
+      "title": "`prompts/list`",
+      "description": "Lists the prompt templates a server exposes, with their names, titles, descriptions and argument definitions.",
+      "question": "Can the agent discover the server's prompts?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Prompts"
+      ],
+      "keywords": "prompts/list,prompts,templates,slash commands,user-controlled",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Serve prompts from the fixture and check whether each adapter offers any path to enumerate them."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Prompts are the user-controlled primitive: the slash commands and menu entries a server contributes to the host. A framework that ignores them silently discards a third of what the server publishes, and the omission is invisible because nothing errors.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/prompts#listing-prompts",
+      "docs_label": "MCP Docs",
+      "area": "Prompts",
+      "measurement_state": "not_measured",
+      "probe": "Serve prompts from the fixture and check whether each adapter offers any path to enumerate them.",
+      "wire": [
+        "prompts/list"
+      ]
+    },
+    "prompts-list-changed": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "prompts-list-changed",
+      "title": "`notifications/prompts/list_changed`",
+      "description": "The notification a server sends when the set of available prompts changes.",
+      "question": "Does the framework notice when the prompt list changes?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Prompts"
+      ],
+      "keywords": "list_changed,listChanged,prompt list,refresh",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Change the fixture server's prompt list mid-session and check whether each adapter's list follows."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Prompts are surfaced directly to users as commands. A stale list means a command menu that offers entries the server has withdrawn.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/prompts#list-changed-notification",
+      "docs_label": "MCP Docs",
+      "area": "Prompts",
+      "measurement_state": "not_measured",
+      "probe": "Change the fixture server's prompt list mid-session and check whether each adapter's list follows.",
+      "wire": [
+        "notifications/prompts/list_changed"
+      ]
+    },
+    "elicitation-form-mode": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "elicitation-form-mode",
+      "title": "`elicitation/create` (form)",
+      "description": "A server request for structured user input, described by a restricted flat JSON Schema and answered with accept, decline or cancel.",
+      "question": "Can a server ask the user a question through this framework?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "keywords": "elicitation,form mode,requestedSchema,user input,accept decline cancel",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Have a fixture tool return a form-mode elicitation request and check whether each adapter surfaces it and can return a response."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Elicitation is the only client feature the 2026-07-28 index still recommends, and it is what lets a tool ask for the one missing detail instead of failing. A framework without it forces every server to guess or error.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/elicitation#form-mode-elicitation-requests",
+      "docs_label": "MCP Docs",
+      "area": "Client features",
+      "measurement_state": "not_measured",
+      "probe": "Have a fixture tool return a form-mode elicitation request and check whether each adapter surfaces it and can return a response.",
+      "wire": [
+        "elicitation/create"
+      ]
+    },
+    "elicitation-url-mode": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "elicitation-url-mode",
+      "title": "`elicitation/create` (URL)",
+      "description": "A server request that sends the user out of band to a URL, for interactions such as sign-in that must not pass through the client.",
+      "question": "Can the framework hand a user off to an external URL and resume?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "keywords": "elicitation,url mode,out of band,oauth,sensitive data,consent",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Have a fixture tool return a URL-mode elicitation request and check whether each adapter surfaces the URL and reports the user's action."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Form mode is explicitly forbidden from collecting credentials, so URL mode is the sanctioned path for sign-in flows. A framework that implements only form mode leaves servers with no compliant way to authenticate a user mid-task.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/elicitation#url-mode-elicitation-requests",
+      "docs_label": "MCP Docs",
+      "area": "Client features",
+      "measurement_state": "not_measured",
+      "probe": "Have a fixture tool return a URL-mode elicitation request and check whether each adapter surfaces the URL and reports the user's action.",
+      "wire": [
+        "elicitation/create"
+      ]
+    },
+    "roots-list": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "roots-list",
+      "title": "`roots/list`",
+      "description": "A server request for the client's filesystem roots, offered as informational guidance rather than as access control.",
+      "question": "Can a server learn which directories the client is working in?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "keywords": "roots,roots/list,file uri,workspace,boundaries",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Have a fixture tool return a roots request and check whether each adapter answers with the client's roots."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Roots tell a server where to look without it guessing paths.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/roots#listing-roots",
+      "docs_label": "MCP Docs",
+      "area": "Client features",
+      "measurement_state": "not_measured",
+      "probe": "Have a fixture tool return a roots request and check whether each adapter answers with the client's roots.",
+      "wire": [
+        "roots/list"
+      ]
+    },
+    "roots-list-changed": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "roots-list-changed",
+      "title": "`notifications/roots/list_changed`",
+      "description": "A client notification telling the server its exposed filesystem roots have changed.",
+      "question": "Does this framework emit the notification when its roots change?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "keywords": "roots,list_changed,notification,filesystem roots",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Change the client's roots mid-session and check whether the fixture receives the notification."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "It is the only client-to-server change notification in the revision, and 2026-07-28 removed it along with the rest of the roots machinery.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/roots#root-list-changes",
+      "docs_label": "MCP Docs",
+      "area": "Client features",
+      "measurement_state": "not_measured",
+      "probe": "Change the client's roots mid-session and check whether the fixture receives the notification.",
+      "wire": [
+        "notifications/roots/list_changed"
+      ]
+    },
+    "sampling-create-message": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "sampling-create-message",
+      "title": "`sampling/createMessage`",
+      "description": "A server request asking the client's model for a generation, so the server can use an LLM without holding model credentials of its own.",
+      "question": "Can a server borrow the client's model through this framework?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "keywords": "sampling,createMessage,modelPreferences,maxTokens,server-initiated generation",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Have a fixture tool return a sampling request and check whether each adapter routes it to a model and returns the completion."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Sampling inverts the usual direction of control, which is why it is both powerful and rarely implemented.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/sampling#creating-messages",
+      "docs_label": "MCP Docs",
+      "area": "Client features",
+      "measurement_state": "not_measured",
+      "probe": "Have a fixture tool return a sampling request and check whether each adapter routes it to a model and returns the completion.",
+      "wire": [
+        "sampling/createMessage"
+      ]
+    },
+    "sampling-tools": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "sampling-tools",
+      "title": "Sampling `tools` / `toolChoice`",
+      "description": "Request-scoped tool use inside a sampling call, driving a multi-turn tool loop with `tool_use` and `tool_result` content and a `toolUse` stop reason.",
+      "question": "Does the framework run the sampling tool loop, or only single-shot generation?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "keywords": "sampling tools,toolChoice,tool_use,tool_result,multi-turn loop",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Issue a sampling request carrying `tools` and a `toolChoice` mode and check whether each adapter completes the tool loop."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "This was added in the same revision that deprecated sampling, so it is the least likely feature in the protocol to be implemented anywhere. It is catalogued so that absence is recorded rather than assumed.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/sampling#sampling-with-tools",
+      "docs_label": "MCP Docs",
+      "area": "Client features",
+      "measurement_state": "not_measured",
+      "probe": "Issue a sampling request carrying `tools` and a `toolChoice` mode and check whether each adapter completes the tool loop.",
+      "wire": [
+        "sampling/createMessage"
+      ]
+    },
+    "completion-complete": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "completion-complete",
+      "title": "`completion/complete`",
+      "description": "Returns autocomplete suggestions for a prompt argument or a resource template variable, capped at 100 values per response.",
+      "question": "Can the framework ask the server to complete an argument value?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Server utilities"
+      ],
+      "keywords": "completion,autocomplete,ref/prompt,ref/resource,argument suggestions",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Request completions for a fixture prompt argument and a template variable and check whether each adapter exposes the call."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Completion is what makes prompt arguments and resource templates usable by a human rather than only by a program that already knows the valid values.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/completion#requesting-completions",
+      "docs_label": "MCP Docs",
+      "area": "Server utilities",
+      "measurement_state": "not_measured",
+      "probe": "Request completions for a fixture prompt argument and a template variable and check whether each adapter exposes the call.",
+      "wire": [
+        "completion/complete"
+      ]
+    },
+    "logging-notifications": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "logging-notifications",
+      "title": "`notifications/message`",
+      "description": "Structured server log records at RFC 5424 levels, enabled per request through a log level in that request's `_meta`.",
+      "question": "Can a developer see the server's own logs through the framework?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Server utilities"
+      ],
+      "keywords": "logging,notifications/message,log level,RFC 5424,diagnostics",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Set a log level in request `_meta` against the fixture and check whether each adapter surfaces the resulting notifications."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "This is the only channel through which a server explains itself while a call is in flight, and it is the difference between debugging a failing integration and guessing at it. Note that the connection-wide `logging/setLevel` was removed in this revision: log level is now per request, so a framework that sets it once at startup gets nothing.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/logging#log-message-notifications",
+      "docs_label": "MCP Docs",
+      "area": "Server utilities",
+      "measurement_state": "not_measured",
+      "probe": "Set a log level in request `_meta` against the fixture and check whether each adapter surfaces the resulting notifications.",
+      "wire": [
+        "notifications/message"
+      ]
+    },
+    "logging-set-level": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "logging-set-level",
+      "title": "`logging/setLevel`",
+      "description": "A request setting the minimum severity the server should emit for the rest of the session.",
+      "question": "Does this framework let a caller set the server log level?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Server utilities"
+      ],
+      "keywords": "logging,setLevel,log level,notifications/message",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Call logging/setLevel through each adapter and check which notifications the fixture is then asked to emit."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Session-scoped log level is a stateful control. 2026-07-28 replaced it with a per-request `_meta` field.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/logging#setting-log-level",
+      "docs_label": "MCP Docs",
+      "area": "Server utilities",
+      "measurement_state": "not_measured",
+      "probe": "Call logging/setLevel through each adapter and check which notifications the fixture is then asked to emit.",
+      "wire": [
+        "logging/setLevel"
+      ]
+    },
+    "pagination-cursor": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "pagination-cursor",
+      "title": "Cursor pagination",
+      "description": "Opaque forward-only cursor paging on every list operation, where the client passes `cursor` and the server returns `nextCursor`.",
+      "question": "Does the framework follow the cursor, or stop after the first page?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Server utilities"
+      ],
+      "keywords": "pagination,cursor,nextCursor,paging,large catalogues",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Serve a fixture catalogue across several pages and compare each adapter's enumerated set with the full set."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "This failure is quiet and severe: an adapter that ignores `nextCursor` reports a server's first page as its entire catalogue, so tools simply do not exist as far as the agent is concerned. The spec also warns that an empty-string cursor is valid and must not be read as the end.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/pagination#pagination-model",
+      "docs_label": "MCP Docs",
+      "area": "Server utilities",
+      "measurement_state": "not_measured",
+      "probe": "Serve a fixture catalogue across several pages and compare each adapter's enumerated set with the full set.",
+      "wire": [
+        "tools/list",
+        "resources/list",
+        "resources/templates/list",
+        "prompts/list"
+      ]
+    },
+    "tasks-experimental": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "tasks-experimental",
+      "title": "Experimental tasks",
+      "description": "The in-core experimental mechanism for long-running work, using a blocking `tasks/result` call and a `tasks/list` enumeration.",
+      "question": "Does this framework drive a task to completion?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "draft",
+      "categories": [
+        "Server utilities"
+      ],
+      "keywords": "tasks,long running,tasks/result,tasks/list,experimental",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Return a task from a fixture tool and check whether each adapter blocks on tasks/result and surfaces the outcome."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "This is the shape long-running work took before 2026-07-28 moved it into an extension and replaced blocking retrieval with polling.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/tasks",
+      "docs_label": "MCP Docs",
+      "area": "Server utilities",
+      "measurement_state": "not_measured",
+      "probe": "Return a task from a fixture tool and check whether each adapter blocks on tasks/result and surfaces the outcome.",
+      "wire": [
+        "tasks/result",
+        "tasks/list"
+      ]
+    },
+    "cancellation": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "cancellation",
+      "title": "`notifications/cancelled`",
+      "description": "Abandons an in-flight request, signalled by notification on stdio and by closing the response stream on Streamable HTTP.",
+      "question": "Can the agent abandon a call and have the server hear about it?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Base protocol"
+      ],
+      "keywords": "cancellation,notifications/cancelled,requestId,abort,timeout",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Cancel a long-running fixture call on each transport and check what the server observes."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "An agent that stops waiting but never says so leaves the server doing work nobody will read, holding whatever the call was holding. The signalling is transport-specific, so a framework can be correct on one transport and silently wrong on the other.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/patterns/cancellation#cancellation-flow",
+      "docs_label": "MCP Docs",
+      "area": "Base protocol",
+      "measurement_state": "not_measured",
+      "probe": "Cancel a long-running fixture call on each transport and check what the server observes.",
+      "wire": [
+        "notifications/cancelled"
+      ]
+    },
+    "initialize-handshake": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "initialize-handshake",
+      "title": "`initialize`",
+      "description": "The opening exchange in which client and server agree a protocol version and declare their capabilities once for the whole connection.",
+      "question": "Does this framework complete the handshake and act on the negotiated version?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Base protocol"
+      ],
+      "keywords": "initialize,initialized,handshake,capability negotiation,protocolVersion",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Connect each adapter to the fixture and capture the initialize request and result, checking the negotiated version it settles on."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Statefulness starts here. Every capability the rest of the session relies on is settled in this one exchange, which is why 2026-07-28 removed it in favour of per-request metadata.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle#initialization",
+      "docs_label": "MCP Docs",
+      "area": "Base protocol",
+      "measurement_state": "not_measured",
+      "probe": "Connect each adapter to the fixture and capture the initialize request and result, checking the negotiated version it settles on.",
+      "wire": [
+        "initialize",
+        "notifications/initialized"
+      ]
+    },
+    "json-schema-dialect": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "json-schema-dialect",
+      "title": "JSON Schema dialect",
+      "description": "The rule that schemas default to JSON Schema 2020-12 unless a `$schema` field declares another dialect, such as draft-07.",
+      "question": "Does the framework honour the declared dialect, or assume one?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Base protocol",
+        "Tool definition"
+      ],
+      "keywords": "$schema,2020-12,draft-07,dialect,$ref resolution,validation",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Serve fixture tools with a default schema and an explicit draft-07 schema and compare how each adapter validates them."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Dialects disagree about details that change validation outcomes. A framework that assumes 2020-12 will mis-handle a draft-07 schema that says so explicitly, and the resulting failures look like the server sent a bad schema.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic#schema-dialect",
+      "docs_label": "MCP Docs",
+      "area": "Base protocol",
+      "measurement_state": "not_measured",
+      "probe": "Serve fixture tools with a default schema and an explicit draft-07 schema and compare how each adapter validates them.",
+      "wire": [
+        "tools/list"
+      ]
+    },
+    "ping": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "ping",
+      "title": "`ping`",
+      "description": "A liveness check either side may send to confirm the peer is still responsive.",
+      "question": "Does this framework answer or issue a ping?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Base protocol"
+      ],
+      "keywords": "ping,keepalive,liveness,heartbeat",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Send a ping from the fixture and check whether the adapter replies, and whether it issues pings of its own."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "A keepalive matters only for long-lived connections, which is exactly what the stateless 2026-07-28 revision removed.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/ping",
+      "docs_label": "MCP Docs",
+      "area": "Base protocol",
+      "measurement_state": "not_measured",
+      "probe": "Send a ping from the fixture and check whether the adapter replies, and whether it issues pings of its own.",
+      "wire": [
+        "ping"
+      ]
+    },
+    "progress-notifications": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "progress-notifications",
+      "title": "`notifications/progress`",
+      "description": "Server-pushed progress updates for a request that opted in by supplying a progress token, reporting a monotonically increasing value with an optional total and message.",
+      "question": "Can the agent observe progress on a long-running call?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Base protocol"
+      ],
+      "keywords": "progress,progressToken,long running,notifications/progress",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Emit progress from a slow fixture tool and check whether each adapter sends a token and surfaces the updates."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Without it every slow tool is indistinguishable from a hung one, and the only tuning available is the timeout. The client has to send the token first, so this is a capability the framework must actively opt into.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/patterns/progress#progress-flow",
+      "docs_label": "MCP Docs",
+      "area": "Base protocol",
+      "measurement_state": "not_measured",
+      "probe": "Emit progress from a slow fixture tool and check whether each adapter sends a token and surfaces the updates.",
+      "wire": [
+        "notifications/progress"
+      ]
+    },
+    "session-identifier": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "session-identifier",
+      "title": "`Mcp-Session-Id`",
+      "description": "A server-minted session header that binds subsequent Streamable HTTP requests to server-side state.",
+      "question": "Does this framework return the session header on later requests?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Transports"
+      ],
+      "keywords": "session,Mcp-Session-Id,sticky routing,stateful,streamable http",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Issue a session-minting response from the fixture and check whether the adapter echoes the header on its next request."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Sessions force sticky routing and a shared session store on every deployment. 2026-07-28 removed them outright, so support here is a marker of the older era.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#session-management",
+      "docs_label": "MCP Docs",
+      "area": "Transports",
+      "measurement_state": "not_measured",
+      "probe": "Issue a session-minting response from the fixture and check whether the adapter echoes the header on its next request.",
+      "wire": [
+        "Mcp-Session-Id"
+      ]
+    },
+    "sse-resumability": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "sse-resumability",
+      "title": "`Last-Event-ID` resumability",
+      "description": "Stream resumption in which a client reconnects with the last event id it saw and the server redelivers what it missed.",
+      "question": "Does this framework resume a broken stream rather than losing the request?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Transports"
+      ],
+      "keywords": "resumability,Last-Event-ID,SSE,redelivery,reconnect",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Break the fixture's response stream mid-call and check whether the adapter reconnects with Last-Event-ID."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Redelivery is the difference between a dropped connection costing nothing and costing an in-flight call. 2026-07-28 removed it, making every broken stream a lost request.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#resumability-and-redelivery",
+      "docs_label": "MCP Docs",
+      "area": "Transports",
+      "measurement_state": "not_measured",
+      "probe": "Break the fixture's response stream mid-call and check whether the adapter reconnects with Last-Event-ID.",
+      "wire": [
+        "Last-Event-ID"
+      ]
+    },
+    "transport-http-sse": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "transport-http-sse",
+      "title": "HTTP+SSE transport",
+      "description": "The original two-endpoint HTTP transport, superseded by Streamable HTTP and kept only for backwards compatibility.",
+      "question": "Does this framework still connect over the legacy transport?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "deprecated",
+      "categories": [
+        "Transports"
+      ],
+      "keywords": "HTTP+SSE,legacy transport,deprecated transport,sse endpoint",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Serve the fixture over the legacy two-endpoint transport and check whether each adapter completes a request."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Deprecated since 2025-03-26 but still widely deployed, so whether an adapter can reach an old server is a real migration question.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#backwards-compatibility",
+      "docs_label": "MCP Docs",
+      "area": "Transports",
+      "measurement_state": "not_measured",
+      "probe": "Serve the fixture over the legacy two-endpoint transport and check whether each adapter completes a request.",
+      "wire": [
+        "GET /sse",
+        "POST /messages"
+      ]
+    },
+    "transport-stdio": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "transport-stdio",
+      "title": "stdio transport",
+      "description": "Newline-delimited JSON-RPC over the standard streams of a subprocess the client launches.",
+      "question": "Can the framework talk to a local subprocess server?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Transports"
+      ],
+      "keywords": "stdio,subprocess,newline delimited,local server,transport",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Connect each adapter to the fixture over stdio and confirm a completed request."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "This is how nearly every local MCP server is run, and how this project's own fixture is scanned. It is the baseline transport row.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports/stdio",
+      "docs_label": "MCP Docs",
+      "area": "Transports",
+      "measurement_state": "not_measured",
+      "probe": "Connect each adapter to the fixture over stdio and confirm a completed request.",
+      "wire": [
+        "stdio"
+      ]
+    },
+    "transport-streamable-http": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "transport-streamable-http",
+      "title": "Streamable HTTP transport",
+      "description": "One HTTP POST per message to a single endpoint, answered with a JSON object or a request-scoped SSE stream, and carrying the required `Mcp-Method` and `Mcp-Name` headers.",
+      "question": "Can the framework talk to a remote server on this revision's terms?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Transports"
+      ],
+      "keywords": "streamable http,POST,SSE,Mcp-Method,Mcp-Name,remote server",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Connect each adapter to the fixture over Streamable HTTP and inspect the outgoing headers and stream handling."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Every remote MCP server uses this transport, and 2026-07-28 changed it substantially: sessions and the `Mcp-Session-Id` header are gone, SSE resumability is gone, and two new headers are required. An adapter written for the old shape may connect and still be non-conformant.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports/streamable-http",
+      "docs_label": "MCP Docs",
+      "area": "Transports",
+      "measurement_state": "not_measured",
+      "probe": "Connect each adapter to the fixture over Streamable HTTP and inspect the outgoing headers and stream handling.",
+      "wire": [
+        "streamable-http"
+      ]
+    },
+    "authorization-oauth": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "authorization-oauth",
+      "title": "OAuth 2.1 authorization",
+      "description": "Transport-level OAuth 2.1 for HTTP transports, including the RFC 8707 `resource` parameter on both authorization and token requests.",
+      "question": "Can the framework authorize against a protected MCP server?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Authorization"
+      ],
+      "keywords": "oauth,oauth 2.1,bearer token,access token,resource parameter,RFC 8707",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Point each adapter at an OAuth-protected fixture and inspect the authorization requests it makes."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "Almost every hosted MCP server is protected, so this row decides whether a framework can reach real servers or only local ones. The `resource` parameter is what binds a token to one server; omitting it produces tokens that a careful server will refuse and a careless one will over-accept.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization#protocol-requirements",
+      "docs_label": "MCP Docs",
+      "area": "Authorization",
+      "measurement_state": "not_measured",
+      "probe": "Point each adapter at an OAuth-protected fixture and inspect the authorization requests it makes.",
+      "wire": [
+        "Authorization"
+      ]
+    },
+    "authorization-resource-metadata": {
+      "schema": "mcp-mirror/capability@3",
+      "id": "authorization-resource-metadata",
+      "title": "Protected Resource Metadata",
+      "description": "RFC 9728 discovery, where the server advertises its authorization server through a `WWW-Authenticate` challenge and clients follow it rather than being configured by hand.",
+      "question": "Does the framework discover the authorization server from the challenge?",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "status": "stable",
+      "categories": [
+        "Authorization"
+      ],
+      "keywords": "RFC 9728,protected resource metadata,WWW-Authenticate,discovery,scope,step-up",
+      "stats": {
+        "crewai": {
+          "1.15.1": "u"
+        },
+        "langchain": {
+          "0.3.2": "u"
+        },
+        "openai-agents": {
+          "0.22.0": "u"
+        },
+        "pydantic-ai": {
+          "2.40.0": "u"
+        },
+        "mastra": {
+          "1.17.3": "u"
+        }
+      },
+      "notes": "No scan produces this row yet, so every cell is unmeasured. It is published because the specification defines the feature, not because anything is known about how these frameworks handle it.",
+      "notes_by_num": {},
+      "verdict": {
+        "code": "u",
+        "headline": "Not yet measured.",
+        "detail": "Return a `WWW-Authenticate` challenge with `resource_metadata` from the fixture and check whether each adapter follows it."
+      },
+      "usage_perc_y": null,
+      "usage_perc_a": null,
+      "usage_note": null,
+      "why": "This is what makes connecting to an unfamiliar protected server possible without out-of-band setup. A framework that requires hand-configured endpoints cannot connect to a server it was not told about in advance, and cannot handle a step-up scope challenge when one arrives.",
+      "reproduce": "",
+      "measured": {
+        "run_date": null,
+        "mcp_spec": "2025-11-25",
+        "fixture": null
+      },
+      "shown": true,
+      "spec_label": "MCP 2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization#authorization-server-discovery",
+      "docs_label": "MCP Docs",
+      "area": "Authorization",
+      "measurement_state": "not_measured",
+      "probe": "Return a `WWW-Authenticate` challenge with `resource_metadata` from the fixture and check whether each adapter follows it.",
+      "wire": [
+        "WWW-Authenticate"
+      ]
+    }
+  }
+}

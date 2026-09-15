@@ -1,0 +1,64 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "tool-icons",
+  "title": "`icons`",
+  "description": "An optional array of display icons on a tool definition, each with a source URL, MIME type and size list.",
+  "question": "Does the tool's icon set reach the agent's tool definition?",
+  "spec": "https://modelcontextprotocol.io/specification/2026-07-28",
+  "status": "stable",
+  "categories": [
+    "Tool definition"
+  ],
+  "keywords": "icons,icon,src,mimeType,sizes,tool display,branding",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "n #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "n #4"
+    },
+    "mastra": {
+      "1.17.3": "x #5"
+    }
+  },
+  "notes": "Neither adapter that reaches 2026-07-28 exposes a tool icon set, and neither retains one in metadata; 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "OpenAI Agents SDK 0.22.0: the agents package contains no reference to icons. FunctionTool keeps the MCP title only.",
+    "4": "Pydantic AI 2.40.0: pydantic_ai.mcp declares icons on its resource type only. ToolDefinition has no icon field, so tool icons are dropped.",
+    "5": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "n",
+    "headline": "Destroyed by both adapters that reach 2026-07-28.",
+    "detail": "Pydantic AI models icons for resources but not for tools, so the omission is specific to the tool definition rather than a gap in its MCP typing. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#tool",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "Icons are the one part of a tool definition aimed at a human rather than a model. A framework that drops them removes the server's only way to identify its tools visually in any UI built on top of the adapter.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5 --spec-version 2026-07-28",
+  "measured": {
+    "run_date": "2026-09-11",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2026-07-28",
+  "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#tool",
+  "docs_label": "MCP Docs"
+}

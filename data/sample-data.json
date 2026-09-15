@@ -1,16 +1,10 @@
 {
   "schema": "mcp-mirror/data@1.0",
-  "updated": "2026-09-04",
-  "mcp_spec": "2025-11-25",
+  "updated": "2026-09-06",
+  "mcp_spec": "2026-07-28",
   "repo": "https://github.com/thierrypdamiba/mcp-mirror",
   "eras": {
-    "e-3": "3 release(s) before current",
-    "e-2": "2 release(s) before current",
-    "e-1": "1 release(s) before current",
-    "e0": "current release",
-    "e1": "1 release(s) after current",
-    "e2": "2 release(s) after current",
-    "e3": "3 release(s) after current"
+    "e0": "current release"
   },
   "agents": {
     "crewai": {
@@ -26,50 +20,22 @@
         "capture_object": "CrewAI BaseTool name, description, and args_schema",
         "capture_stage": "framework_tool_definition",
         "provider_request_captured": false,
-        "negotiated_mcp_spec_version": "2025-11-25",
-        "protocol_version_evidence": "protocolVersion instrumented from ClientSession.initialize inside MCPServerAdapter"
+        "negotiated_mcp_spec_version": null,
+        "protocol_version_evidence": "Dependency resolution rejects mcp 2.0.0 before the adapter can run."
       },
-      "current_version": "1.14.7",
+      "current_version": "1.15.1",
       "stable_version": "1.15.1",
       "dev_version": null,
       "version_list": [
         {
-          "version": "1.14.4",
-          "release_date": "2026-04-30T19:12:43Z",
-          "era": -3,
-          "release_date_unix": 1777576363
-        },
-        {
-          "version": "1.14.5",
-          "release_date": "2026-05-18T19:20:51Z",
-          "era": -2,
-          "release_date_unix": 1779132051
-        },
-        {
-          "version": "1.14.6",
-          "release_date": "2026-05-28T17:05:44Z",
-          "era": -1,
-          "release_date_unix": 1779987944
-        },
-        {
-          "version": "1.14.7",
-          "release_date": "2026-06-11T17:14:49Z",
-          "era": 0,
-          "release_date_unix": 1781198089
-        },
-        {
-          "version": "1.15.0",
-          "release_date": "2026-06-25T23:18:37Z",
-          "era": 1,
-          "release_date_unix": 1782429517
-        },
-        {
           "version": "1.15.1",
+          "era": 0,
           "release_date": "2026-06-27T06:51:32Z",
-          "era": 2,
           "release_date_unix": 1782543092
         }
-      ]
+      ],
+      "measurement_status": "sdk_incompatible",
+      "measurement_note": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session."
     },
     "langchain": {
       "name": "LangChain",
@@ -84,50 +50,22 @@
         "capture_object": "OpenAI-compatible function-tool dictionary",
         "capture_stage": "provider_format",
         "provider_request_captured": false,
-        "negotiated_mcp_spec_version": "2025-11-25",
-        "protocol_version_evidence": "protocolVersion returned by ClientSession.initialize inside the langchain-mcp-adapters session"
+        "negotiated_mcp_spec_version": null,
+        "protocol_version_evidence": "Dependency resolution rejects mcp 2.0.0 before the adapter can run."
       },
-      "current_version": "0.3.0",
+      "current_version": "0.3.2",
       "stable_version": "0.3.2",
       "dev_version": null,
       "version_list": [
         {
-          "version": "0.2.0",
-          "release_date": "2025-12-09T12:57:55Z",
-          "era": -3,
-          "release_date_unix": 1765285075
-        },
-        {
-          "version": "0.2.1",
-          "release_date": "2025-12-09T16:28:37Z",
-          "era": -2,
-          "release_date_unix": 1765297717
-        },
-        {
-          "version": "0.2.2",
-          "release_date": "2026-03-16T17:13:29Z",
-          "era": -1,
-          "release_date_unix": 1773681209
-        },
-        {
-          "version": "0.3.0",
-          "release_date": "2026-06-10T01:10:27Z",
-          "era": 0,
-          "release_date_unix": 1781053827
-        },
-        {
-          "version": "0.3.1",
-          "release_date": "2026-07-27T18:36:44Z",
-          "era": 1,
-          "release_date_unix": 1785177404
-        },
-        {
           "version": "0.3.2",
+          "era": 0,
           "release_date": "2026-08-06T06:15:02Z",
-          "era": 2,
           "release_date_unix": 1785996902
         }
-      ]
+      ],
+      "measurement_status": "sdk_incompatible",
+      "measurement_note": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session."
     },
     "openai-agents": {
       "name": "OpenAI Agents SDK",
@@ -142,38 +80,22 @@
         "capture_object": "agents.tool.FunctionTool",
         "capture_stage": "framework_tool_definition",
         "provider_request_captured": false,
-        "negotiated_mcp_spec_version": "2025-11-25",
-        "protocol_version_evidence": "protocolVersion exposed by MCPServer.server_initialize_result"
+        "negotiated_mcp_spec_version": "2026-07-28",
+        "protocol_version_evidence": "protocol version exposed by the MCPServer client session"
       },
-      "current_version": "0.20.0",
+      "current_version": "0.22.0",
       "stable_version": "0.22.0",
       "dev_version": null,
       "version_list": [
         {
-          "version": "0.20.0",
-          "release_date": "2026-08-11T03:12:47Z",
-          "era": 0,
-          "release_date_unix": 1786417967
-        },
-        {
-          "version": "0.21.0",
-          "release_date": "2026-08-15T02:50:08Z",
-          "era": 1,
-          "release_date_unix": 1786762208
-        },
-        {
-          "version": "0.21.1",
-          "release_date": "2026-08-16T22:29:33Z",
-          "era": 2,
-          "release_date_unix": 1786919373
-        },
-        {
           "version": "0.22.0",
+          "era": 0,
           "release_date": "2026-08-19T13:45:19Z",
-          "era": 3,
           "release_date_unix": 1787147119
         }
-      ]
+      ],
+      "measurement_status": "measured",
+      "measurement_note": "Measured through the real OpenAI Agents SDK adapter."
     },
     "pydantic-ai": {
       "name": "Pydantic AI",
@@ -188,50 +110,21 @@
         "capture_object": "pydantic_ai.tools.ToolDefinition",
         "capture_stage": "framework_tool_definition",
         "provider_request_captured": false,
-        "negotiated_mcp_spec_version": "2025-11-25",
-        "protocol_version_evidence": "protocolVersion exposed by MCPToolset.client.initialize_result"
+        "negotiated_mcp_spec_version": "2026-07-28",
+        "protocol_version_evidence": "protocol version exposed by MCPToolset.client"
       },
-      "current_version": "1.107.0",
-      "stable_version": "2.1.0",
+      "current_version": "2.40.0",
+      "stable_version": "2.40.0",
       "dev_version": null,
       "version_list": [
         {
-          "version": "1.104.0",
-          "release_date": "2026-05-29T04:52:27Z",
-          "era": -3,
-          "release_date_unix": 1780030347
-        },
-        {
-          "version": "1.105.0",
-          "release_date": "2026-06-02T06:19:52Z",
-          "era": -2,
-          "release_date_unix": 1780381192
-        },
-        {
-          "version": "1.106.0",
-          "release_date": "2026-06-05T01:28:59Z",
-          "era": -1,
-          "release_date_unix": 1780622939
-        },
-        {
-          "version": "1.107.0",
-          "release_date": "2026-06-10T14:53:03Z",
+          "version": "2.40.0",
           "era": 0,
-          "release_date_unix": 1781103183
-        },
-        {
-          "version": "2.0.0",
-          "release_date": "2026-06-23T15:48:51Z",
-          "era": 1,
-          "release_date_unix": 1782229731
-        },
-        {
-          "version": "2.1.0",
-          "release_date": "2026-06-29T09:51:11Z",
-          "era": 2,
-          "release_date_unix": 1782726671
+          "release_date_unix": null
         }
-      ]
+      ],
+      "measurement_status": "measured",
+      "measurement_note": "Measured through the real Pydantic AI MCPToolset adapter."
     },
     "mastra": {
       "name": "Mastra",
@@ -247,42 +140,26 @@
         "capture_stage": "framework_tool_definition",
         "provider_request_captured": false,
         "negotiated_mcp_spec_version": "2025-11-25",
-        "protocol_version_evidence": "protocolVersion observed from the pinned @modelcontextprotocol/client instance used by MCPClient.listTools"
+        "protocol_version_evidence": "protocolVersion observed from the pinned @modelcontextprotocol/sdk client used by MCPClient.listTools"
       },
       "current_version": "1.17.3",
       "stable_version": "1.17.3",
       "dev_version": null,
       "version_list": [
         {
-          "version": "1.17.0",
-          "release_date": "2026-08-19T04:09:11Z",
-          "era": -3,
-          "release_date_unix": 1787112551
-        },
-        {
-          "version": "1.17.1",
-          "release_date": "2026-08-21T01:17:44Z",
-          "era": -2,
-          "release_date_unix": 1787275064
-        },
-        {
-          "version": "1.17.2",
-          "release_date": "2026-08-26T10:55:03Z",
-          "era": -1,
-          "release_date_unix": 1787741703
-        },
-        {
           "version": "1.17.3",
-          "release_date": "2026-09-03T04:14:30Z",
           "era": 0,
+          "release_date": "2026-09-03T04:14:30Z",
           "release_date_unix": 1788408870
         }
-      ]
+      ],
+      "measurement_status": "protocol_mismatch",
+      "measurement_note": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
     }
   },
   "statuses": {
     "stable": {
-      "short": "MCP 2025-11-25",
+      "short": "MCP 2026-07-28",
       "label": "Defined in the released MCP specification"
     },
     "draft": {
@@ -292,390 +169,273 @@
     "proposed": {
       "short": "proposed",
       "label": "Proposed, not yet in any published specification"
+    },
+    "deprecated": {
+      "short": "deprecated",
+      "label": "Defined in the released MCP specification but deprecated in this revision, and eligible for removal no earlier than the first revision released on or after 2027-07-28"
+    },
+    "extension": {
+      "short": "extension",
+      "label": "Defined in an official opt-in extension rather than the core specification, and disabled unless both sides negotiate it"
     }
   },
   "support_codes": {
-    "y": "present at the declared capture boundary",
-    "a": "changed at the boundary or retained elsewhere",
-    "n": "dropped during adaptation",
+    "y": "exposed to the agent at the declared capture boundary",
+    "a": "changed at the boundary or reachable only elsewhere",
+    "n": "not exposed to the agent",
+    "x": "the adapter cannot negotiate this protocol revision, so no capability is reachable",
     "u": "not yet measured"
   },
   "defaults": {
     "inclusion_rule": "A framework is listed if it ships a first-party or officially documented MCP adapter. Nothing is excluded on quality grounds.",
     "order_rule": "Alphabetical within language group. No ranking is implied or computed.",
-    "version_policy": "Era 0 is the release actually measured. Surrounding releases come from the package registry (PyPI, npm) and are shown as not yet measured until a scan covers them.",
-    "green_rule": "A cell is 'y' only if the value is present in the tool definition at that framework's declared capture boundary. Nothing else counts.",
-    "partial_rule": "'a' means the capability is not present unchanged: the note must say whether it was transformed at the boundary, only partly preserved, or retained elsewhere by the framework.",
+    "version_policy": "Era 0 is the framework release tested for this protocol snapshot. An unmeasured cell means no same-protocol adapter capture was produced.",
+    "green_rule": "Every cell answers one question: does this framework expose this MCP capability to the agent at its declared capture boundary? For a value carried in a tool definition, 'y' means the value is present there unchanged. For a protocol feature, 'y' means the adapter gives the agent a working path to it and a scan exercised that path. A capability the framework could support but does not is not 'y'.",
+    "partial_rule": "'a' means the capability is reachable but not on the terms the specification sets: the note must say whether the value was transformed at the boundary, only partly preserved, retained somewhere the agent does not read, or supported only for part of the feature.",
+    "surface_rule": "surface.json enumerates what MCP 2026-07-28 defines, and it is maintained separately from what we have measured. Any feature in it without a capability file is published with every cell 'u'. Coverage is therefore computed from the two files rather than asserted, and a feature cannot be quietly dropped from the denominator to make coverage look better.",
     "note_rule": "Every 'a' and 'n' cell must carry a #n note reference naming the exact mechanism, so a status can be checked rather than trusted.",
     "usage_rule": "No adoption weighting is published. We have no defensible source yet, and an invented percentage would be the least trustworthy number on the page."
   },
-  "popularity": {
-    "schema": "mcp-mirror/popularity@1",
-    "mode": "mock",
-    "generated_at": "2026-09-04T00:00:00Z",
-    "windows": [
-      "hour",
-      "day",
-      "week",
-      "month",
-      "quarter",
-      "year",
-      "all_time"
-    ],
-    "entries": [
+  "popularity": null,
+  "coverage": {
+    "revision": "2026-07-28",
+    "catalogued": true,
+    "source": "https://modelcontextprotocol.io/specification/2026-07-28",
+    "measured": 36,
+    "total": 66,
+    "by_area": [
       {
-        "capability_id": "tool-name",
-        "counts": {
-          "hour": [
-            12,
-            11
-          ],
-          "day": [
-            100,
-            90
-          ],
-          "week": [
-            800,
-            700
-          ],
-          "month": [
-            3300,
-            3000
-          ],
-          "quarter": [
-            9800,
-            9000
-          ],
-          "year": [
-            39000,
-            35000
-          ],
-          "all_time": [
-            82000,
-            76000
-          ]
-        }
+        "area": "Tool definition",
+        "measured": 20,
+        "total": 21
       },
       {
-        "capability_id": "required",
-        "counts": {
-          "hour": [
-            40,
-            20
-          ],
-          "day": [
-            50,
-            100
-          ],
-          "week": [
-            650,
-            500
-          ],
-          "month": [
-            2900,
-            2700
-          ],
-          "quarter": [
-            8700,
-            8200
-          ],
-          "year": [
-            35000,
-            33000
-          ],
-          "all_time": [
-            76000,
-            71000
-          ]
-        }
+        "area": "Tool results",
+        "measured": 9,
+        "total": 11
       },
       {
-        "capability_id": "nested-objects",
-        "counts": {
-          "hour": [
-            18,
-            30
-          ],
-          "day": [
-            140,
-            70
-          ],
-          "week": [
-            560,
-            600
-          ],
-          "month": [
-            3100,
-            2400
-          ],
-          "quarter": [
-            7400,
-            7900
-          ],
-          "year": [
-            32000,
-            28000
-          ],
-          "all_time": [
-            69000,
-            65000
-          ]
-        }
+        "area": "Resources",
+        "measured": 4,
+        "total": 6
       },
       {
-        "capability_id": "description-fidelity",
-        "counts": {
-          "hour": [
-            22,
-            21
-          ],
-          "day": [
-            90,
-            120
-          ],
-          "week": [
-            900,
-            450
-          ],
-          "month": [
-            2500,
-            2600
-          ],
-          "quarter": [
-            9100,
-            7000
-          ],
-          "year": [
-            30000,
-            31000
-          ],
-          "all_time": [
-            64000,
-            60000
-          ]
-        }
+        "area": "Prompts",
+        "measured": 3,
+        "total": 4
       },
       {
-        "capability_id": "arrays-of-objects",
-        "counts": {
-          "hour": [
-            30,
-            10
-          ],
-          "day": [
-            80,
-            70
-          ],
-          "week": [
-            400,
-            300
-          ],
-          "month": [
-            3500,
-            1800
-          ],
-          "quarter": [
-            6900,
-            6200
-          ],
-          "year": [
-            28000,
-            23000
-          ],
-          "all_time": [
-            59000,
-            54000
-          ]
-        }
+        "area": "Client features",
+        "measured": 0,
+        "total": 5
       },
       {
-        "capability_id": "enum",
-        "counts": {
-          "hour": [
-            15,
-            12
-          ],
-          "day": [
-            160,
-            80
-          ],
-          "week": [
-            500,
-            480
-          ],
-          "month": [
-            2100,
-            1700
-          ],
-          "quarter": [
-            10000,
-            5000
-          ],
-          "year": [
-            26000,
-            25000
-          ],
-          "all_time": [
-            52000,
-            49000
-          ]
-        }
+        "area": "Server utilities",
+        "measured": 0,
+        "total": 4
       },
       {
-        "capability_id": "format",
-        "counts": {
-          "hour": [
-            10,
-            25
-          ],
-          "day": [
-            110,
-            105
-          ],
-          "week": [
-            750,
-            500
-          ],
-          "month": [
-            2000,
-            2200
-          ],
-          "quarter": [
-            6100,
-            5900
-          ],
-          "year": [
-            34000,
-            17000
-          ],
-          "all_time": [
-            47000,
-            45000
-          ]
-        }
+        "area": "Base protocol",
+        "measured": 0,
+        "total": 8
       },
       {
-        "capability_id": "destructive-hint",
-        "counts": {
-          "hour": [
-            11,
-            10
-          ],
-          "day": [
-            70,
-            65
-          ],
-          "week": [
-            300,
-            290
-          ],
-          "month": [
-            1800,
-            1700
-          ],
-          "quarter": [
-            5200,
-            5000
-          ],
-          "year": [
-            21000,
-            20000
-          ],
-          "all_time": [
-            41000,
-            39000
-          ]
-        }
+        "area": "Transports",
+        "measured": 0,
+        "total": 2
+      },
+      {
+        "area": "Authorization",
+        "measured": 0,
+        "total": 2
+      },
+      {
+        "area": "Extensions",
+        "measured": 0,
+        "total": 3
       }
+    ],
+    "note": "The feature surface of MCP 2026-07-28, enumerated from the released specification. This file is the denominator: it is what the protocol defines, independent of what we have measured. A feature with a hand-authored file in capabilities/ is measured; every other feature is published as a row whose cells are all 'u'. Coverage is therefore a fact the build computes, not a claim the site makes.",
+    "omissions": [
+      "Skills over MCP is not listed. The spec index advertises it, but /extensions/skills/overview 404s and the only published material is a working-group charter, so there is no wire contract to measure against.",
+      "Features removed in this revision (initialize, ping, logging/setLevel, resources/subscribe, notifications/roots/list_changed, Mcp-Session-Id, SSE resumability) are absent by design. They belong to the 2025-11-25 snapshot, not this one."
     ]
   },
   "cats": {
-    "Structure": [
-      "arrays-of-objects",
-      "nested-objects",
-      "one-of-any-of"
-    ],
     "Identity and text": [
+      "tool-name",
       "description-fidelity",
-      "long-descriptions",
-      "tool-name"
+      "long-descriptions"
     ],
     "Tool annotations": [
+      "title-annotation",
+      "read-only-hint",
       "destructive-hint",
       "idempotent-hint",
-      "open-world-hint",
-      "read-only-hint",
-      "title-annotation"
+      "open-world-hint"
     ],
     "Parameter contract": [
+      "required",
       "enum",
       "format",
+      "default-value",
       "numeric-range",
-      "required"
+      "null-acceptance",
+      "property-descriptions",
+      "additional-properties"
+    ],
+    "Descriptions": [
+      "property-descriptions"
+    ],
+    "Structure": [
+      "additional-properties",
+      "nested-objects",
+      "arrays-of-objects",
+      "one-of-any-of"
+    ],
+    "Tool definition": [
+      "tool-icons",
+      "x-mcp-header",
+      "json-schema-dialect"
+    ],
+    "Tool results": [
+      "tools-call",
+      "tool-output-schema",
+      "structured-content",
+      "tool-text-content",
+      "tool-image-content",
+      "tool-audio-content",
+      "resource-link-content",
+      "embedded-resource-content",
+      "tool-execution-errors",
+      "content-annotations",
+      "tools-list-changed"
+    ],
+    "Resources": [
+      "resource-link-content",
+      "embedded-resource-content",
+      "content-annotations",
+      "resources-list",
+      "resources-read",
+      "resource-templates",
+      "resource-binary-contents",
+      "resources-list-changed",
+      "resource-subscriptions"
+    ],
+    "Prompts": [
+      "prompts-list",
+      "prompts-get",
+      "prompt-arguments",
+      "prompts-list-changed"
+    ],
+    "Client features": [
+      "elicitation-form-mode",
+      "elicitation-url-mode",
+      "sampling-create-message",
+      "sampling-tools",
+      "roots-list",
+      "mrtr-input-required"
+    ],
+    "Server utilities": [
+      "completion-complete",
+      "logging-notifications",
+      "pagination-cursor",
+      "caching-hints"
+    ],
+    "Base protocol": [
+      "server-discover",
+      "per-request-metadata",
+      "result-type",
+      "mrtr-input-required",
+      "progress-notifications",
+      "cancellation",
+      "subscriptions-listen",
+      "json-schema-dialect"
+    ],
+    "Transports": [
+      "transport-stdio",
+      "transport-streamable-http"
+    ],
+    "Authorization": [
+      "authorization-oauth",
+      "authorization-resource-metadata"
+    ],
+    "Extensions": [
+      "extension-negotiation",
+      "extension-tasks",
+      "extension-apps"
     ]
   },
   "data": {
-    "arrays-of-objects": {
+    "tool-name": {
       "schema": "mcp-mirror/capability@3",
-      "id": "arrays-of-objects",
-      "title": "Arrays of Objects",
-      "description": "A list parameter whose items are structured objects.",
-      "question": "Do arrays of structured items survive to each capture boundary?",
-      "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+      "id": "tool-name",
+      "title": "`name`",
+      "description": "The identifier a downstream consumer uses to invoke the tool.",
+      "question": "Is the tool name unchanged at each capture boundary?",
+      "spec": "https://modelcontextprotocol.io/specification",
       "status": "stable",
       "categories": [
-        "Structure"
+        "Identity and text"
       ],
-      "keywords": "array,items,list,structure",
+      "keywords": "name,tool name,namespace,prefix,identifier",
       "stats": {
         "crewai": {
-          "1.14.7": "y"
+          "1.15.1": "x #1"
         },
         "langchain": {
-          "0.3.0": "y"
+          "0.3.2": "x #2"
         },
         "openai-agents": {
-          "0.20.0": "y"
+          "0.22.0": "y"
         },
         "pydantic-ai": {
-          "1.107.0": "y"
+          "2.40.0": "y"
         },
         "mastra": {
-          "1.17.3": "y"
+          "1.17.3": "x #3"
         }
       },
-      "notes": "Measured as present at every declared framework capture boundary.",
-      "notes_by_num": {},
+      "notes": "Exposed by both adapters that reach 2026-07-28; 3 cannot reach the revision.",
+      "notes_by_num": {
+        "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+        "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+        "3": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+      },
       "verdict": {
         "code": "y",
-        "headline": "Survives to all five declared capture boundaries.",
-        "detail": "Item schemas remain intact in every captured tool definition."
+        "headline": "Exposed by both adapters that reach 2026-07-28; 3 cannot reach the revision.",
+        "detail": "OpenAI Agents SDK 0.22.0 and Pydantic AI 2.40.0 expose it at the declared capture boundary. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
       },
       "usage_perc_y": null,
       "usage_perc_a": null,
       "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
       "links": [
         {
-          "url": "https://json-schema.org/understanding-json-schema/reference/array#items",
-          "title": "JSON Schema Docs"
+          "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#tool-names",
+          "title": "MCP Docs"
         },
         {
           "url": "https://platform.openai.com/docs/guides/function-calling",
           "title": "OpenAI function calling, tool schema"
         }
       ],
-      "known_issues": [],
-      "why": "Item schema loss can let a downstream model produce malformed list entries.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
+      "known_issues": [
+        "A prefixed name changes between server configurations, so a hard coded allowlist can silently stop matching."
+      ],
+      "why": "Name based routing, allowlists, and eval fixtures that match exact tool names break under prefixing.",
+      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J1 --spec-version 2026-07-28",
       "measured": {
-        "run_date": "2026-09-04",
-        "mcp_spec": "2025-11-25",
+        "run_date": "2026-09-06",
+        "mcp_spec": "2026-07-28",
         "fixture": "fixtures/tricky_server.py"
       },
       "shown": true,
-      "spec_label": "JSON Schema 2020-12",
-      "docs_url": "https://json-schema.org/understanding-json-schema/reference/array#items",
-      "docs_label": "JSON Schema Docs"
+      "spec_label": "MCP 2026-07-28",
+      "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#tool-names",
+      "docs_label": "MCP Docs",
+      "area": "Tool definition",
+      "measurement_state": "measured"
     }
   }
 }

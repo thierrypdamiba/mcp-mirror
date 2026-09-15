@@ -129,15 +129,6 @@ export function MoonIcon(props: IconProps) {
   );
 }
 
-export function SearchIcon(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <circle cx="11" cy="11" r="6" />
-      <path d="m16 16 4 4" />
-    </svg>
-  );
-}
-
 export function StarIcon({
   filled = false,
   ...props

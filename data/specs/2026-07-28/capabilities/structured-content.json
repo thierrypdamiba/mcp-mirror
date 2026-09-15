@@ -1,0 +1,64 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "structured-content",
+  "title": "`structuredContent`",
+  "description": "A JSON result value returned alongside `content`, conforming to the tool's `outputSchema` when one is declared.",
+  "question": "Does the agent receive the structured value, or only its text rendering?",
+  "spec": "https://modelcontextprotocol.io/specification/2026-07-28",
+  "status": "stable",
+  "categories": [
+    "Tool results"
+  ],
+  "keywords": "structuredContent,structured content,json result,typed result",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "n #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "n #4"
+    },
+    "mastra": {
+      "1.17.3": "x #5"
+    }
+  },
+  "notes": "Both adapters that reach 2026-07-28 drop the typed value for a mixed-content result, each for a different reason; 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "OpenAI Agents SDK 0.22.0: `structuredContent` is used only when the server object sets `use_structured_content`, which is off by default. With the default the typed value is dropped and only the text mirror reaches the agent.",
+    "4": "Pydantic AI 2.40.0: `structuredContent` is returned only when every content part is text. A result that also carries an image or audio block loses the typed value entirely.",
+    "5": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "n",
+    "headline": "Dropped by both adapters that reach 2026-07-28.",
+    "detail": "Neither drop is unconditional, which makes this harder to notice than a flat refusal: OpenAI Agents SDK 0.22.0 needs an opt-in flag, and Pydantic AI 2.40.0 silently skips the typed value as soon as the result is not all text. In both cases the agent gets characters where the server offered structure. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#structured-content",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "The spec asks servers to mirror structured results into a text block for backwards compatibility. That mirror makes a dropped `structuredContent` invisible: the call still looks successful, and typed data quietly becomes a string the model has to re-parse.",
+  "reproduce": "python scripts/measure_results.py",
+  "measured": {
+    "run_date": "2026-09-11",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2026-07-28",
+  "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#structured-content",
+  "docs_label": "MCP Docs"
+}

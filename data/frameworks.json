@@ -3,22 +3,31 @@
   "updated": "2026-09-04",
   "mcp_spec": "2025-11-25",
   "repo": "https://github.com/thierrypdamiba/mcp-mirror",
-
   "_shape": "Mirrors the caniuse data model. Agents (their browsers) carry a version_list with an era index and a release date, and capability files carry stats as a version to support-code map. Era 0 is the release we measured, negative is older, positive is newer. Versions with no entry in a capability's stats render as not yet measured.",
-
   "statuses": {
-    "stable":   { "short": "MCP 2025-11-25", "label": "Defined in the released MCP specification" },
-    "draft":    { "short": "MCP draft",      "label": "Defined only in a draft revision of the MCP specification" },
-    "proposed": { "short": "proposed",       "label": "Proposed, not yet in any published specification" }
+    "stable": {
+      "short": "MCP 2025-11-25",
+      "label": "Defined in the released MCP specification"
+    },
+    "draft": {
+      "short": "MCP draft",
+      "label": "Defined only in a draft revision of the MCP specification"
+    },
+    "proposed": {
+      "short": "proposed",
+      "label": "Proposed, not yet in any published specification"
+    },
+    "deprecated": {
+      "short": "deprecated",
+      "label": "Defined in the released MCP specification but deprecated in this revision, and scheduled for removal in a later one"
+    }
   },
-
   "support_codes": {
     "y": "present at the declared capture boundary",
     "a": "changed at the boundary or retained elsewhere",
     "n": "dropped during adaptation",
     "u": "not yet measured"
   },
-
   "defaults": {
     "inclusion_rule": "A framework is listed if it ships a first-party or officially documented MCP adapter. Nothing is excluded on quality grounds.",
     "order_rule": "Alphabetical within language group. No ranking is implied or computed.",
@@ -28,11 +37,13 @@
     "note_rule": "Every 'a' and 'n' cell must carry a #n note reference naming the exact mechanism, so a status can be checked rather than trusted.",
     "usage_rule": "No adoption weighting is published. We have no defensible source yet, and an invented percentage would be the least trustworthy number on the page."
   },
-
   "agents": {
     "crewai": {
-      "name": "CrewAI", "abbr": "Crew", "type": "python",
-      "package": "crewai-tools", "registry": "pypi",
+      "name": "CrewAI",
+      "abbr": "Crew",
+      "type": "python",
+      "package": "crewai-tools",
+      "registry": "pypi",
       "adapter": "crewai_tools.MCPServerAdapter",
       "renderer": "src/mcp_mirror/renderers/crewai_renderer.py",
       "capture_boundary": {
@@ -43,21 +54,48 @@
         "negotiated_mcp_spec_version": "2025-11-25",
         "protocol_version_evidence": "protocolVersion instrumented from ClientSession.initialize inside MCPServerAdapter"
       },
-      "current_version": "1.14.7",
-      "stable_version": "1.15.1",
+      "current_version": "1.15.1",
+      "stable_version": "1.15.3",
       "dev_version": null,
       "version_list": [
-        { "version": "1.14.4", "release_date": "2026-04-30T19:12:43Z", "era": -3 },
-        { "version": "1.14.5", "release_date": "2026-05-18T19:20:51Z", "era": -2 },
-        { "version": "1.14.6", "release_date": "2026-05-28T17:05:44Z", "era": -1 },
-        { "version": "1.14.7", "release_date": "2026-06-11T17:14:49Z", "era": 0 },
-        { "version": "1.15.0", "release_date": "2026-06-25T23:18:37Z", "era": 1 },
-        { "version": "1.15.1", "release_date": "2026-06-27T06:51:32Z", "era": 2 }
+        {
+          "version": "1.14.6",
+          "release_date": "2026-05-28T17:05:44Z",
+          "era": -3
+        },
+        {
+          "version": "1.14.7",
+          "release_date": "2026-06-11T17:14:49Z",
+          "era": -2
+        },
+        {
+          "version": "1.15.0",
+          "release_date": "2026-06-25T23:18:37Z",
+          "era": -1
+        },
+        {
+          "version": "1.15.1",
+          "release_date": "2026-06-27T06:51:32Z",
+          "era": 0
+        },
+        {
+          "version": "1.15.2",
+          "release_date": "2026-07-08T02:06:14Z",
+          "era": 1
+        },
+        {
+          "version": "1.15.3",
+          "release_date": "2026-07-16T19:43:55Z",
+          "era": 2
+        }
       ]
     },
     "langchain": {
-      "name": "LangChain", "abbr": "LC", "type": "python",
-      "package": "langchain-mcp-adapters", "registry": "pypi",
+      "name": "LangChain",
+      "abbr": "LC",
+      "type": "python",
+      "package": "langchain-mcp-adapters",
+      "registry": "pypi",
       "adapter": "langchain_mcp_adapters with convert_to_openai_tool",
       "renderer": "src/mcp_mirror/renderers/langchain_renderer.py",
       "capture_boundary": {
@@ -68,21 +106,38 @@
         "negotiated_mcp_spec_version": "2025-11-25",
         "protocol_version_evidence": "protocolVersion returned by ClientSession.initialize inside the langchain-mcp-adapters session"
       },
-      "current_version": "0.3.0",
+      "current_version": "0.3.2",
       "stable_version": "0.3.2",
       "dev_version": null,
       "version_list": [
-        { "version": "0.2.0", "release_date": "2025-12-09T12:57:55Z", "era": -3 },
-        { "version": "0.2.1", "release_date": "2025-12-09T16:28:37Z", "era": -2 },
-        { "version": "0.2.2", "release_date": "2026-03-16T17:13:29Z", "era": -1 },
-        { "version": "0.3.0", "release_date": "2026-06-10T01:10:27Z", "era": 0 },
-        { "version": "0.3.1", "release_date": "2026-07-27T18:36:44Z", "era": 1 },
-        { "version": "0.3.2", "release_date": "2026-08-06T06:15:02Z", "era": 2 }
+        {
+          "version": "0.2.2",
+          "release_date": "2026-03-16T17:13:29Z",
+          "era": -3
+        },
+        {
+          "version": "0.3.0",
+          "release_date": "2026-06-10T01:10:27Z",
+          "era": -2
+        },
+        {
+          "version": "0.3.1",
+          "release_date": "2026-07-27T18:36:44Z",
+          "era": -1
+        },
+        {
+          "version": "0.3.2",
+          "release_date": "2026-08-06T06:15:02Z",
+          "era": 0
+        }
       ]
     },
     "openai-agents": {
-      "name": "OpenAI Agents SDK", "abbr": "OAI", "type": "python",
-      "package": "openai-agents", "registry": "pypi",
+      "name": "OpenAI Agents SDK",
+      "abbr": "OAI",
+      "type": "python",
+      "package": "openai-agents",
+      "registry": "pypi",
       "adapter": "agents.mcp.util.MCPUtil.to_function_tool",
       "renderer": "src/mcp_mirror/renderers/openai_agents_renderer.py",
       "capture_boundary": {
@@ -93,19 +148,48 @@
         "negotiated_mcp_spec_version": "2025-11-25",
         "protocol_version_evidence": "protocolVersion exposed by MCPServer.server_initialize_result"
       },
-      "current_version": "0.20.0",
-      "stable_version": "0.22.0",
+      "current_version": "0.22.0",
+      "stable_version": "0.22.2",
       "dev_version": null,
       "version_list": [
-        { "version": "0.20.0", "release_date": "2026-08-11T03:12:47Z", "era": 0 },
-        { "version": "0.21.0", "release_date": "2026-08-15T02:50:08Z", "era": 1 },
-        { "version": "0.21.1", "release_date": "2026-08-16T22:29:33Z", "era": 2 },
-        { "version": "0.22.0", "release_date": "2026-08-19T13:45:19Z", "era": 3 }
+        {
+          "version": "0.20.0",
+          "release_date": "2026-08-11T03:12:47Z",
+          "era": -3
+        },
+        {
+          "version": "0.21.0",
+          "release_date": "2026-08-15T02:50:08Z",
+          "era": -2
+        },
+        {
+          "version": "0.21.1",
+          "release_date": "2026-08-16T22:29:33Z",
+          "era": -1
+        },
+        {
+          "version": "0.22.0",
+          "release_date": "2026-08-19T13:45:19Z",
+          "era": 0
+        },
+        {
+          "version": "0.22.1",
+          "release_date": "2026-09-08T09:22:16Z",
+          "era": 1
+        },
+        {
+          "version": "0.22.2",
+          "release_date": "2026-09-09T12:37:23Z",
+          "era": 2
+        }
       ]
     },
     "pydantic-ai": {
-      "name": "Pydantic AI", "abbr": "PAI", "type": "python",
-      "package": "pydantic-ai-slim", "registry": "pypi",
+      "name": "Pydantic AI",
+      "abbr": "PAI",
+      "type": "python",
+      "package": "pydantic-ai-slim",
+      "registry": "pypi",
       "adapter": "pydantic_ai.mcp toolset ToolDefinition",
       "renderer": "src/mcp_mirror/renderers/pydantic_ai_renderer.py",
       "capture_boundary": {
@@ -116,21 +200,48 @@
         "negotiated_mcp_spec_version": "2025-11-25",
         "protocol_version_evidence": "protocolVersion exposed by MCPToolset.client.initialize_result"
       },
-      "current_version": "1.107.0",
-      "stable_version": "2.1.0",
+      "current_version": "2.40.0",
+      "stable_version": "2.42.0",
       "dev_version": null,
       "version_list": [
-        { "version": "1.104.0", "release_date": "2026-05-29T04:52:27Z", "era": -3 },
-        { "version": "1.105.0", "release_date": "2026-06-02T06:19:52Z", "era": -2 },
-        { "version": "1.106.0", "release_date": "2026-06-05T01:28:59Z", "era": -1 },
-        { "version": "1.107.0", "release_date": "2026-06-10T14:53:03Z", "era": 0 },
-        { "version": "2.0.0", "release_date": "2026-06-23T15:48:51Z", "era": 1 },
-        { "version": "2.1.0", "release_date": "2026-06-29T09:51:11Z", "era": 2 }
+        {
+          "version": "2.37.0",
+          "release_date": "2026-09-01T02:07:31Z",
+          "era": -3
+        },
+        {
+          "version": "2.38.0",
+          "release_date": "2026-09-03T07:57:21Z",
+          "era": -2
+        },
+        {
+          "version": "2.39.0",
+          "release_date": "2026-09-04T04:30:14Z",
+          "era": -1
+        },
+        {
+          "version": "2.40.0",
+          "release_date": "2026-09-05T00:19:00Z",
+          "era": 0
+        },
+        {
+          "version": "2.41.0",
+          "release_date": "2026-09-08T04:25:57Z",
+          "era": 1
+        },
+        {
+          "version": "2.42.0",
+          "release_date": "2026-09-09T03:48:43Z",
+          "era": 2
+        }
       ]
     },
     "mastra": {
-      "name": "Mastra", "abbr": "Mas", "type": "typescript",
-      "package": "@mastra/mcp", "registry": "npm",
+      "name": "Mastra",
+      "abbr": "Mas",
+      "type": "typescript",
+      "package": "@mastra/mcp",
+      "registry": "npm",
       "adapter": "@mastra/mcp MCPClient.listTools",
       "renderer": "src/mcp_mirror/renderers/mastra_renderer.py",
       "capture_boundary": {
@@ -145,10 +256,26 @@
       "stable_version": "1.17.3",
       "dev_version": null,
       "version_list": [
-        { "version": "1.17.0", "release_date": "2026-08-19T04:09:11Z", "era": -3 },
-        { "version": "1.17.1", "release_date": "2026-08-21T01:17:44Z", "era": -2 },
-        { "version": "1.17.2", "release_date": "2026-08-26T10:55:03Z", "era": -1 },
-        { "version": "1.17.3", "release_date": "2026-09-03T04:14:30Z", "era": 0 }
+        {
+          "version": "1.17.0",
+          "release_date": "2026-08-19T04:09:11Z",
+          "era": -3
+        },
+        {
+          "version": "1.17.1",
+          "release_date": "2026-08-21T01:17:44Z",
+          "era": -2
+        },
+        {
+          "version": "1.17.2",
+          "release_date": "2026-08-26T10:55:03Z",
+          "era": -1
+        },
+        {
+          "version": "1.17.3",
+          "release_date": "2026-09-03T04:14:30Z",
+          "era": 0
+        }
       ]
     }
   }

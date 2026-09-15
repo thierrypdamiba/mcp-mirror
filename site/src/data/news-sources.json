@@ -1,0 +1,23 @@
+[
+  {
+    "name": "MCP Python SDK releases",
+    "source": "Model Context Protocol",
+    "url": "https://github.com/modelcontextprotocol/python-sdk/releases.atom",
+    "category": "Frameworks",
+    "limit": 3
+  },
+  {
+    "name": "MCP TypeScript SDK releases",
+    "source": "Model Context Protocol",
+    "url": "https://github.com/modelcontextprotocol/typescript-sdk/releases.atom",
+    "category": "Frameworks",
+    "limit": 3
+  },
+  {
+    "name": "MCP servers releases",
+    "source": "Model Context Protocol",
+    "url": "https://github.com/modelcontextprotocol/servers/releases.atom",
+    "category": "Ecosystem",
+    "limit": 3
+  }
+]

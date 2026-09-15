@@ -1,157 +1,42 @@
 import {
-  Button,
   Card,
-  Label,
   Link,
-  ListBox,
-  Select,
   ToggleButton,
   ToggleButtonGroup,
 } from "@heroui/react";
-import {useState} from "react";
 
 import {CapabilityCard} from "../components/CapabilityCard";
-import {CapabilityTitle} from "../components/CapabilityText";
 import type {GridMode} from "../components/CapabilityGrid";
-import {FrameworkLogo} from "../components/FrameworkLogo";
-import {ChevronRightIcon, GridIcon, ListIcon} from "../components/Icons";
-import {
-  capabilityHref,
-  currentSupport,
-  supportCounts,
-} from "../lib/data";
+import {CapabilityTitle} from "../components/CapabilityText";
+import {CopyCodeBlock} from "../components/CopyCodeBlock";
+import {GridIcon, ListIcon} from "../components/Icons";
+import {capabilityHref, currentSupport, isMeasured} from "../lib/data";
 import type {Capability, MirrorDatabase, SupportCode} from "../types";
 
 export type ResultsMode = "tables" | "list";
-type ExploreMode = "popular" | "trending" | "new";
 
-const COMPACT_ROW_COUNT = 10;
+const EDITORIAL_POPULAR_IDS = [
+  "destructive-hint",
+  "read-only-hint",
+  "required",
+  "nested-objects",
+  "enum",
+] as const;
 
-function conciseDate(isoDate: string): string {
-  return new Intl.DateTimeFormat("en", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(`${isoDate}T00:00:00Z`));
-}
-
-function measuredCounts(
-  database: MirrorDatabase,
-  capability: Capability,
-): Record<SupportCode, number> & {measured: number} {
-  const counts = supportCounts(database, capability);
-  return {...counts, measured: counts.y + counts.a + counts.n};
-}
-
-interface CapabilityFact {
-  capability: Capability;
-  prefix: string;
-  suffix: string;
-}
-
-function buildCapabilityFacts(
-  database: MirrorDatabase,
-  capabilities: Capability[],
-): CapabilityFact[] {
-  const measured = capabilities.map((capability) => {
-    const counts = {y: 0, a: 0, n: 0, u: 0};
-    Object.keys(database.agents).forEach((agentId) => {
-      counts[currentSupport(database, capability, agentId).code] += 1;
-    });
-    return {
-      capability,
-      counts,
-      measuredCount: counts.y + counts.a + counts.n,
-    };
-  });
-  const byTitle = (
-    left: (typeof measured)[number],
-    right: (typeof measured)[number],
-  ) =>
-    left.capability.title.localeCompare(right.capability.title) ||
-    left.capability.id.localeCompare(right.capability.id);
-  const selected: typeof measured = [];
-  const takeFirst = (
-    predicate: (entry: (typeof measured)[number]) => boolean,
-  ) => {
-    const entry = measured
-      .filter(
-        (candidate) =>
-          !selected.some(
-            ({capability}) => capability.id === candidate.capability.id,
-          ) && predicate(candidate),
-      )
-      .sort(byTitle)[0];
-    if (entry) {
-      selected.push(entry);
-    }
-  };
-
-  // The first fact is the first annotation, alphabetically, with a measured
-  // retained-vs-dropped split. The remaining selectors deliberately cover
-  // distinct result shapes before falling back to title order.
-  takeFirst(
-    ({capability, counts}) =>
-      capability.keywords?.toLowerCase().includes("annotations") === true &&
-      counts.a > 0 &&
-      counts.n > 0,
-  );
-  takeFirst(({counts, measuredCount}) => measuredCount > 0 && counts.y === measuredCount);
-  takeFirst(({counts}) => counts.y > 0 && counts.n > 0);
-  takeFirst(({counts, measuredCount}) => measuredCount > 0 && counts.n === measuredCount);
-  takeFirst(({counts}) => counts.a > 0 && counts.y > 0);
-
-  measured
-    .filter(
-      (entry) =>
-        !selected.some(
-          ({capability}) => capability.id === entry.capability.id,
-        ),
-    )
-    .sort(byTitle)
-    .forEach((entry) => {
-      if (selected.length < 5) {
-        selected.push(entry);
-      }
-    });
-
-  return selected.map(({capability, counts, measuredCount}) => {
-    if (counts.a > 0 && counts.n > 0) {
-      return {
-        capability,
-        prefix: `Across ${measuredCount} current tested releases, `,
-        suffix: ` is changed or retained elsewhere by ${counts.a} frameworks and dropped during adaptation by ${counts.n}.`,
-      };
-    }
-    if (counts.y === measuredCount && measuredCount > 0) {
-      return {
-        capability,
-        prefix: "Across current tested releases, ",
-        suffix: ` is present at all ${counts.y} measured capture boundaries.`,
-      };
-    }
-    if (counts.n === measuredCount && measuredCount > 0) {
-      return {
-        capability,
-        prefix: "Across current tested releases, ",
-        suffix: ` is dropped during adaptation by all ${counts.n} measured frameworks.`,
-      };
-    }
-    if (counts.y > 0 && counts.n > 0) {
-      return {
-        capability,
-        prefix: `Across ${measuredCount} current tested releases, `,
-        suffix: ` is present at ${counts.y} capture boundaries and dropped by ${counts.n} frameworks.`,
-      };
-    }
-    return {
-      capability,
-      prefix: `Across ${measuredCount} current tested releases, `,
-      suffix: ` is present at ${counts.y} capture boundaries, changed or retained elsewhere by ${counts.a}, and dropped by ${counts.n}.`,
-    };
-  });
-}
+const MCP_FACTS = [
+  {
+    label: "MCP messages use JSON-RPC 2.0.",
+    path: "basic",
+  },
+  {
+    label: "Clients and servers negotiate a protocol revision during initialization.",
+    path: "basic/lifecycle",
+  },
+  {
+    label: "Servers can expose tools, resources, and reusable prompts.",
+    path: "server",
+  },
+] as const;
 
 export function IndexPage({
   database,
@@ -175,13 +60,6 @@ export function IndexPage({
   onGridModeChange: (mode: GridMode) => void;
 }) {
   const isSearching = Boolean(query.trim());
-  const [factIndex, setFactIndex] = useState(0);
-  const [exploreMode, setExploreMode] = useState<ExploreMode>("popular");
-  const [exploreCadence, setExploreCadence] = useState("week");
-  const [showAllCapabilities, setShowAllCapabilities] = useState(false);
-  const [frameworkVersionMode, setFrameworkVersionMode] = useState<
-    "stable_version" | "dev_version"
-  >("stable_version");
 
   if (isSearching) {
     return (
@@ -257,251 +135,175 @@ export function IndexPage({
     );
   }
 
-  const activityByCapability = new Map(
-    (database.popularity?.entries ?? []).map((entry) => [
+  const capabilityById = new Map(
+    capabilities.map((capability) => [capability.id, capability]),
+  );
+  const latestCapabilities = capabilities
+    .filter(isMeasured)
+    .sort(
+      (left, right) =>
+        (right.measured.run_date ?? "").localeCompare(
+          left.measured.run_date ?? "",
+        ) || left.title.localeCompare(right.title),
+    )
+    .slice(0, 5);
+  const observedPopularity =
+    database.popularity?.mode === "observed" ? database.popularity : undefined;
+  const popularityWindow = observedPopularity?.windows.includes("week")
+    ? "week"
+    : observedPopularity?.windows[0];
+  const observedCounts = new Map(
+    (observedPopularity?.entries ?? []).map((entry) => [
       entry.capability_id,
-      entry,
+      popularityWindow ? (entry.counts[popularityWindow]?.[0] ?? 0) : 0,
     ]),
   );
-  const trendLabels: Record<string, string> = {
-    hour: "Past hour",
-    day: "Today",
-    week: "This week",
-    month: "This month",
-    quarter: "This quarter",
-    year: "This year",
-    all_time: "All time",
-  };
-  const byTitle = (left: Capability, right: Capability) =>
-    left.title.localeCompare(right.title) || left.id.localeCompare(right.id);
-  const exploredCapabilities = [...capabilities].sort((left, right) => {
-    if (exploreMode === "new") {
-      return (
-        right.measured.run_date.localeCompare(left.measured.run_date) ||
-        byTitle(left, right)
+  const popularCapabilities = observedPopularity
+    ? [...capabilities]
+        .sort(
+          (left, right) =>
+            (observedCounts.get(right.id) ?? 0) -
+              (observedCounts.get(left.id) ?? 0) ||
+            left.title.localeCompare(right.title),
+        )
+        .slice(0, 5)
+    : EDITORIAL_POPULAR_IDS.map((id) => capabilityById.get(id)).filter(
+        (capability): capability is Capability => Boolean(capability),
       );
-    }
-    const leftPair =
-      activityByCapability.get(left.id)?.counts[exploreCadence] ?? [0, 0];
-    const rightPair =
-      activityByCapability.get(right.id)?.counts[exploreCadence] ?? [0, 0];
-    if (exploreMode === "popular") {
-      return rightPair[0] - leftPair[0] || byTitle(left, right);
-    }
-    const leftEligible = leftPair[0] >= 10;
-    const rightEligible = rightPair[0] >= 10;
-    const leftGrowth = leftEligible
-      ? (leftPair[0] - leftPair[1]) / Math.max(leftPair[1], 1)
-      : Number.NEGATIVE_INFINITY;
-    const rightGrowth = rightEligible
-      ? (rightPair[0] - rightPair[1]) / Math.max(rightPair[1], 1)
-      : Number.NEGATIVE_INFINITY;
-    return (
-      Number(rightEligible) - Number(leftEligible) ||
-      rightGrowth - leftGrowth ||
-      rightPair[0] - leftPair[0] ||
-      byTitle(left, right)
-    );
-  });
-  const visibleCapabilities = showAllCapabilities
-    ? exploredCapabilities
-    : exploredCapabilities.slice(0, COMPACT_ROW_COUNT);
-  const currentFrameworkCount = Object.keys(database.agents).length;
-  const facts = buildCapabilityFacts(database, capabilities);
-  const fact = facts[factIndex % Math.max(facts.length, 1)];
+  const measuredFrameworkCount = Object.values(database.agents).filter(
+    (agent) => (agent.measurement_status ?? "measured") === "measured",
+  ).length;
+  const incompatibleFrameworkCount = Object.values(database.agents).filter(
+    (agent) => agent.measurement_status === "sdk_incompatible",
+  ).length;
+  const mismatchedFrameworkCount = Object.values(database.agents).filter(
+    (agent) => agent.measurement_status === "protocol_mismatch",
+  ).length;
 
   return (
     <main className="site-shell page-main index-home" id="main-content">
-      <h1 className="sr-only">MCP capability support</h1>
+      <h1 className="sr-only">Can AI use MCP capabilities?</h1>
       <div className="home-sections">
-        <section className="home-explore" aria-labelledby="explore-heading">
-          <div className="home-explore-header">
-            <div>
-              <h2 id="explore-heading" tabIndex={-1}>Explore measured capabilities</h2>
-              <p id="explore-mode-description">
-                Popular and Trending order page and search activity, not
-                fidelity or framework quality. New orders recently measured
-                evidence by its published measurement date.
-              </p>
-            </div>
-            <div className="explore-controls">
-              <ToggleButtonGroup
-                className="explore-mode-toggle"
-                aria-label="Capability activity ordering"
-                aria-describedby="explore-mode-description"
-                disallowEmptySelection
-                selectionMode="single"
-                selectedKeys={[exploreMode]}
-                size="sm"
-                onSelectionChange={(keys) => {
-                  const selected = Array.from(keys)[0];
-                  if (
-                    selected === "popular" ||
-                    selected === "trending" ||
-                    selected === "new"
-                  ) {
-                    setExploreMode(selected);
-                    setShowAllCapabilities(false);
-                  }
-                }}
-              >
-                <ToggleButton id="popular">Popular</ToggleButton>
-                <ToggleButtonGroup.Separator />
-                <ToggleButton id="trending">Trending</ToggleButton>
-                <ToggleButtonGroup.Separator />
-                <ToggleButton id="new">New</ToggleButton>
-              </ToggleButtonGroup>
-              <Select
-                aria-label="Activity cadence"
-                className="explore-period-select"
-                value={exploreCadence}
-                onChange={(nextValue) => {
-                  setExploreCadence(String(nextValue));
-                  setShowAllCapabilities(false);
-                }}
-              >
-                <Label className="sr-only">Activity cadence</Label>
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    {(database.popularity?.windows ?? []).map((period) => (
-                      <ListBox.Item
-                        id={period}
-                        key={period}
-                        textValue={trendLabels[period] ?? period}
-                      >
-                        {trendLabels[period] ?? period}
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-            </div>
-          </div>
-
-          <div className="home-evidence-table-wrap">
-            <table className="home-evidence-table">
-              <thead>
-                <tr>
-                  {[
-                    "Capability",
-                    "Source",
-                    "Present",
-                    "Retained",
-                    "Dropped",
-                    "Measured",
-                  ].map((heading) => <th key={heading}>{heading}</th>)}
-                </tr>
-              </thead>
-              <tbody aria-live="polite">
-                {visibleCapabilities.map((capability) => {
-                  const counts = measuredCounts(database, capability);
-                  const docsUrl = capability.docs_url ?? capability.spec;
-                  const docsLabel =
-                    capability.docs_label ?? capability.spec_label ?? "Docs";
-                  const metric = (
-                    code: "y" | "a" | "n",
-                    label: string,
-                  ) => (
-                    <td
-                      className={`evidence-metric evidence-${code}`}
-                      data-label={label}
-                      aria-label={`${label.toLowerCase()} for ${counts[code]} of ${counts.measured} measured current framework releases`}
-                    >
-                      <strong>{counts[code]}</strong>
-                      <span aria-hidden="true"> / {counts.measured}</span>
-                    </td>
-                  );
-                  return (
-                    <tr data-capability-id={capability.id} key={capability.id}>
-                      <th data-label="Capability" scope="row">
-                        <Link href={capabilityHref(capability.id)}>
-                          <CapabilityTitle capability={capability} />
-                          {stars.includes(capability.id) ? (
-                            <span aria-label="Starred"> ★</span>
-                          ) : null}
-                        </Link>
-                      </th>
-                      <td className="evidence-source" data-label="Source">
-                        <Link
-                          href={docsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`${docsLabel}, opens externally`}
-                        >
-                          {docsLabel}
-                          <Link.Icon />
-                        </Link>
-                      </td>
-                      {metric("y", "Present")}
-                      {metric("a", "Retained")}
-                      {metric("n", "Dropped")}
-                      <td className="evidence-date" data-label="Measured">
-                        <time dateTime={capability.measured.run_date}>
-                          {conciseDate(capability.measured.run_date)}
-                        </time>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          <footer className="home-explore-footer">
-            <div>
-              <span>
-                {capabilities.length} capabilities · {currentFrameworkCount} current
-                framework releases
-              </span>
-              <small>Sample activity order until telemetry launches.</small>
-            </div>
-            {capabilities.length > COMPACT_ROW_COUNT ? (
-              <Button
-                className="explore-show-all"
-                size="sm"
-                variant="ghost"
-                onPress={() => setShowAllCapabilities((current) => !current)}
-              >
-                {showAllCapabilities
-                  ? "Show fewer capabilities"
-                  : `Show all ${capabilities.length} capabilities`}
-              </Button>
-            ) : null}
-          </footer>
+        <section className="home-section home-section-scores">
+          <h2>Frameworks</h2>
+          <p className="home-section-intro">
+            {database.coverage
+              ? `${database.coverage.measured} of ${database.coverage.total} MCP ${database.mcp_spec} capabilities have measurements.`
+              : `${capabilities.length} capabilities are catalogued for MCP ${database.mcp_spec}.`}{" "}
+            {measuredFrameworkCount} of {Object.keys(database.agents).length} frameworks
+            produced same-revision captures.
+            {incompatibleFrameworkCount
+              ? ` ${incompatibleFrameworkCount} cannot negotiate this revision.`
+              : ""}
+            {mismatchedFrameworkCount
+              ? ` ${mismatchedFrameworkCount} negotiated another revision in the recorded run.`
+              : ""}
+          </p>
+          <ol
+            className="home-list home-framework-scores"
+            data-version-kind="current_version"
+          >
+            {Object.entries(database.agents).map(([agentId, agent]) => {
+              const counts: Record<SupportCode, number> = {
+                y: 0,
+                a: 0,
+                n: 0,
+                x: 0,
+                u: 0,
+              };
+              capabilities.forEach((capability) => {
+                counts[currentSupport(database, capability, agentId).code] += 1;
+              });
+              const total = capabilities.length || 1;
+              return (
+                <li
+                  className="home-framework-score"
+                  data-agent-id={agentId}
+                  data-summary-version={agent.current_version}
+                  key={agentId}
+                  aria-label={`${agent.name} ${agent.current_version}`}
+                >
+                  <span className="home-framework-score-label">
+                    {agent.name}{" "}
+                    <strong className="framework-summary-version">
+                      {agent.current_version}
+                    </strong>
+                  </span>
+                  <span className="home-framework-score-bars" aria-hidden="true">
+                    {(["y", "a", "n", "x", "u"] as const).map((code) =>
+                      counts[code] ? (
+                        <i
+                          className={`home-score-segment support-${code}`}
+                          key={code}
+                          style={{width: `${(counts[code] / total) * 100}%`}}
+                        />
+                      ) : null,
+                    )}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+          <Link className="home-score-note" href="#/stats?view=frameworks">
+            Compare all frameworks
+          </Link>
         </section>
 
-        <section
-          className="home-section home-section-dyk"
-          data-fact-count={facts.length}
-        >
-          <h2>Did you know?</h2>
-          {fact ? (
-            <p className="home-fact" data-capability-id={fact.capability.id}>
-              {fact.prefix}
-              <Link href={capabilityHref(fact.capability.id)}>
-                <CapabilityTitle capability={fact.capability} />
-              </Link>
-              {fact.suffix}
-            </p>
-          ) : null}
-          {facts.length > 1 ? (
-            <Button
-              className="home-next-fact"
-              aria-label="Next fact"
-              size="sm"
-              variant="ghost"
-              onPress={() =>
-                setFactIndex((index) => (index + 1) % facts.length)
-              }
-            >
-              <span>Next fact</span>
-              <ChevronRightIcon width={14} height={14} />
-            </Button>
-          ) : null}
+        <section className="home-section home-section-new">
+          <h2>New</h2>
+          <ul className="home-list">
+            {latestCapabilities.map((capability) => (
+              <li data-capability-id={capability.id} key={capability.id}>
+                <Link href={capabilityHref(capability.id)}>
+                  <CapabilityTitle capability={capability} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="home-section home-section-popular">
+          <h2>Popular</h2>
+          <ul className="home-list">
+            {popularCapabilities.map((capability) => (
+              <li data-capability-id={capability.id} key={capability.id}>
+                <Link href={capabilityHref(capability.id)}>
+                  <CapabilityTitle capability={capability} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="home-section home-section-test">
+          <h2>Test a capability</h2>
+          <p>
+            Scan your MCP server against the current framework adapters. The
+            command runs locally and does not call a model.
+          </p>
+          <CopyCodeBlock
+            className="home-command"
+            value={`uvx mcp-mirror scan "python your_server.py" --spec-version ${database.mcp_spec}`}
+          />
+          <Link href="#/method">How measurements work</Link>
+        </section>
+
+        <section className="home-section home-section-dyk">
+          <h2>MCP facts</h2>
+          <ul className="home-list">
+            {MCP_FACTS.map((fact) => (
+              <li key={fact.path}>
+                <Link
+                  href={`https://modelcontextprotocol.io/specification/${database.mcp_spec}/${fact.path}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {fact.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Link href="#/stats">Explore measured adapter behavior</Link>
         </section>
 
         <section className="home-section home-section-tools">
@@ -517,62 +319,47 @@ export function IndexPage({
               </Link>
             </li>
             <li>
-              <Link href="./data/data-1.0.json" target="_blank">
-                Published JSON data feed
+              <Link
+                href={`./data/data-${database.mcp_spec}.json`}
+                target="_blank"
+              >
+                Published JSON data for MCP {database.mcp_spec}
               </Link>
+            </li>
+            <li>
+              <Link href="#/stats">Filter and export measured support</Link>
             </li>
           </ul>
         </section>
 
-        <section className="home-section home-section-scores">
-          <h2>Measured frameworks</h2>
-          <ToggleButtonGroup
-            className="home-version-toggle"
-            aria-label="Framework version summary"
-            disallowEmptySelection
-            selectionMode="single"
-            selectedKeys={[frameworkVersionMode]}
-            size="sm"
-            onSelectionChange={(keys) => {
-              const selected = Array.from(keys)[0];
-              if (selected === "stable_version" || selected === "dev_version") {
-                setFrameworkVersionMode(selected);
-              }
-            }}
-          >
-            <ToggleButton id="stable_version">Current version</ToggleButton>
-            <ToggleButtonGroup.Separator />
-            <ToggleButton id="dev_version">Dev version</ToggleButton>
-          </ToggleButtonGroup>
-          <ol
-            className="home-list home-framework-scores"
-            data-version-kind={frameworkVersionMode}
-          >
-            {Object.entries(database.agents).map(([agentId, agent]) => {
-              const version = agent[frameworkVersionMode];
-              const visibleVersion = version ?? "Not tracked";
-              return (
-                <li
-                  className="home-framework-score"
-                  data-agent-id={agentId}
-                  data-summary-version={version ?? ""}
-                  key={agentId}
-                  aria-label={`${agent.name} ${visibleVersion}`}
-                >
-                  <FrameworkLogo frameworkId={agentId} name={agent.name} />
-                  <span className="home-framework-score-label">
-                    <span>{agent.name}</span>
-                    <strong className="framework-summary-version">
-                      {visibleVersion}
-                    </strong>
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-          <Link className="home-score-note" href="#/method">
-            About these results
-          </Link>
+        <section className="home-section home-section-how">
+          <h2>How it works</h2>
+          <div className="home-how-copy">
+            <p>
+              Can AI use compares the tool definition published by an MCP
+              server with the shape each framework exposes at a documented
+              capture boundary. That shows what stayed present, changed, or
+              disappeared. The comparison does not call a model.
+            </p>
+            <p>
+              Help extend the index.{" "}
+              <Link
+                href={`${database.repo || "https://github.com/"}/issues/new`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Suggest a capability
+              </Link>
+              , or{" "}
+              <Link
+                href={`${database.repo || "https://github.com/"}/blob/main/CONTRIBUTING.md`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                contribute a reproducible fixture and evidence.
+              </Link>
+            </p>
+          </div>
         </section>
       </div>
     </main>

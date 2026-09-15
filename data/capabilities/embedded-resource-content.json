@@ -1,0 +1,64 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "embedded-resource-content",
+  "title": "Embedded resources",
+  "description": "A tool result block that inlines a resource's contents together with its URI and MIME type.",
+  "question": "Does an embedded resource keep its identity, or arrive as anonymous text?",
+  "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+  "status": "stable",
+  "categories": [
+    "Tool results",
+    "Resources"
+  ],
+  "keywords": "embedded resource,resource content block,inline resource,uri,mimeType",
+  "stats": {
+    "crewai": {
+      "1.15.1": "n #1"
+    },
+    "langchain": {
+      "0.3.2": "u"
+    },
+    "openai-agents": {
+      "0.22.0": "a #2"
+    },
+    "pydantic-ai": {
+      "2.40.0": "n #3"
+    },
+    "mastra": {
+      "1.17.3": "n #4"
+    }
+  },
+  "notes": "An embedded resource carries its own identity: a uri, a mime type, and contents. No adapter delivers it as a resource. One preserves the fields by stringifying them, one keeps the contents and discards the identity, two drop it. LangChain is unmeasured here: its audio conversion raises on the same result, so the call aborts before this block can be observed. Isolating it needs a fixture that returns one block at a time.",
+  "notes_by_num": {
+    "1": "CrewAI: the embedded resource is dropped from the result.",
+    "2": "OpenAI Agents: serialized into a text block holding the resource's JSON, so uri and mimeType survive as characters rather than as fields.",
+    "3": "Pydantic AI: reduced to a bare text block containing the resource's text. The uri and mimeType that identify it are gone.",
+    "4": "Mastra: all content blocks are dropped, embedded resources included."
+  },
+  "verdict": {
+    "code": "n",
+    "headline": "Delivered as a resource by none of the five.",
+    "detail": "Once the uri is gone the agent cannot cite, re-read, or refer to what it was given."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#embedded-resources",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "The URI and MIME type are what let a caller cite, cache or re-read the content. Stripping them to the inner text leaves the agent holding data it cannot attribute to a source.",
+  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "measured": {
+    "run_date": "2026-09-14",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2025-11-25",
+  "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#embedded-resources",
+  "docs_label": "MCP Docs"
+}

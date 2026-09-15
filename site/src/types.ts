@@ -1,4 +1,4 @@
-export type SupportCode = "y" | "a" | "n" | "u";
+export type SupportCode = "y" | "a" | "n" | "x" | "u";
 
 export interface VersionEntry {
   version: string;
@@ -26,6 +26,11 @@ export interface Agent {
     negotiated_mcp_spec_version: string | null;
     protocol_version_evidence: string;
   };
+  measurement_status?:
+    | "measured"
+    | "sdk_incompatible"
+    | "protocol_mismatch";
+  measurement_note?: string;
   current_version: string;
   stable_version: string;
   dev_version: string | null;
@@ -69,11 +74,37 @@ export interface Capability {
   why: string;
   reproduce?: string;
   measured: {
-    run_date: string;
+    // Null on a row the protocol defines but no scan has exercised yet.
+    run_date: string | null;
     mcp_spec: string;
-    fixture?: string;
+    fixture?: string | null;
   };
   shown?: boolean;
+  /** Which part of the protocol this row belongs to, from the spec surface. */
+  area?: string;
+  measurement_state?: "measured" | "not_measured";
+  /** What a scan would have to do to turn this row into a measurement. */
+  probe?: string;
+  /** The wire methods, notifications or fields the feature is carried by. */
+  wire?: string[];
+}
+
+export interface CoverageArea {
+  area: string;
+  measured: number;
+  total: number;
+}
+
+/** How much of the protocol revision we have measured, computed at build time. */
+export interface Coverage {
+  revision: string;
+  catalogued: boolean;
+  source: string;
+  measured: number;
+  total: number;
+  by_area: CoverageArea[];
+  note: string;
+  omissions: string[];
 }
 
 export interface MirrorDatabase {
@@ -96,13 +127,32 @@ export interface MirrorDatabase {
       counts: Record<string, [number, number]>;
     }>;
   };
+  coverage?: Coverage | null;
   cats: Record<string, string[]>;
   data: Record<string, Capability>;
+}
+
+export interface SpecIndexEntry {
+  id: string;
+  label: string;
+  file: string;
+  updated: string;
+  measured_frameworks: number;
+  total_frameworks: number;
+  coverage?: Coverage | null;
+}
+
+export interface SpecIndex {
+  schema: string;
+  default_spec: string;
+  specs: SpecIndexEntry[];
 }
 
 declare global {
   interface Window {
     __MCP_MIRROR_DATA__?: MirrorDatabase;
+    __MCP_MIRROR_DATASETS__?: Record<string, MirrorDatabase>;
+    __MCP_MIRROR_SPEC_INDEX__?: SpecIndex;
   }
 }
 
@@ -114,6 +164,6 @@ export interface ParsedSupport {
 export type Route =
   | {name: "index"}
   | {name: "capability"; capabilityId: string}
+  | {name: "stats"}
   | {name: "changes"}
-  | {name: "compare"}
   | {name: "method"};

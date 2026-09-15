@@ -1,0 +1,65 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "embedded-resource-content",
+  "title": "Embedded resources",
+  "description": "A tool result block that inlines a resource's contents together with its URI and MIME type.",
+  "question": "Does an embedded resource keep its identity, or arrive as anonymous text?",
+  "spec": "https://modelcontextprotocol.io/specification/2026-07-28",
+  "status": "stable",
+  "categories": [
+    "Tool results",
+    "Resources"
+  ],
+  "keywords": "embedded resource,resource content block,inline resource,uri,mimeType",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "a #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "n #4"
+    },
+    "mastra": {
+      "1.17.3": "x #5"
+    }
+  },
+  "notes": "Neither adapter keeps an embedded resource as a resource. The OpenAI Agents SDK preserves its identity inside JSON text; Pydantic AI discards it. 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "OpenAI Agents SDK 0.22.0: the whole embedded resource is re-serialized as JSON inside a text item. The `uri` and `mimeType` survive as characters, so the resource is still identifiable if the agent parses the text.",
+    "4": "Pydantic AI 2.40.0: only the resource's text is returned, as a bare string. The `uri` and `mimeType` are gone, so the agent cannot tell this came from a resource at all.",
+    "5": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "Identity survives only as JSON text, and only in one of the two adapters.",
+    "detail": "This is the sharpest split between the two: OpenAI Agents SDK 0.22.0 keeps every field but changes the shape, while Pydantic AI 2.40.0 keeps only the body text and destroys the URI. An agent on Pydantic AI receives anonymous text. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#embedded-resources",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "The URI and MIME type are what let a caller cite, cache or re-read the content. Stripping them to the inner text leaves the agent holding data it cannot attribute to a source.",
+  "reproduce": "python scripts/measure_results.py",
+  "measured": {
+    "run_date": "2026-09-11",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2026-07-28",
+  "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#embedded-resources",
+  "docs_label": "MCP Docs"
+}

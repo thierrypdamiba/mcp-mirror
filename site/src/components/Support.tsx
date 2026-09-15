@@ -11,6 +11,7 @@ const chipColor: Record<
   SupportCode,
   "success" | "warning" | "danger" | "default"
 > = {
+  x: "default",
   y: "success",
   a: "warning",
   n: "danger",

@@ -12,16 +12,16 @@
   "keywords": "truncation,length,unicode,description",
   "stats": {
     "crewai": {
-      "1.14.7": "y #1"
+      "1.15.1": "y #1"
     },
     "langchain": {
-      "0.3.0": "y"
+      "0.3.2": "y"
     },
     "openai-agents": {
-      "0.20.0": "y"
+      "0.22.0": "y"
     },
     "pydantic-ai": {
-      "1.107.0": "y"
+      "2.40.0": "y"
     },
     "mastra": {
       "1.17.3": "y"

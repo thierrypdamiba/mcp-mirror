@@ -1,0 +1,64 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "resource-link-content",
+  "title": "`resource_link`",
+  "description": "A tool result block that points at a resource URI instead of inlining its contents.",
+  "question": "Does a resource link reach the agent as a reference it can follow?",
+  "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+  "status": "stable",
+  "categories": [
+    "Tool results",
+    "Resources"
+  ],
+  "keywords": "resource_link,resource link,uri,reference,large results",
+  "stats": {
+    "crewai": {
+      "1.15.1": "n #1"
+    },
+    "langchain": {
+      "0.3.2": "u"
+    },
+    "openai-agents": {
+      "0.22.0": "a #2"
+    },
+    "pydantic-ai": {
+      "2.40.0": "a #3"
+    },
+    "mastra": {
+      "1.17.3": "n #4"
+    }
+  },
+  "notes": "A resource_link is a pointer the agent is meant to be able to follow. Two adapters keep the pointer but not its type, one of them shedding the name and description on the way. Two drop it entirely. LangChain is unmeasured here: its audio conversion raises on the same result, so the call aborts before this block can be observed. Isolating it needs a fixture that returns one block at a time.",
+  "notes_by_num": {
+    "1": "CrewAI: the resource link is dropped from the result.",
+    "2": "OpenAI Agents: serialized into a text block holding the link's JSON, so name, uri and description survive as characters rather than as fields.",
+    "3": "Pydantic AI: reduced to a bare text block containing only the uri. The link's name and description are gone.",
+    "4": "Mastra: all content blocks are dropped, resource links included."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "Survives as text at two boundaries, dropped at two.",
+    "detail": "A link flattened into prose still tells the agent where to look, which is more than the alternatives here manage."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#resource-links",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "Resource links are how a large result stays out of the context window until something asks for it. A framework that flattens the link to text keeps the URI as prose and loses the ability to fetch what it points at.",
+  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "measured": {
+    "run_date": "2026-09-14",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2025-11-25",
+  "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#resource-links",
+  "docs_label": "MCP Docs"
+}

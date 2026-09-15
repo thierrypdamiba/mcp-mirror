@@ -9,10 +9,27 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 Category = Literal["faithful", "lossy", "additive", "transformative"]
 CaptureStage = Literal["framework_tool_definition", "provider_format", "provider_request"]
+ObservationStage = Literal[
+    "source",
+    "framework_tool_definition",
+    "provider_format",
+    "provider_request",
+    "tool_call",
+    "tool_result",
+]
+RunStatus = Literal[
+    "measured",
+    "unsupported",
+    "adapter_error",
+    "protocol_mismatch",
+    "server_variance",
+    "unmeasured",
+]
+Attestation = Literal["local", "local_attested", "service_verified"]
 
 
 class Dimension:
@@ -32,6 +49,8 @@ class Dimension:
     INJECTION = "injection"
     REQUIRED = "required"
     AUTHZ = "authz"
+    ICONS = "icons"
+    RESULT = "result"
 
 
 class ToolRep(BaseModel):
@@ -48,9 +67,35 @@ class ToolRep(BaseModel):
     description: str | None = None
     params: dict[str, Any] = Field(default_factory=dict)
     annotations: dict[str, Any] = Field(default_factory=dict)
+    icons: list[dict[str, Any]] = Field(default_factory=list)
     framework_metadata: dict[str, Any] = Field(default_factory=dict)
     origin: str
     raw: dict[str, Any] = Field(default_factory=dict)
+
+
+class ResultRep(BaseModel):
+    """Normalized representation of what a ``tools/call`` produced.
+
+    ``ToolRep`` answers what the agent was told a tool *is*; this answers what the agent
+    receives when it calls one. They are separate captures because an adapter can be
+    faithful about the definition and still flatten the result: the common shape a
+    framework hands a model is a single string, which has nowhere to put an image, a
+    resource link, a JSON value, or an error flag.
+
+    ``block_kinds`` is the ordered list of content types, kept separately from
+    ``blocks`` so a diff can say "the image is gone" without comparing base64 payloads.
+    ``is_error`` is ``None`` when the framework exposes no failure channel at all,
+    which is different from exposing one that says ``False``.
+    """
+
+    tool: str
+    blocks: list[dict[str, Any]] = Field(default_factory=list)
+    block_kinds: list[str] = Field(default_factory=list)
+    structured_content: Any | None = None
+    is_error: bool | None = None
+    text: str | None = None
+    origin: str
+    raw: Any = None
 
 
 class Difference(BaseModel):
@@ -133,13 +178,63 @@ class RendererEvidence(BaseModel):
     limitation: str | None = None
 
 
+class CaptureObservation(BaseModel):
+    """One inspectable artifact at one stage of the MCP-to-provider pipeline.
+
+    ``tools`` contains the normalized comparison view. ``artifact_sha256`` hashes
+    the canonical artifact represented by that view so a report can cite evidence
+    without pretending the normalization is the original wire payload.
+    A future provider-request capture may additionally retain the redacted raw body
+    in ``artifact``. ``redacted`` is false unless a capture path actually applied a
+    redaction policy.
+    """
+
+    stage: ObservationStage
+    capture_api: str
+    capture_object: str
+    tools: list[ToolRep] = Field(default_factory=list)
+    artifact_sha256: str
+    artifact: Any | None = None
+    redacted: bool = False
+    limitation: str | None = None
+
+
+class ScanProvenance(BaseModel):
+    """Versions and runtime identity needed to reproduce a report."""
+
+    generated_at: str
+    scanner_version: str
+    scanner_commit: str | None = None
+    python_version: str | None = None
+    platform: str | None = None
+    runner_digest: str | None = None
+
+
+class ScanConfiguration(BaseModel):
+    """Non-secret inputs needed to understand and reproduce a scan."""
+
+    transport: Literal["stdio", "http"]
+    frameworks: list[str] = Field(default_factory=list)
+    spec_version_assertion: str | None = None
+    jobs: list[str] = Field(default_factory=list)
+    jtbd: str | None = None
+    header_names: list[str] = Field(default_factory=list)
+    runner_mode: Literal["local_subprocess", "managed", "container"] = (
+        "local_subprocess"
+    )
+
+
 class FrameworkRun(BaseModel):
     """Everything one framework produced for one scan."""
 
     framework: str
     framework_version: str
     adapter_version: str | None = None
+    runner_digest: str | None = None
+    status: RunStatus = "measured"
+    status_detail: str | None = None
     evidence: RendererEvidence | None = None
+    observations: list[CaptureObservation] = Field(default_factory=list)
     differences: list[Difference] = Field(default_factory=list)
 
 
@@ -151,10 +246,18 @@ class Report(BaseModel):
     ``RendererEvidence`` and remains ``None`` when the framework does not expose it.
     """
 
+    model_config = ConfigDict(populate_by_name=True)
+
+    report_schema: str = Field(default="mcp-mirror/report@2", alias="schema")
     mcp_server: str
     mcp_spec_version: str
     mcp_spec_version_evidence: str = "direct source connection initialize result"
     generated_with: str
+    attestation: Attestation = "local"
+    provider_profile: str | None = None
+    provenance: ScanProvenance | None = None
+    scan: ScanConfiguration | None = None
+    source_observation: CaptureObservation | None = None
     tools: list[str]
     runs: list[FrameworkRun] = Field(default_factory=list)
     job_findings: list[JobFinding] = Field(default_factory=list)

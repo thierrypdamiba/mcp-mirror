@@ -1,0 +1,58 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "tools-call",
+  "title": "`tools/call`",
+  "description": "The request that invokes a tool by name with an arguments object and returns its result.",
+  "question": "Can the framework invoke an MCP tool and hand the result back to the agent?",
+  "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+  "status": "stable",
+  "categories": [
+    "Tool results"
+  ],
+  "keywords": "tools/call,invoke,execute,call tool,arguments",
+  "stats": {
+    "crewai": {
+      "1.15.1": "y"
+    },
+    "langchain": {
+      "0.3.2": "y"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "y"
+    }
+  },
+  "notes": "Every adapter can invoke a tool and return something to the agent. What arrives varies enormously, and the rest of this category is where that shows up: the call mechanism works everywhere, the result contract does not.",
+  "notes_by_num": {},
+  "verdict": {
+    "code": "y",
+    "headline": "Supported by all five.",
+    "detail": "Invocation is the part of the tool-result surface that every adapter gets right."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#calling-tools",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "Every tool-definition row in this table is inert if the adapter never reaches this call. This is the floor of MCP support: a framework that renders a tool definition but cannot invoke it has integrated a catalogue, not a protocol.",
+  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "measured": {
+    "run_date": "2026-09-14",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2025-11-25",
+  "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#calling-tools",
+  "docs_label": "MCP Docs"
+}

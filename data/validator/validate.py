@@ -25,10 +25,12 @@ REQUIRED_KEYS = {
     "status", "categories",
     "stats", "notes_by_num", "verdict", "why", "reproduce", "measured",
 }
-CODES = {"y", "a", "n", "u"}
+CODES = {"y", "a", "n", "x", "u"}
 # Codes that assert something happened to the value, and therefore owe an explanation.
-CODES_NEEDING_NOTE = {"a", "n"}
-CODE_RE = re.compile(r"^(?P<code>[yanu])(?P<rest>(?:\s+#\d+)*)$")
+# 'x' asserts the adapter cannot reach the revision at all, which is a claim about
+# the framework rather than the feature, so it owes the same evidence.
+CODES_NEEDING_NOTE = {"a", "n", "x"}
+CODE_RE = re.compile(r"^(?P<code>[yanxu])(?P<rest>(?:\s+#\d+)*)$")
 GENERIC_DOC_ROOTS = {
     "https://modelcontextprotocol.io/specification",
     "https://json-schema.org/draft/2020-12/json-schema-validation",
@@ -169,6 +171,103 @@ def validate_capability(path: Path, agents: dict, statuses: dict, errors: list[s
     return cap
 
 
+SURFACE_REQUIRED_KEYS = {"schema", "revision", "catalogued", "areas", "features"}
+# A feature nobody has measured still has to explain itself, because the site publishes it
+# as a row. These are the fields that row is rendered from.
+SURFACE_UNMEASURED_KEYS = (
+    "description", "question", "why", "categories", "keywords", "spec",
+    "docs_url", "docs_label", "probe",
+)
+
+
+def validate_surface(
+    data_dir: Path,
+    root: dict,
+    capabilities: list[dict],
+    errors: list[str],
+) -> dict | None:
+    """Check the protocol feature catalogue against the measured capability files.
+
+    surface.json is the denominator: what the specification defines. capabilities/ is the
+    numerator: what we measured. Keeping them in one directory and cross-checking here is
+    what stops coverage from being improved by quietly forgetting a feature.
+    """
+    path = data_dir / "surface.json"
+    if not path.exists():
+        return None
+    where = path.name
+    try:
+        surface = json.loads(path.read_text())
+    except json.JSONDecodeError as exc:
+        _err(errors, where, f"invalid JSON ({exc})")
+        return None
+
+    missing = SURFACE_REQUIRED_KEYS - set(surface)
+    if missing:
+        _err(errors, where, f"missing required keys: {sorted(missing)}")
+        return None
+    if surface["revision"] != root.get("mcp_spec"):
+        _err(
+            errors,
+            where,
+            f"revision {surface['revision']!r} does not match frameworks.json mcp_spec "
+            f"{root.get('mcp_spec')!r}",
+        )
+
+    areas = surface["areas"]
+    statuses = root["statuses"]
+    by_id = {cap["id"]: cap for cap in capabilities}
+
+    seen: set[str] = set()
+    for feature in surface["features"]:
+        feature_id = feature.get("id")
+        if not feature_id:
+            _err(errors, where, "feature is missing an id")
+            continue
+        if feature_id in seen:
+            _err(errors, where, f"{feature_id}: duplicate feature id")
+        seen.add(feature_id)
+        if feature.get("area") not in areas:
+            _err(errors, where, f"{feature_id}: area {feature.get('area')!r} not in areas")
+        if feature.get("status") not in statuses:
+            _err(errors, where, f"{feature_id}: status {feature.get('status')!r} not in {sorted(statuses)}")
+        if not str(feature.get("title", "")).strip():
+            _err(errors, where, f"{feature_id}: title must be non-empty")
+
+        measured = by_id.get(feature_id)
+        if measured is not None:
+            # Both files describe the same row, so they must agree on what it is called.
+            if measured["title"] != feature.get("title"):
+                _err(
+                    errors,
+                    where,
+                    f"{feature_id}: title {feature.get('title')!r} does not match the "
+                    f"capability file's {measured['title']!r}",
+                )
+            continue
+
+        # No capability file, so the build synthesises the row entirely from this entry.
+        for key in SURFACE_UNMEASURED_KEYS:
+            if not str(feature.get(key, "")).strip() and not feature.get(key):
+                _err(errors, where, f"{feature_id}: unmeasured feature requires a non-empty {key!r}")
+        if str(feature.get("docs_url", "")).rstrip("/") in GENERIC_DOC_ROOTS:
+            _err(errors, where, f"{feature_id}: docs_url must target the exact specification section")
+        categories = feature.get("categories")
+        if not isinstance(categories, list) or not categories:
+            _err(errors, where, f"{feature_id}: categories must be a non-empty list")
+
+    for capability_id in sorted(by_id):
+        if capability_id not in seen:
+            _err(
+                errors,
+                where,
+                f"capability {capability_id!r} has no entry in the protocol surface; every "
+                "published row must map to a feature the specification defines",
+            )
+
+    return surface
+
+
 def validate_all(data_dir: Path) -> tuple[dict, list[dict], list[str]]:
     errors: list[str] = []
     root = json.loads((data_dir / "frameworks.json").read_text())
@@ -177,6 +276,25 @@ def validate_all(data_dir: Path) -> tuple[dict, list[dict], list[str]]:
     for agent_id, agent in agents.items():
         eras = [e.get("era") for e in agent.get("version_list", [])]
         versions = {e.get("version") for e in agent.get("version_list", [])}
+        measurement_status = agent.get("measurement_status", "measured")
+        if measurement_status not in {
+            "measured",
+            "sdk_incompatible",
+            "protocol_mismatch",
+        }:
+            _err(
+                errors,
+                "frameworks.json",
+                f"{agent_id}: invalid measurement_status {measurement_status!r}",
+            )
+        if measurement_status != "measured" and not str(
+            agent.get("measurement_note", "")
+        ).strip():
+            _err(
+                errors,
+                "frameworks.json",
+                f"{agent_id}: unmeasured framework requires measurement_note",
+            )
         capture = agent.get("capture_boundary")
         required_capture_keys = {
             "capture_api",
@@ -213,7 +331,10 @@ def validate_all(data_dir: Path) -> tuple[dict, list[dict], list[str]]:
                     "frameworks.json",
                     f"{agent_id}: provider request can be captured only at provider_request stage",
                 )
-            if capture.get("negotiated_mcp_spec_version") != root.get("mcp_spec"):
+            if (
+                measurement_status == "measured"
+                and capture.get("negotiated_mcp_spec_version") != root.get("mcp_spec")
+            ):
                 _err(
                     errors,
                     "frameworks.json",
@@ -240,6 +361,7 @@ def validate_all(data_dir: Path) -> tuple[dict, list[dict], list[str]]:
 
     if not capabilities:
         errors.append("capabilities/: no capability files found")
+    root["surface"] = validate_surface(data_dir, root, capabilities, errors)
     popularity_path = data_dir / "popularity.mock.json"
     if popularity_path.exists():
         popularity = json.loads(popularity_path.read_text())
@@ -274,6 +396,13 @@ def main() -> int:
         print(f"\n{len(errors)} problem(s) found.")
         return 1
     print(f"  ✓ {len(capabilities)} capability file(s) valid across {len(root['agents'])} agents.")
+    surface = root.get("surface")
+    if surface:
+        total = len(surface["features"])
+        print(
+            f"  ✓ protocol surface for {surface['revision']}: {len(capabilities)} of "
+            f"{total} feature(s) measured, {total - len(capabilities)} published unmeasured."
+        )
     return 0
 
 

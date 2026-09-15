@@ -1,7 +1,9 @@
 import {Button, Link, SearchField} from "@heroui/react";
 import {useEffect, useRef, useState} from "react";
 
-import {SearchIcon} from "./Icons";
+import type {GridMode} from "./CapabilityGrid";
+import type {SpecIndex} from "../types";
+import {GearIcon} from "./Icons";
 
 const RECENT_SEARCH_STORAGE_KEY = "mcp-mirror:recent-searches:v1";
 const MAX_RECENT_SEARCHES = 6;
@@ -28,6 +30,11 @@ interface SearchHeroProps {
   resultCount: number;
   onChange: (value: string) => void;
   onHomeReset: () => void;
+  specIndex: SpecIndex | null;
+  selectedSpec: string;
+  onSpecChange: (value: string) => void;
+  gridMode: GridMode;
+  onGridModeChange: (value: GridMode) => void;
 }
 
 export function SearchHero({
@@ -35,6 +42,11 @@ export function SearchHero({
   resultCount,
   onChange,
   onHomeReset,
+  specIndex,
+  selectedSpec,
+  onSpecChange,
+  gridMode,
+  onGridModeChange,
 }: SearchHeroProps) {
   const [recentSearches, setRecentSearches] = useState<string[]>(
     readRecentSearches,
@@ -42,6 +54,7 @@ export function SearchHero({
   const [isRecentOpen, setIsRecentOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const settingsRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     const closeOutside = (event: PointerEvent) => {
@@ -68,141 +81,240 @@ export function SearchHero({
       ),
     ].slice(0, MAX_RECENT_SEARCHES));
   };
+  const selectedSpecEntry = specIndex?.specs.find(
+    (entry) => entry.id === selectedSpec,
+  );
+  const openSettings = () => {
+    setIsRecentOpen(false);
+    settingsRef.current?.showModal();
+  };
 
   return (
     <section className="search-hero" aria-label="Capability search">
       <div className="site-shell search-hero-inner">
-        <h1>
-          <Link
-            className="search-wordmark"
-            href="#/"
-            aria-label="Reset capability search"
-            onPress={onHomeReset}
-          >
-            <span>MCP capability support</span>{" "}
-            <strong>across agent frameworks</strong>
-          </Link>
-        </h1>
-        <p className="hero-copy">
-          Search a tool-definition capability to see whether each framework
-          preserves it across exact tested versions.
-        </p>
+        <Link
+          className="search-wordmark"
+          href="#/"
+          aria-label="Reset Can AI use search"
+          onPress={onHomeReset}
+        >
+          Can AI use
+        </Link>
 
-        <div className="hero-interaction-row">
-          <div
-            className="capability-search-wrap"
-            ref={wrapperRef}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") setIsRecentOpen(false);
+        <div
+          className="capability-search-wrap"
+          ref={wrapperRef}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") setIsRecentOpen(false);
+          }}
+        >
+          <SearchField
+            aria-label="Search MCP capabilities"
+            className="capability-search"
+            fullWidth
+            value={query}
+            onChange={(value) => {
+              onChange(value);
+              if (value) setIsRecentOpen(false);
             }}
           >
-            <SearchField
-              aria-label="Search MCP capabilities"
-              className="capability-search"
-              fullWidth
-              value={query}
-              onChange={(value) => {
-                onChange(value);
-                if (value) setIsRecentOpen(false);
-              }}
+            <SearchField.Group>
+              <SearchField.Input
+                id="capability-search"
+                ref={inputRef}
+                autoFocus
+                autoComplete="off"
+                spellCheck={false}
+                onFocus={() => {
+                  if (!query && recentSearches.length) setIsRecentOpen(true);
+                }}
+                onBlur={commitCurrentQuery}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") commitCurrentQuery();
+                }}
+              />
+            </SearchField.Group>
+          </SearchField>
+          {isRecentOpen && !query && recentSearches.length ? (
+            <div
+              className="recent-searches"
+              role="region"
+              aria-label="Recent searches"
             >
-              <SearchField.Group>
-                <span className="search-input-icon" aria-hidden="true">
-                  <SearchIcon width={17} height={17} />
-                </span>
-                <SearchField.Input
-                  id="capability-search"
-                  ref={inputRef}
-                  autoFocus
-                  autoComplete="off"
-                  placeholder="Can I rely on…?"
-                  spellCheck={false}
-                  onFocus={() => {
-                    if (!query && recentSearches.length) setIsRecentOpen(true);
-                  }}
-                  onBlur={commitCurrentQuery}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") commitCurrentQuery();
-                  }}
-                />
-              </SearchField.Group>
-            </SearchField>
-            {isRecentOpen && !query && recentSearches.length ? (
-              <div
-                className="recent-searches"
-                role="region"
-                aria-label="Recent searches"
-              >
-                <div className="recent-searches-heading">
-                  <strong>Recent searches</strong>
-                </div>
-                <ul>
-                  {recentSearches.map((item) => (
-                    <li key={item.toLocaleLowerCase()}>
-                      <Button
-                        className="recent-search-run"
-                        variant="ghost"
-                        onPress={() => {
-                          onChange(item);
-                          setIsRecentOpen(false);
-                          inputRef.current?.focus();
-                        }}
-                      >
-                        {item}
-                      </Button>
-                      <Button
-                        className="recent-search-remove"
-                        aria-label={`Remove recent search ${item}`}
-                        isIconOnly
-                        variant="ghost"
-                        onPress={() =>
-                          persistRecent(
-                            recentSearches.filter((candidate) => candidate !== item),
-                          )
-                        }
-                      >
-                        ×
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  className="recent-search-clear"
-                  variant="ghost"
-                  onPress={() => {
-                    persistRecent([]);
-                    setIsRecentOpen(false);
-                  }}
-                >
-                  Clear recent searches
-                </Button>
+              <div className="recent-searches-heading">
+                <strong>Recent searches</strong>
               </div>
-            ) : null}
-          </div>
-          <div className="hero-actions">
-            <Button
-              className="hero-browse"
-              variant="primary"
-              onPress={() => {
-                const target = document.getElementById("explore-heading");
-                target?.scrollIntoView({behavior: "smooth", block: "start"});
-                target?.focus({preventScroll: true});
+              <ul>
+                {recentSearches.map((item) => (
+                  <li key={item.toLocaleLowerCase()}>
+                    <Button
+                      className="recent-search-run"
+                      variant="ghost"
+                      onPress={() => {
+                        onChange(item);
+                        setIsRecentOpen(false);
+                        inputRef.current?.focus();
+                      }}
+                    >
+                      {item}
+                    </Button>
+                    <Button
+                      className="recent-search-remove"
+                      aria-label={`Remove recent search ${item}`}
+                      isIconOnly
+                      variant="ghost"
+                      onPress={() =>
+                        persistRecent(
+                          recentSearches.filter((candidate) => candidate !== item),
+                        )
+                      }
+                    >
+                      ×
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              <Button
+                className="recent-search-clear"
+                variant="ghost"
+                onPress={() => {
+                  persistRecent([]);
+                  setIsRecentOpen(false);
+                }}
+              >
+                Clear recent searches
+              </Button>
+            </div>
+          ) : null}
+        </div>
+
+        <span className="search-question" aria-hidden="true">?</span>
+        <Button
+          className="search-settings"
+          variant="ghost"
+          aria-haspopup="dialog"
+          onPress={openSettings}
+        >
+          <GearIcon />
+          <span>Settings</span>
+        </Button>
+      </div>
+      <div className="search-context">
+        <span className="search-result-context" aria-live="polite">
+          {query.trim()
+            ? `${resultCount} ${resultCount === 1 ? "result" : "results"}`
+            : null}
+        </span>
+        {specIndex ? (
+          <label className="spec-selector">
+            <span>Protocol snapshot</span>
+            <select
+              aria-label="MCP specification revision"
+              value={selectedSpec}
+              onFocus={() => setIsRecentOpen(false)}
+              onChange={(event) => {
+                setIsRecentOpen(false);
+                onSpecChange(event.currentTarget.value);
               }}
             >
-              Browse capabilities
+              {specIndex.specs.map((entry) => (
+                <option value={entry.id} key={entry.id}>
+                  {entry.label}
+                </option>
+              ))}
+            </select>
+            {selectedSpecEntry ? (
+              <small>
+                {selectedSpecEntry.measured_frameworks} of{" "}
+                {selectedSpecEntry.total_frameworks} frameworks reach this
+                revision
+              </small>
+            ) : null}
+          </label>
+        ) : null}
+      </div>
+      <dialog
+        className="settings-dialog"
+        ref={settingsRef}
+        aria-labelledby="settings-title"
+        onClick={(event) => {
+          if (event.target === event.currentTarget) event.currentTarget.close();
+        }}
+      >
+        <form method="dialog" className="settings-panel">
+          <div className="settings-heading">
+            <div>
+              <p className="eyebrow">Display preferences</p>
+              <h2 id="settings-title">Settings</h2>
+            </div>
+            <Button
+              aria-label="Close settings"
+              isIconOnly
+              type="submit"
+              variant="ghost"
+              onPress={() => settingsRef.current?.close()}
+            >
+              ×
             </Button>
-            <Link className="hero-method" href="#/method">
-              How measurements work
-              <Link.Icon />
-            </Link>
           </div>
-        </div>
-      </div>
-      <div className="search-context" aria-live="polite">
-        {query.trim()
-          ? `${resultCount} ${resultCount === 1 ? "result" : "results"}`
-          : null}
-      </div>
+
+          <label className="settings-field">
+            <span>MCP protocol snapshot</span>
+            <select
+              value={selectedSpec}
+              onChange={(event) => onSpecChange(event.currentTarget.value)}
+            >
+              {specIndex?.specs.map((entry) => (
+                <option value={entry.id} key={entry.id}>
+                  {entry.label}
+                </option>
+              ))}
+            </select>
+            {selectedSpecEntry ? (
+              <small>
+                {selectedSpecEntry.measured_frameworks} of{" "}
+                {selectedSpecEntry.total_frameworks} frameworks produced
+                same-revision measurements.
+              </small>
+            ) : null}
+          </label>
+
+          <fieldset className="settings-field">
+            <legend>Capability table cells</legend>
+            <label>
+              <input
+                type="radio"
+                name="grid-mode"
+                checked={gridMode === "support"}
+                onChange={() => onGridModeChange("support")}
+              />
+              Support status
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="grid-mode"
+                checked={gridMode === "date"}
+                onChange={() => onGridModeChange("date")}
+              />
+              Measurement date
+            </label>
+          </fieldset>
+
+          <div className="settings-actions">
+            <Link href="#/method" onPress={() => settingsRef.current?.close()}>
+              Measurement method
+            </Link>
+            <Button
+              type="submit"
+              variant="primary"
+              onPress={() => settingsRef.current?.close()}
+            >
+              Done
+            </Button>
+          </div>
+        </form>
+      </dialog>
     </section>
   );
 }

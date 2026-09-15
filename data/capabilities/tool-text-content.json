@@ -1,0 +1,61 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "tool-text-content",
+  "title": "Text content",
+  "description": "The `text` content block, the baseline result type that every tool result may carry.",
+  "question": "Does text content reach the agent unchanged?",
+  "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+  "status": "stable",
+  "categories": [
+    "Tool results"
+  ],
+  "keywords": "text content,TextContent,result text,content block",
+  "stats": {
+    "crewai": {
+      "1.15.1": "a #1"
+    },
+    "langchain": {
+      "0.3.2": "y"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "n #2"
+    }
+  },
+  "notes": "The one content type almost everything survives. Three adapters pass it through unchanged. CrewAI delivers the characters but wraps them in the repr of the list that held them, so the agent reads brackets and quotes as part of the text. Mastra drops it.",
+  "notes_by_num": {
+    "1": "CrewAI: the text arrives stringified inside a Python list repr, as \"['SENTINEL_TEXT_BLOCK']\" rather than the block's text.",
+    "2": "Mastra: all content blocks are dropped, text included; only structuredContent reaches the agent."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "Unchanged at three boundaries, reshaped at one, dropped at one.",
+    "detail": "Plain text is the floor. Two of five do not clear it cleanly."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#text-content",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "This is the one content type every framework is expected to handle, so it is the control row: the other content types can only be read as losses against a text block that survives.",
+  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "measured": {
+    "run_date": "2026-09-14",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2025-11-25",
+  "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#text-content",
+  "docs_label": "MCP Docs"
+}

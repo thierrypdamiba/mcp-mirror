@@ -71,6 +71,22 @@ TOOLS: list[types.Tool] = [
             "required": ["query"],
         },
         annotations=types.ToolAnnotations(title="Search records", readOnlyHint=True),
+        # Icons are the one part of a tool definition aimed at a human rather than a
+        # model, so an adapter built purely around function-calling has no obvious
+        # place to put them. Two entries with different MIME types and sizes make a
+        # partial rendering (e.g. keeping only `src`) visible as a change.
+        icons=[
+            types.Icon(
+                src="https://example.com/icons/search.svg",
+                mimeType="image/svg+xml",
+                sizes=["any"],
+            ),
+            types.Icon(
+                src="https://example.com/icons/search-32.png",
+                mimeType="image/png",
+                sizes=["32x32"],
+            ),
+        ],
     ),
     types.Tool(
         name="create_report",
@@ -195,18 +211,226 @@ TOOLS: list[types.Tool] = [
 ]
 
 
+# A 1x1 PNG and a minimal WAV header, small enough to inline and still be real media.
+TINY_PNG = (
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+)
+TINY_WAV = "UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="
+
+SENTINEL_STRUCTURED = {
+    "count": 2,
+    "records": [{"id": "rec_1", "status": "active"}, {"id": "rec_2", "status": "archived"}],
+    "note": "SENTINEL_STRUCTURED_CONTENT",
+}
+
+
+def _rich_content() -> list:
+    """One result carrying every content block a 2025-11-25 tool may return.
+
+    Returning them together means a single invocation observes every content-kind
+    feature at once, and an adapter that keeps only text becomes visible as the
+    absence of the other blocks rather than as five separate scans.
+    """
+
+    return [
+        types.TextContent(
+            type="text",
+            text="SENTINEL_TEXT_BLOCK",
+            # Audience and priority are the only content annotations the spec defines,
+            # and they are what a client would use to decide what to show a user.
+            annotations=types.Annotations(audience=["user"], priority=0.9),
+        ),
+        types.ImageContent(type="image", data=TINY_PNG, mimeType="image/png"),
+        types.AudioContent(type="audio", data=TINY_WAV, mimeType="audio/wav"),
+        types.EmbeddedResource(
+            type="resource",
+            resource=types.TextResourceContents(
+                uri="file:///fixtures/embedded.txt",
+                mimeType="text/plain",
+                text="SENTINEL_EMBEDDED_RESOURCE",
+            ),
+        ),
+        types.ResourceLink(
+            type="resource_link",
+            uri="file:///fixtures/linked.txt",
+            name="linked.txt",
+            mimeType="text/plain",
+            description="SENTINEL_RESOURCE_LINK",
+        ),
+    ]
+
+
+def _call_result(name: str, arguments: dict) -> tuple[list, dict | None, bool]:
+    """Build the content, structured content and error flag for one call.
+
+    ``delete_account`` with ``confirm: false`` is the error path: a tool that reports
+    failure through ``isError`` rather than a protocol error, which is the distinction
+    an adapter can flatten into an ordinary success.
+    """
+
+    if name == "delete_account" and not (arguments or {}).get("confirm"):
+        return (
+            [types.TextContent(type="text", text="SENTINEL_TOOL_ERROR: confirm was not set")],
+            None,
+            True,
+        )
+    return _rich_content(), SENTINEL_STRUCTURED, False
+
+
+RESOURCES: list[types.Resource] = [
+    types.Resource(
+        uri="file:///fixtures/notes.txt",
+        name="notes.txt",
+        title="Release notes",
+        description="SENTINEL_RESOURCE_DESCRIPTION",
+        mimeType="text/plain",
+    ),
+    types.Resource(
+        uri="file:///fixtures/logo.png",
+        name="logo.png",
+        description="A binary resource, to check base64 survives the round trip.",
+        mimeType="image/png",
+    ),
+]
+
+RESOURCE_TEMPLATES: list[types.ResourceTemplate] = [
+    types.ResourceTemplate(
+        uriTemplate="file:///fixtures/records/{record_id}",
+        name="record",
+        description="SENTINEL_TEMPLATE_DESCRIPTION",
+        mimeType="application/json",
+    ),
+]
+
+PROMPTS: list[types.Prompt] = [
+    types.Prompt(
+        name="summarize_records",
+        title="Summarize records",
+        description="SENTINEL_PROMPT_DESCRIPTION",
+        arguments=[
+            types.PromptArgument(
+                name="status",
+                description="SENTINEL_ARGUMENT_DESCRIPTION",
+                required=True,
+            ),
+            types.PromptArgument(
+                name="tone",
+                description="Optional writing tone.",
+                required=False,
+            ),
+        ],
+    ),
+]
+
+
+def _read_resource(uri: str):
+    """Return the contents for one resource URI.
+
+    The binary entry is what distinguishes an adapter that decodes base64 correctly from
+    one that hands the agent a mangled string.
+    """
+
+    if str(uri).endswith("logo.png"):
+        return types.BlobResourceContents(
+            uri=uri, mimeType="image/png", blob=TINY_PNG
+        )
+    return types.TextResourceContents(
+        uri=uri, mimeType="text/plain", text="SENTINEL_RESOURCE_TEXT"
+    )
+
+
+def _get_prompt(name: str, arguments: dict | None) -> types.GetPromptResult:
+    status = (arguments or {}).get("status", "<unset>")
+    return types.GetPromptResult(
+        description="SENTINEL_PROMPT_DESCRIPTION",
+        messages=[
+            types.PromptMessage(
+                role="user",
+                content=types.TextContent(
+                    type="text", text=f"SENTINEL_PROMPT_MESSAGE status={status}"
+                ),
+            )
+        ],
+    )
+
+
 def build_server() -> Server:
     server: Server = Server("tricky-mcp")
 
-    @server.list_tools()
-    async def _list_tools() -> list[types.Tool]:
-        return TOOLS
+    # MCP Python SDK 1.x registered low-level handlers through decorators.
+    # SDK 2.x takes explicit callbacks so the same fixture can serve both the
+    # handshake-era and 2026-07-28 stateless protocols.
+    if hasattr(server, "list_tools"):
+        @server.list_tools()
+        async def _list_tools() -> list[types.Tool]:
+            return TOOLS
 
-    @server.call_tool()
-    async def _call_tool(name: str, arguments: dict) -> list[types.TextContent]:
-        return [types.TextContent(type="text", text=f"called {name} with {arguments!r}")]
+        @server.call_tool()
+        async def _call_tool(name: str, arguments: dict):
+            content, structured, is_error = _call_result(name, arguments or {})
+            if is_error:
+                # The 1.x low-level server maps a raised exception onto isError.
+                raise ValueError(content[0].text)
+            return (content, structured) if structured is not None else content
 
-    return server
+        @server.list_resources()
+        async def _list_resources() -> list[types.Resource]:
+            return RESOURCES
+
+        @server.list_resource_templates()
+        async def _list_resource_templates() -> list[types.ResourceTemplate]:
+            return RESOURCE_TEMPLATES
+
+        @server.read_resource()
+        async def _read_resource_v1(uri):
+            return _read_resource(uri)
+
+        @server.list_prompts()
+        async def _list_prompts() -> list[types.Prompt]:
+            return PROMPTS
+
+        @server.get_prompt()
+        async def _get_prompt_v1(name: str, arguments: dict | None) -> types.GetPromptResult:
+            return _get_prompt(name, arguments)
+
+        return server
+
+    async def _list_tools_v2(_context, _params) -> types.ListToolsResult:
+        return types.ListToolsResult(tools=TOOLS)
+
+    async def _call_tool_v2(_context, params) -> types.CallToolResult:
+        content, structured, is_error = _call_result(params.name, params.arguments or {})
+        return types.CallToolResult(
+            content=content,
+            structuredContent=structured,
+            isError=is_error,
+        )
+
+    async def _list_resources_v2(_context, _params) -> types.ListResourcesResult:
+        return types.ListResourcesResult(resources=RESOURCES)
+
+    async def _list_resource_templates_v2(_context, _params) -> types.ListResourceTemplatesResult:
+        return types.ListResourceTemplatesResult(resourceTemplates=RESOURCE_TEMPLATES)
+
+    async def _read_resource_v2(_context, params) -> types.ReadResourceResult:
+        return types.ReadResourceResult(contents=[_read_resource(params.uri)])
+
+    async def _list_prompts_v2(_context, _params) -> types.ListPromptsResult:
+        return types.ListPromptsResult(prompts=PROMPTS)
+
+    async def _get_prompt_v2(_context, params) -> types.GetPromptResult:
+        return _get_prompt(params.name, params.arguments)
+
+    return Server(
+        "tricky-mcp",
+        on_list_tools=_list_tools_v2,
+        on_call_tool=_call_tool_v2,
+        on_list_resources=_list_resources_v2,
+        on_list_resource_templates=_list_resource_templates_v2,
+        on_read_resource=_read_resource_v2,
+        on_list_prompts=_list_prompts_v2,
+        on_get_prompt=_get_prompt_v2,
+    )
 
 
 async def _main() -> None:

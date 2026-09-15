@@ -1,0 +1,63 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "property-descriptions",
+  "title": "Property Descriptions",
+  "description": "Natural-language guidance attached to individual parameters and nested properties.",
+  "question": "Do property-level descriptions survive at each capture boundary?",
+  "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+  "status": "stable",
+  "categories": [
+    "Descriptions",
+    "Parameter contract"
+  ],
+  "keywords": "description,property description,parameter description,nested property,schema annotation",
+  "stats": {
+    "crewai": {
+      "1.15.1": "a #1"
+    },
+    "langchain": {
+      "0.3.2": "y"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "y"
+    }
+  },
+  "notes": "Four capture boundaries preserve all measured property descriptions. CrewAI drops descriptions from branches inside the fixture's destination union.",
+  "notes_by_num": {
+    "1": "CrewAI: descriptions on the URI and object branches of destination.anyOf are absent from the generated args_schema."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "Preserved at four boundaries, partly preserved at one.",
+    "detail": "CrewAI loses descriptions inside union branches while retaining the surrounding parameter guidance."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP tools documenting individual parameters.",
+  "links": [
+    {
+      "url": "https://json-schema.org/understanding-json-schema/reference/annotations#description",
+      "title": "JSON Schema Docs"
+    }
+  ],
+  "known_issues": [
+    "A retained type without its property description can still leave a model unable to choose the intended value."
+  ],
+  "why": "Property descriptions carry the author's parameter-level intent. Losing them can make a structurally valid tool call semantically wrong.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+  "measured": {
+    "run_date": "2026-09-04",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "JSON Schema 2020-12",
+  "docs_url": "https://json-schema.org/understanding-json-schema/reference/annotations#description",
+  "docs_label": "JSON Schema Docs"
+}

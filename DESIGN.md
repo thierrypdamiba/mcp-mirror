@@ -90,10 +90,11 @@ mcp-mirror is that tool. Point it at one MCP server, run it through N frameworks
 3. **Normalizer** (`normalize.py`): maps source tools and each rendering into the common `ToolRep` model.
 4. **Differ** (`diff.py`): compares a source `ToolRep` against a framework `ToolRep`, emits categorized `Difference` records.
 5. **Scorecard** (`scorecard.py`): aggregates differences into per-tool and per-framework verdicts, grouped by Job.
-6. **Reporters** (`report.py`): serialize a `Report` to JSON, a rich terminal table, or markdown.
-7. **Regression harness**: save a baseline `Report`, later compare and exit nonzero on drift; reject source- or renderer-level MCP version mismatches.
-8. **Isolated renderer worker** (`_render_worker.py`): prevents heavyweight framework imports and event-loop state from contaminating one another.
-9. **CLI** (`cli.py`): orchestrates the above.
+6. **Reporters** (`report.py`): serialize a versioned evidence `Report` to JSON, a rich terminal table, or markdown.
+7. **Regression harness**: save a baseline `Report`, later compare and exit nonzero on drift or incomplete framework runs; reject source- or renderer-level MCP version mismatches.
+8. **Runner manifests** (`runner-manifests.json`): pin each adapter's runtime, packages, protocol evidence, and capture stage.
+9. **Workers** (`_source_worker.py`, `_render_worker.py`): prevent heavyweight framework imports and incompatible MCP SDKs from contaminating one another. Managed mode puts each worker in its own `uv` environment.
+10. **CLI** (`cli.py`): orchestrates the above and records non-secret scan configuration plus a copyable reproduction command.
 
 ---
 
@@ -139,14 +140,22 @@ class FrameworkRun(BaseModel):
     framework: str
     framework_version: str
     adapter_version: str | None
+    runner_digest: str | None
+    status: Literal["measured", "unsupported", "adapter_error",
+                    "protocol_mismatch", "server_variance", "unmeasured"]
     evidence: RendererEvidence | None
+    observations: list[CaptureObservation]
     differences: list[Difference]
 
 class Report(BaseModel):
+    schema: Literal["mcp-mirror/report@2"]
     mcp_server: str
     mcp_spec_version: str    # direct source handshake; NON-NEGOTIABLE
     mcp_spec_version_evidence: str
     generated_with: str      # mcp-mirror version
+    provenance: ScanProvenance
+    scan: ScanConfiguration
+    source_observation: CaptureObservation
     tools: list[str]
     runs: list[FrameworkRun]
     # scorecard is derived, not stored
@@ -220,9 +229,13 @@ comparison interface, not a claim that all providers serialize identically.
   The worker fails closed if that private evidence seam moves.
 
 Renderers live behind optional Python extras. Mastra additionally requires
-`npm ci --prefix src/mcp_mirror/renderers/mastra_node`. All run in isolated
-subprocesses from the CLI. The full contribution contract is in
-`ADDING_A_FRAMEWORK.md`.
+`npm ci --prefix src/mcp_mirror/renderers/mastra_node`. Local mode runs each in
+a separate subprocess, which isolates process state but not dependencies.
+Managed mode runs the direct source connection and every selected Python
+adapter in separate `uv` environments built from the manifest registry. This
+allows conflicting MCP SDK generations in one scan without requiring Docker.
+Managed Node runners are not implemented yet. The full contribution contract is
+in `ADDING_A_FRAMEWORK.md`.
 
 ---
 
@@ -324,9 +337,9 @@ closed on mixed old/new evidence.
 
 Rationale: a protocol revision can change the source representation or adapter
 path. Without independent version evidence, a spec change can masquerade as
-adapter drift. The compatibility data is currently a single MCP `2025-11-25`
-snapshot. A second revision must be measured and published separately rather
-than merged into those cells.
+adapter drift. The compatibility data publishes separate MCP `2025-11-25` and
+`2026-07-28` snapshots. The site switches the entire dataset and never merges
+cells across those revisions.
 
 ---
 
@@ -339,6 +352,18 @@ Compute the current `Report`, compare it to the saved baseline (matching source
 and renderer MCP versions required), and exit nonzero if any new difference
 appears or any category worsens. This lets a framework maintainer wire
 mcp-mirror into CI to catch fidelity regressions in an adapter.
+
+The comparison fails closed, because a gate that cannot establish equivalence is
+worth less than no gate at all. Beyond new and worsening differences, drift also
+covers everything that changes what the diff is evidence of: a framework,
+adapter, or runner-manifest version change, including an adapter version that
+appears or disappears; a scanner, Python, or platform change recorded in
+provenance; and a renderer that moved to a different capture stage, API, or
+object, or stopped serializing the provider request. A baseline recorded from an
+incomplete scan is rejected outright rather than compared, and an incomplete
+current scan outranks drift in the exit code: a diff computed from a partial
+scan is not a trustworthy drift signal, so callers running both gates learn the
+scan cannot be believed rather than reading its conclusion.
 
 ---
 
@@ -369,7 +394,7 @@ service.
 mcp-mirror scan <server>
     --frameworks langchain,pydantic_ai,crewai,openai_agents,mastra
                                                   # default: all installed
-    --spec-version 2025-11-25                    # optional source assertion
+    --spec-version 2026-07-28                    # optional source assertion
     --output table|json|md                       # default: table
     --job J1,J2                                  # optional; J5 always remains
     --baseline baseline.json --fail-on-drift      # regression mode
@@ -417,6 +442,13 @@ mcp-mirror/
       openai_agents_renderer.py
       mastra_renderer.py
       mastra_node/     # pinned @mastra/mcp worker
+  data/
+    frameworks.json    # legacy snapshot (MCP 2025-11-25)
+    capabilities/*.json
+    specs/<revision>/
+      frameworks.json  # agents, statuses, and cell rules for one revision
+      surface.json     # what the revision defines (section 16.1)
+      capabilities/*.json  # what we measured
   fixtures/
     tricky_server.py   # section 14
     http_server.py     # local streamable-HTTP fixture
@@ -426,6 +458,51 @@ mcp-mirror/
     test_source_cli.py # transport and exit-code contracts
     test_report.py     # evidence and mandatory-J5 output contracts
 ```
+
+### 16.1 Protocol surface and coverage
+
+A support table is only honest if it is explicit about what it does not cover. The
+tool-definition rows the project started with are a small corner of MCP, and a reader
+looking at nineteen green cells has no way to tell whether that is the whole protocol or
+a fraction of it.
+
+So each protocol snapshot carries two files, kept deliberately separate:
+
+- `surface.json` enumerates what the revision **defines**, one entry per independently
+  implementable feature, each citing the exact specification section. It is maintained
+  against the published specification and is indifferent to what we have measured.
+- `capabilities/*.json` are what we **measured**, one hand-authored file per feature that
+  a scan has actually exercised.
+
+`scripts/build_data.py` joins them. A feature with a capability file is published as
+measured; every other feature is published anyway, as a row whose verdict is "Not yet
+measured", carrying the `probe` text that says what a scan would have to do. Coverage is
+then counted rather than asserted, and appears in the aggregate as a `coverage` block.
+
+Unprobed does not mean unknown for every framework in the row. An adapter whose SDK pin or
+negotiated version rules out the snapshot's revision cannot open a session at it, so it
+reaches none of its features, an answer that holds for all of them at once. Those cells
+are `x`, carrying the evidence from `attempts.json`, and only the adapters that could have
+reached the feature are left `u`. Reserving `u` for genuine ignorance keeps the
+"unmeasured" count a to-do list rather than a mix of work not done and work that cannot be
+done.
+
+Two rules keep the join meaningful, both enforced in `data/validator/validate.py`:
+
+1. Every capability file must map to a feature in the surface, so the table cannot grow
+   rows that correspond to nothing in the specification.
+2. An uncatalogued feature must supply the prose the synthesised row is rendered from,
+   so a gap is described rather than blank.
+
+The remaining failure mode is deleting a feature from `surface.json`, which raises the
+coverage percentage without measuring anything. That is not machine-checkable, and
+`tests/test_protocol_surface.py` says so in as many words. What the design buys is that it
+cannot happen quietly: the denominator lives in one reviewable file, so the only way to do
+it is a diff that deletes a named feature of the published specification.
+
+A revision with no `surface.json` simply publishes no coverage figure. The 2025-11-25
+snapshot is in that state: its historical rows stand, and no claim is made about how much
+of that revision they represent.
 
 ---
 
@@ -483,8 +560,8 @@ and marketing decision; this design does not invent one.
 - Provider-request capture using deterministic local fake transports, where a
   framework exposes a stable interception seam.
 - UTCP and other protocols as additional source loaders.
-- Separately versioned compatibility datasets for MCP revisions beyond
-  `2025-11-25`.
+- Separately versioned compatibility datasets for MCP revisions beyond the
+  published `2025-11-25` and `2026-07-28` snapshots.
 - A hosted, continuously updated public census across popular servers.
 
 ---
@@ -492,8 +569,9 @@ and marketing decision; this design does not invent one.
 ## Appendix: unresolved launch framing
 
 The original plan was tied to shipping before the 2026-07-28 MCP transition.
-That date has passed, and the current public dataset measures MCP 2025-11-25.
-No replacement launch hook has been approved. Before publishing a transition
-story, produce a separate 2026-07-28 dataset and verify every renderer's
-independent negotiation evidence. Marketing framing is an owner decision, not a
-scanner implementation detail.
+That date has passed. A separate 2026-07-28 dataset now records same-protocol
+captures for Pydantic AI and OpenAI Agents SDK. LangChain and CrewAI have
+incompatible SDK constraints, and Mastra still negotiates 2025-11-25, so those
+three rows remain explicitly unmeasured. No replacement launch hook has been
+approved. Marketing framing is an owner decision, not a scanner implementation
+detail.

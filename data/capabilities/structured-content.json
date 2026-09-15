@@ -1,0 +1,63 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "structured-content",
+  "title": "`structuredContent`",
+  "description": "A JSON result value returned alongside `content`, conforming to the tool's `outputSchema` when one is declared.",
+  "question": "Does the agent receive the structured value, or only its text rendering?",
+  "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+  "status": "stable",
+  "categories": [
+    "Tool results"
+  ],
+  "keywords": "structuredContent,structured content,json result,typed result",
+  "stats": {
+    "crewai": {
+      "1.15.1": "n #1"
+    },
+    "langchain": {
+      "0.3.2": "n #2"
+    },
+    "openai-agents": {
+      "0.22.0": "n #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "n #4"
+    },
+    "mastra": {
+      "1.17.3": "y"
+    }
+  },
+  "notes": "Four of five drop the typed value and pass the agent the text mirror the server sent alongside it, which is the copy meant for humans. Mastra is the exception and keeps structuredContent intact, but it does so by dropping every content block in the same result, so no adapter delivers both halves of the response.",
+  "notes_by_num": {
+    "1": "CrewAI: structuredContent is dropped; only the text mirror reaches the agent.",
+    "2": "LangChain: structuredContent is dropped; only the text mirror reaches the agent.",
+    "3": "OpenAI Agents: structuredContent is dropped; only the text mirror reaches the agent.",
+    "4": "Pydantic AI: structuredContent is dropped; only the text mirror reaches the agent."
+  },
+  "verdict": {
+    "code": "n",
+    "headline": "Reaches the agent at one boundary of five, and there by dropping all other content.",
+    "detail": "structuredContent exists so an agent can consume a result without parsing prose. Where it is dropped, the typed value a server carefully produced is replaced by its own human-readable summary."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#structured-content",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "The spec asks servers to mirror structured results into a text block for backwards compatibility. That mirror makes a dropped `structuredContent` invisible: the call still looks successful, and typed data quietly becomes a string the model has to re-parse.",
+  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "measured": {
+    "run_date": "2026-09-14",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2025-11-25",
+  "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#structured-content",
+  "docs_label": "MCP Docs"
+}

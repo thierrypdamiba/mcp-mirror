@@ -113,6 +113,26 @@ def build_scorecard(report: Report) -> dict[str, Any]:
 
     frameworks: dict[str, Any] = {}
     for run in report.runs:
+        if run.status != "measured":
+            details = [run.status_detail] if run.status_detail else []
+            frameworks[run.framework] = {
+                "framework_version": run.framework_version,
+                "adapter_version": run.adapter_version,
+                "status": run.status,
+                "status_detail": run.status_detail,
+                "jobs": {
+                    job_id: {
+                        "verdict": "unmeasured",
+                        "count": 0,
+                        "details": details,
+                    }
+                    for job_id in JOB_ORDER
+                },
+                "total_differences": 0,
+                "authz_flags": [],
+            }
+            continue
+
         by_job: dict[str, list[Difference]] = {job_id: [] for job_id in JOB_ORDER}
         for diff in run.differences:
             job_id = _dimension_to_job(diff.dimension)
@@ -130,6 +150,8 @@ def build_scorecard(report: Report) -> dict[str, Any]:
         frameworks[run.framework] = {
             "framework_version": run.framework_version,
             "adapter_version": run.adapter_version,
+            "status": run.status,
+            "status_detail": run.status_detail,
             "jobs": job_cells,
             "total_differences": len(run.differences),
             "authz_flags": _authz_flags(run.differences),

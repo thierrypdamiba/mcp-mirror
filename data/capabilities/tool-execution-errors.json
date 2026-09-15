@@ -1,0 +1,64 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "tool-execution-errors",
+  "title": "`isError`",
+  "description": "The in-band flag marking a tool result as a tool execution error, which the spec expects clients to pass to the model so it can correct itself.",
+  "question": "Can the agent tell a tool execution error from a successful result?",
+  "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+  "status": "stable",
+  "categories": [
+    "Tool results"
+  ],
+  "keywords": "isError,tool execution error,protocol error,self-correction,retry",
+  "stats": {
+    "crewai": {
+      "1.15.1": "n #1"
+    },
+    "langchain": {
+      "0.3.2": "n #2"
+    },
+    "openai-agents": {
+      "0.22.0": "n #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "a #4"
+    },
+    "mastra": {
+      "1.17.3": "a #5"
+    }
+  },
+  "notes": "Not one of the five hands the agent the boolean the specification defines. Three return the failure as ordinary text, so an agent reading the result cannot tell a failed call from a successful one. Two convert it into an exception, which preserves the fact of failure but moves it out of the result and into control flow.",
+  "notes_by_num": {
+    "1": "CrewAI: the failed call returns its text like any other result. Nothing marks it as a failure.",
+    "2": "LangChain: the error text arrives as an ordinary text block with a generated lc_ id. The flag is gone.",
+    "3": "OpenAI Agents: the error text is returned as normal tool output, indistinguishable from success.",
+    "4": "Pydantic AI: converted into a raised ModelRetry rather than a flag on the result. The failure is reachable, but as control flow.",
+    "5": "Mastra: converted into a thrown error rather than a flag on the result."
+  },
+  "verdict": {
+    "code": "n",
+    "headline": "Delivered by none of the five; two convert it into an exception.",
+    "detail": "isError is how a tool says 'this did not work' without the agent having to read prose. Three frameworks erase that distinction entirely."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "MCP separates protocol errors from tool execution errors precisely so a model can retry the second kind with better arguments. A framework that raises both as exceptions, or reports both as success, collapses that distinction and removes the recovery path the spec designed.",
+  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "measured": {
+    "run_date": "2026-09-14",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2025-11-25",
+  "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling",
+  "docs_label": "MCP Docs"
+}

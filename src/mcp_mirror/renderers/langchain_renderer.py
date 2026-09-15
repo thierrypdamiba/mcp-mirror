@@ -10,11 +10,12 @@ stronger provider evidence.
 from __future__ import annotations
 
 from importlib import util
+from typing import Any
 
 import anyio
 
-from ..models import RendererEvidence, ToolRep
-from ..normalize import normalize_function_tool
+from ..models import RendererEvidence, ResultRep, ToolRep
+from ..normalize import normalize_framework_result, normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
 from ._common import dist_version
@@ -29,6 +30,22 @@ def available() -> bool:
 
 def get_renderer() -> "LangChainRenderer":
     return LangChainRenderer()
+
+
+def _block_of(item: Any) -> dict[str, Any]:
+    """Classify one returned item by what the agent can actually tell it is."""
+
+    if isinstance(item, str):
+        return {"type": "text", "text": item}
+    if isinstance(item, dict):
+        return item
+    dump = getattr(item, "model_dump", None)
+    if callable(dump):
+        try:
+            return dump(mode="json")
+        except Exception:  # noqa: BLE001
+            pass
+    return {"type": type(item).__name__}
 
 
 def _connection(handle: ServerHandle) -> dict:
@@ -89,6 +106,107 @@ class LangChainRenderer:
                 connection=connection,
                 server_name="src",
             )
+
+        return self._to_reps(tools)
+
+    # Result capture boundary: direct StructuredTool invocation. LangChain's
+    # ToolNode may subsequently convert this return or a ToolException into a
+    # ToolMessage, so this is not claimed as the final model-visible boundary.
+    result_capture_api = "langchain_core.tools.StructuredTool.ainvoke"
+    result_capture_object = (
+        "direct tool return before ToolNode creates the agent ToolMessage"
+    )
+
+    def render_result(
+        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+    ) -> ResultRep:
+        """Invoke one tool and capture the declared framework-result boundary."""
+
+        return anyio.run(self._render_result_async, server, tool, arguments)
+
+    async def _render_result_async(
+        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+    ) -> ResultRep:
+        from langchain_mcp_adapters.client import create_session
+        from langchain_mcp_adapters.tools import load_mcp_tools
+
+        connection = _connection(server)
+        async with create_session(connection) as session:
+            await session.initialize()
+            tools = await load_mcp_tools(session, connection=connection, server_name="src")
+            target = next((t for t in tools if getattr(t, "name", None) == tool), None)
+            if target is None:
+                available = sorted(getattr(t, "name", "?") for t in tools)
+                raise RenderError(
+                    f"langchain renderer found no tool named {tool!r} (has: {available})"
+                )
+            try:
+                returned = await target.ainvoke(arguments)
+            except Exception as exc:  # noqa: BLE001 - the failure mode is the observation
+                # A tool that reported failure through `isError` may surface here as a
+                # raised exception instead, which is a different contract for the agent
+                # rather than a scanner error, so it is recorded rather than propagated.
+                return normalize_framework_result(
+                    tool=tool,
+                    origin=self.id,
+                    is_error=True,
+                    text=f"{type(exc).__name__}: {exc}",
+                    raw=repr(exc),
+                )
+        return self._result_to_rep(tool, returned)
+
+    def _result_to_rep(self, tool: str, returned: Any) -> ResultRep:
+        """Map whatever the adapter returned onto the common result shape.
+
+        langchain-mcp-adapters declares non-text tools as ``content_and_artifact``, so
+        a call can come back as a ``(content, artifact)`` tuple where the artifact
+        carries the blocks that did not fit into the content string. Both halves are
+        recorded, because which half a block landed in is the finding.
+        """
+
+        artifact = None
+        if isinstance(returned, tuple) and len(returned) == 2:
+            returned, artifact = returned
+
+        blocks = []
+        if isinstance(artifact, (list, tuple)):
+            blocks = [_block_of(item) for item in artifact]
+        elif artifact is not None:
+            blocks = [_block_of(artifact)]
+
+        if isinstance(returned, str):
+            return normalize_framework_result(
+                tool=tool,
+                origin=self.id,
+                blocks=blocks,
+                text=returned,
+                raw=repr((returned, artifact))[:2000],
+            )
+        if isinstance(returned, dict):
+            return normalize_framework_result(
+                tool=tool,
+                origin=self.id,
+                blocks=blocks,
+                structured_content=returned,
+                raw=repr((returned, artifact))[:2000],
+            )
+        if isinstance(returned, (list, tuple)):
+            return normalize_framework_result(
+                tool=tool,
+                origin=self.id,
+                blocks=blocks or [_block_of(item) for item in returned],
+                raw=repr((returned, artifact))[:2000],
+            )
+        return normalize_framework_result(
+            tool=tool,
+            origin=self.id,
+            blocks=blocks,
+            text=str(returned),
+            raw=repr((returned, artifact))[:2000],
+        )
+
+    def _to_reps(self, tools) -> list[ToolRep]:
+        from langchain_core.utils.function_calling import convert_to_openai_tool
 
         reps: list[ToolRep] = []
         for tool in tools:

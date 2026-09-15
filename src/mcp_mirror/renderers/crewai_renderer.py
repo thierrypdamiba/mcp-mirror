@@ -10,8 +10,8 @@ from __future__ import annotations
 from importlib import util
 from typing import Any
 
-from ..models import RendererEvidence, ToolRep
-from ..normalize import normalize_function_tool
+from ..models import RendererEvidence, ResultRep, ToolRep
+from ..normalize import normalize_framework_result, normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
 from ._common import dist_version
@@ -26,6 +26,27 @@ def available() -> bool:
 
 def get_renderer() -> "CrewAIRenderer":
     return CrewAIRenderer()
+
+
+def _block_of(item: Any) -> dict[str, Any]:
+    """Classify one returned item by what the agent can actually tell it is.
+
+    A bare ``str`` is recorded as text even when the server sent an image or an
+    embedded resource, because nothing in a plain string distinguishes them: the
+    original kind is genuinely gone by the time the agent reads it.
+    """
+
+    if isinstance(item, str):
+        return {"type": "text", "text": item}
+    if isinstance(item, dict):
+        return item
+    dump = getattr(item, "model_dump", None)
+    if callable(dump):
+        try:
+            return dump(mode="json")
+        except Exception:  # noqa: BLE001
+            pass
+    return {"type": type(item).__name__}
 
 
 class CrewAIRenderer:
@@ -89,6 +110,66 @@ class CrewAIRenderer:
             )
         self._negotiated_mcp_spec_version = observed.pop()
         return reps
+
+    # Result capture boundary: direct BaseTool.run invocation. CrewAI may also
+    # emit execution events around this return, so this is not claimed as the
+    # complete agent-runtime boundary.
+    result_capture_api = "crewai.tools.BaseTool.run"
+    result_capture_object = (
+        "direct tool return before surrounding agent event/message handling"
+    )
+
+    def render_result(
+        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+    ) -> ResultRep:
+        """Invoke one tool and capture the declared framework-result boundary."""
+
+        from crewai_tools import MCPServerAdapter
+
+        params = self._build_params(server)
+        with MCPServerAdapter(params) as tools:
+            target = next((t for t in tools if getattr(t, "name", None) == tool), None)
+            if target is None:
+                available = sorted(getattr(t, "name", "?") for t in tools)
+                raise RenderError(
+                    f"crewai renderer found no tool named {tool!r} (has: {available})"
+                )
+            try:
+                returned = target.run(**arguments)
+            except Exception as exc:  # noqa: BLE001 - the failure mode is the observation
+                # A tool that reported failure through `isError` may surface here as a
+                # raised exception instead. That is a different contract for the agent,
+                # not a scanner error, so it is recorded rather than propagated.
+                return normalize_framework_result(
+                    tool=tool,
+                    origin=self.id,
+                    is_error=True,
+                    text=f"{type(exc).__name__}: {exc}",
+                    raw=repr(exc),
+                )
+        return self._result_to_rep(tool, returned)
+
+    def _result_to_rep(self, tool: str, returned: Any) -> ResultRep:
+        """Map whatever the adapter returned onto the common result shape."""
+
+        if isinstance(returned, str):
+            return normalize_framework_result(
+                tool=tool, origin=self.id, text=returned, raw=returned[:2000]
+            )
+        if isinstance(returned, dict):
+            return normalize_framework_result(
+                tool=tool, origin=self.id, structured_content=returned, raw=returned
+            )
+        if isinstance(returned, (list, tuple)):
+            return normalize_framework_result(
+                tool=tool,
+                origin=self.id,
+                blocks=[_block_of(item) for item in returned],
+                raw=repr(returned)[:2000],
+            )
+        return normalize_framework_result(
+            tool=tool, origin=self.id, text=str(returned), raw=repr(returned)[:2000]
+        )
 
     def _build_params(self, server: ServerHandle) -> Any:
         if server.transport == "http":

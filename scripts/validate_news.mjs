@@ -6,6 +6,14 @@ const news = JSON.parse(
 const categories = new Set(["Protocol", "Frameworks", "Ecosystem", "Security", "MCP Mirror"]);
 const urls = new Set();
 let previousDate = "9999-12-31";
+const now = new Date();
+const maxVerificationAgeDays = Number(
+  process.env.NEWS_MAX_VERIFICATION_AGE_DAYS ?? 30,
+);
+
+if (!Number.isFinite(maxVerificationAgeDays) || maxVerificationAgeDays < 1) {
+  throw new Error("NEWS_MAX_VERIFICATION_AGE_DAYS must be a positive number");
+}
 
 for (const [index, item] of news.entries()) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(item.date) || Number.isNaN(Date.parse(item.date))) {
@@ -21,7 +29,26 @@ for (const [index, item] of news.entries()) {
   if (urls.has(canonical)) throw new Error(`${item.id} duplicates canonical URL ${canonical}`);
   urls.add(canonical);
   if (!categories.has(item.category)) throw new Error(`${item.id} has invalid category`);
-  if (item.verified_at !== "2026-09-04") throw new Error(`${item.id} has stale verification metadata`);
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(item.verified_at) ||
+    Number.isNaN(Date.parse(item.verified_at))
+  ) {
+    throw new Error(`${item.id} has invalid verification metadata`);
+  }
+  const verifiedAt = new Date(`${item.verified_at}T23:59:59Z`);
+  const verificationAgeDays = (now - verifiedAt) / 86_400_000;
+  if (verificationAgeDays < -1) {
+    throw new Error(`${item.id} was verified in the future`);
+  }
+  if (verificationAgeDays > maxVerificationAgeDays) {
+    throw new Error(
+      `${item.id} was last verified ${Math.floor(verificationAgeDays)} days ago; ` +
+        `maximum is ${maxVerificationAgeDays}`,
+    );
+  }
+  if (item.date > item.verified_at) {
+    throw new Error(`${item.id} was verified before its publication date`);
+  }
   for (const field of ["id", "title", "summary", "source"]) {
     if (!String(item[field] ?? "").trim()) throw new Error(`${item.id} is missing ${field}`);
   }

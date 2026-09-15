@@ -1,0 +1,63 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "tool-audio-content",
+  "title": "Audio content",
+  "description": "The `audio` content block, carrying base64-encoded audio data and its MIME type.",
+  "question": "Does an audio result survive adaptation?",
+  "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+  "status": "stable",
+  "categories": [
+    "Tool results"
+  ],
+  "keywords": "audio content,AudioContent,base64,mimeType,multimodal",
+  "stats": {
+    "crewai": {
+      "1.15.1": "n #1"
+    },
+    "langchain": {
+      "0.3.2": "n #2"
+    },
+    "openai-agents": {
+      "0.22.0": "a #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "n #4"
+    }
+  },
+  "notes": "The least survivable content type measured. One adapter passes it through as audio. One turns it into a JSON string. Two drop it. LangChain does something worse than dropping it: it raises, and the exception takes the rest of the result with it, so a server that returns audio alongside text returns nothing usable at all.",
+  "notes_by_num": {
+    "1": "CrewAI: the audio block is dropped from the result.",
+    "2": "LangChain: raises NotImplementedError -- 'AudioContent conversion to LangChain content blocks is not yet supported' -- which aborts the whole call, so no part of the result reaches the agent.",
+    "3": "OpenAI Agents: the block is serialized into a text block containing its JSON, base64 payload and all, so the audio reaches the agent only as characters.",
+    "4": "Mastra: all content blocks are dropped, audio included."
+  },
+  "verdict": {
+    "code": "n",
+    "headline": "Delivered as audio by one of five; fatal at one.",
+    "detail": "An unsupported content type that raises rather than degrades turns a partially supported result into a failed call."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#audio-content",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "Audio is the least-implemented content type in the union, which makes it the sharpest test of whether a framework handles the content list generically or only the cases it happened to code for.",
+  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "measured": {
+    "run_date": "2026-09-14",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2025-11-25",
+  "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#audio-content",
+  "docs_label": "MCP Docs"
+}

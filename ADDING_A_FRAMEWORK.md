@@ -8,7 +8,8 @@ tool definition the framework's real adapter presents at the model boundary.
 Once that renderer is registered, the shared engine provides the rest:
 
 - stdio and streamable-HTTP server configuration;
-- process isolation from the other framework packages;
+- process isolation from the other framework packages, plus dependency
+  isolation in managed mode;
 - normalization into `ToolRep`;
 - field-level differences and J1-J5 aggregation;
 - terminal, JSON, and markdown reports;
@@ -128,19 +129,22 @@ tool object or any provider-bound payload.
 
 ## 3. Register installation and discovery
 
-1. Add the renderer id and module to `_RENDERER_MODULES` in
-   `src/mcp_mirror/renderers/__init__.py`.
+1. Add the renderer id, module, runtime, exact top-level packages, supported
+   protocol evidence, and capture expectation to
+   `src/mcp_mirror/runner-manifests.json`.
 2. Add only useful spelling variants to `_ALIASES`.
-3. For Python, add a same-named optional dependency in `pyproject.toml` and add
-   it to the `all` extra.
+3. For Python, add a same-named optional dependency in `pyproject.toml` for
+   local mode. Do not force mutually incompatible adapters into one
+   environment.
 4. For a Node worker, commit both `package.json` and `package-lock.json` and
    document its `npm ci --prefix ...` command.
 5. Make `versions()` report the installed framework and adapter distributions,
    not versions copied from documentation.
 
 After registration, `available_renderers()` automatically includes the
-framework when its dependency is present, the CLI runs it in an isolated
-process, and the shared integration test parametrizes it.
+framework when its dependency is present. Local mode runs it in an isolated
+process. Managed mode also creates a separate `uv` environment from its
+manifest so another adapter's MCP SDK constraint cannot affect it.
 
 ## 4. Prove the renderer against the fixture
 
@@ -158,7 +162,9 @@ Add the new framework's equivalent npm installation when applicable, then run:
 uv run pytest tests -q
 uv run mcp-mirror frameworks
 uv run mcp-mirror scan "python fixtures/tricky_server.py" \
-  --frameworks framework_id
+  --frameworks framework_id \
+  --runner managed \
+  --fail-on-incomplete
 ```
 
 The shared test verifies that the renderer:
@@ -198,9 +204,12 @@ possible; it does not silently publish support claims.
    `data/capabilities/*.json` file.
 3. Use `u` for an unmeasured release. Do not omit known releases to make the
    row look complete.
-4. Every `a` or `n` cell must cite a numbered note describing the observable
-   mechanism.
-5. Keep framework ordering alphabetical within language group. There is no
+4. Use `x` when the adapter cannot negotiate the snapshot's revision at all. It
+   then reaches no feature in that revision, which is an answer for every row
+   rather than a reason to leave them `u`.
+5. Every `a`, `n` or `x` cell must cite a numbered note describing the
+   observable mechanism.
+6. Keep framework ordering alphabetical within language group. There is no
    aggregate framework score.
 
 Validate and regenerate the published aggregate:

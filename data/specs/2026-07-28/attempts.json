@@ -1,0 +1,24 @@
+{
+  "schema": "mcp-mirror/protocol-attempts@1",
+  "run_date": "2026-09-06",
+  "mcp_spec": "2026-07-28",
+  "measured_report": "report.json",
+  "attempts": {
+    "crewai": {
+      "framework_version": "1.15.1",
+      "status": "sdk_incompatible",
+      "evidence": "crewai-tools 1.15.1 depends on crewai 1.15.1, which requires mcp>=1.26.0,<1.27.dev0; dependency resolution with mcp==2.0.0 failed."
+    },
+    "langchain": {
+      "framework_version": "0.3.2",
+      "status": "sdk_incompatible",
+      "evidence": "langchain-mcp-adapters 0.3.2 requires mcp>=1.24.0,<2.0.0; dependency resolution with mcp==2.0.0 failed."
+    },
+    "mastra": {
+      "framework_version": "1.17.3",
+      "status": "protocol_mismatch",
+      "negotiated_mcp_spec_version": "2025-11-25",
+      "evidence": "@mastra/mcp 1.17.3 uses @modelcontextprotocol/sdk 1.30.0. Its adapter connection negotiated 2025-11-25, so mcp-mirror refused a cross-version diff."
+    }
+  }
+}

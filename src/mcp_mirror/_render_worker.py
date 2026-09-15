@@ -20,6 +20,34 @@ import sys
 from pathlib import Path
 
 
+def _capture_results(renderer, handle, calls: list[dict]) -> list[dict]:
+    """Invoke each requested tool through the adapter and record what came back.
+
+    A renderer without ``render_result`` has no result boundary implemented yet, which
+    is reported per call rather than failing the whole render: the tool definitions in
+    the same response are still a valid measurement.
+    """
+
+    render_result = getattr(renderer, "render_result", None)
+    captured = []
+    for call in calls:
+        tool = call.get("tool", "")
+        arguments = call.get("arguments") or {}
+        if not callable(render_result):
+            captured.append(
+                {"tool": tool, "ok": False, "error": "renderer has no render_result"}
+            )
+            continue
+        try:
+            rep = render_result(handle, tool, arguments)
+            captured.append({"tool": tool, "ok": True, "rep": rep.model_dump(mode="json")})
+        except Exception as exc:  # noqa: BLE001 - a failed call is an observation
+            captured.append(
+                {"tool": tool, "ok": False, "error": f"{type(exc).__name__}: {exc}"}
+            )
+    return captured
+
+
 def main() -> int:
     renderer_id = sys.argv[1]
     out_path = Path(sys.argv[2])
@@ -46,6 +74,9 @@ def main() -> int:
                 "evidence": evidence.model_dump(mode="json"),
                 "reps": [rep.model_dump() for rep in reps],
             }
+            calls = request.get("calls") or []
+            if calls:
+                result["results"] = _capture_results(renderer, handle, calls)
     except Exception as exc:  # noqa: BLE001 - report any failure back to the parent
         result = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 

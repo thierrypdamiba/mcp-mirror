@@ -1,0 +1,192 @@
+{
+  "schema": "mcp-mirror/agents@1",
+  "updated": "2026-09-06",
+  "mcp_spec": "2026-07-28",
+  "repo": "https://github.com/thierrypdamiba/mcp-mirror",
+  "_shape": "Mirrors the caniuse data model. Agents (their browsers) carry a version_list with an era index and a release date, and capability files carry stats as a version to support-code map. Era 0 is the release we measured, negative is older, positive is newer. Versions with no entry in a capability's stats render as not yet measured.",
+  "statuses": {
+    "stable": {
+      "short": "MCP 2026-07-28",
+      "label": "Defined in the released MCP specification"
+    },
+    "draft": {
+      "short": "MCP draft",
+      "label": "Defined only in a draft revision of the MCP specification"
+    },
+    "proposed": {
+      "short": "proposed",
+      "label": "Proposed, not yet in any published specification"
+    },
+    "deprecated": {
+      "short": "deprecated",
+      "label": "Defined in the released MCP specification but deprecated in this revision, and eligible for removal no earlier than the first revision released on or after 2027-07-28"
+    },
+    "extension": {
+      "short": "extension",
+      "label": "Defined in an official opt-in extension rather than the core specification, and disabled unless both sides negotiate it"
+    }
+  },
+  "support_codes": {
+    "y": "exposed to the agent at the declared capture boundary",
+    "a": "changed at the boundary or reachable only elsewhere",
+    "n": "not exposed to the agent",
+    "x": "the adapter cannot negotiate this protocol revision, so no capability is reachable",
+    "u": "not yet measured"
+  },
+  "defaults": {
+    "inclusion_rule": "A framework is listed if it ships a first-party or officially documented MCP adapter. Nothing is excluded on quality grounds.",
+    "order_rule": "Alphabetical within language group. No ranking is implied or computed.",
+    "version_policy": "Era 0 is the framework release tested for this protocol snapshot. An unmeasured cell means no same-protocol adapter capture was produced.",
+    "green_rule": "Every cell answers one question: does this framework expose this MCP capability to the agent at its declared capture boundary? For a value carried in a tool definition, 'y' means the value is present there unchanged. For a protocol feature, 'y' means the adapter gives the agent a working path to it and a scan exercised that path. A capability the framework could support but does not is not 'y'.",
+    "partial_rule": "'a' means the capability is reachable but not on the terms the specification sets: the note must say whether the value was transformed at the boundary, only partly preserved, retained somewhere the agent does not read, or supported only for part of the feature.",
+    "surface_rule": "surface.json enumerates what MCP 2026-07-28 defines, and it is maintained separately from what we have measured. Any feature in it without a capability file is published with every cell 'u'. Coverage is therefore computed from the two files rather than asserted, and a feature cannot be quietly dropped from the denominator to make coverage look better.",
+    "note_rule": "Every 'a' and 'n' cell must carry a #n note reference naming the exact mechanism, so a status can be checked rather than trusted.",
+    "usage_rule": "No adoption weighting is published. We have no defensible source yet, and an invented percentage would be the least trustworthy number on the page."
+  },
+  "agents": {
+    "crewai": {
+      "name": "CrewAI",
+      "abbr": "Crew",
+      "type": "python",
+      "package": "crewai-tools",
+      "registry": "pypi",
+      "adapter": "crewai_tools.MCPServerAdapter",
+      "renderer": "src/mcp_mirror/renderers/crewai_renderer.py",
+      "capture_boundary": {
+        "capture_api": "crewai_tools.MCPServerAdapter",
+        "capture_object": "CrewAI BaseTool name, description, and args_schema",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": null,
+        "protocol_version_evidence": "Dependency resolution rejects mcp 2.0.0 before the adapter can run."
+      },
+      "current_version": "1.15.1",
+      "stable_version": "1.15.1",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "1.15.1",
+          "era": 0,
+          "release_date": "2026-06-27T06:51:32Z"
+        }
+      ],
+      "measurement_status": "sdk_incompatible",
+      "measurement_note": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session."
+    },
+    "langchain": {
+      "name": "LangChain",
+      "abbr": "LC",
+      "type": "python",
+      "package": "langchain-mcp-adapters",
+      "registry": "pypi",
+      "adapter": "langchain_mcp_adapters with convert_to_openai_tool",
+      "renderer": "src/mcp_mirror/renderers/langchain_renderer.py",
+      "capture_boundary": {
+        "capture_api": "langchain_core.utils.function_calling.convert_to_openai_tool",
+        "capture_object": "OpenAI-compatible function-tool dictionary",
+        "capture_stage": "provider_format",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": null,
+        "protocol_version_evidence": "Dependency resolution rejects mcp 2.0.0 before the adapter can run."
+      },
+      "current_version": "0.3.2",
+      "stable_version": "0.3.2",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "0.3.2",
+          "era": 0,
+          "release_date": "2026-08-06T06:15:02Z"
+        }
+      ],
+      "measurement_status": "sdk_incompatible",
+      "measurement_note": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session."
+    },
+    "openai-agents": {
+      "name": "OpenAI Agents SDK",
+      "abbr": "OAI",
+      "type": "python",
+      "package": "openai-agents",
+      "registry": "pypi",
+      "adapter": "agents.mcp.util.MCPUtil.to_function_tool",
+      "renderer": "src/mcp_mirror/renderers/openai_agents_renderer.py",
+      "capture_boundary": {
+        "capture_api": "agents.mcp.util.MCPUtil.to_function_tool",
+        "capture_object": "agents.tool.FunctionTool",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2026-07-28",
+        "protocol_version_evidence": "protocol version exposed by the MCPServer client session"
+      },
+      "current_version": "0.22.0",
+      "stable_version": "0.22.0",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "0.22.0",
+          "era": 0,
+          "release_date": "2026-08-19T13:45:19Z"
+        }
+      ],
+      "measurement_status": "measured",
+      "measurement_note": "Measured through the real OpenAI Agents SDK adapter."
+    },
+    "pydantic-ai": {
+      "name": "Pydantic AI",
+      "abbr": "PAI",
+      "type": "python",
+      "package": "pydantic-ai-slim",
+      "registry": "pypi",
+      "adapter": "pydantic_ai.mcp toolset ToolDefinition",
+      "renderer": "src/mcp_mirror/renderers/pydantic_ai_renderer.py",
+      "capture_boundary": {
+        "capture_api": "pydantic_ai.mcp.MCPToolset.get_tools",
+        "capture_object": "pydantic_ai.tools.ToolDefinition",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2026-07-28",
+        "protocol_version_evidence": "protocol version exposed by MCPToolset.client"
+      },
+      "current_version": "2.40.0",
+      "stable_version": "2.40.0",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "2.40.0",
+          "era": 0
+        }
+      ],
+      "measurement_status": "measured",
+      "measurement_note": "Measured through the real Pydantic AI MCPToolset adapter."
+    },
+    "mastra": {
+      "name": "Mastra",
+      "abbr": "Mas",
+      "type": "typescript",
+      "package": "@mastra/mcp",
+      "registry": "npm",
+      "adapter": "@mastra/mcp MCPClient.listTools",
+      "renderer": "src/mcp_mirror/renderers/mastra_renderer.py",
+      "capture_boundary": {
+        "capture_api": "@mastra/mcp MCPClient.listTools",
+        "capture_object": "Mastra Tool action returned by listTools",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion observed from the pinned @modelcontextprotocol/sdk client used by MCPClient.listTools"
+      },
+      "current_version": "1.17.3",
+      "stable_version": "1.17.3",
+      "dev_version": null,
+      "version_list": [
+        {
+          "version": "1.17.3",
+          "era": 0,
+          "release_date": "2026-09-03T04:14:30Z"
+        }
+      ],
+      "measurement_status": "protocol_mismatch",
+      "measurement_note": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+    }
+  }
+}

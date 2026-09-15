@@ -1,0 +1,1052 @@
+{
+  "schema": "mcp-mirror/surface@1",
+  "revision": "2025-11-25",
+  "catalogued": true,
+  "source": "https://modelcontextprotocol.io/specification/2025-11-25",
+  "note": "The feature surface of MCP 2025-11-25. Derived from the 2026-07-28 catalogue and that revision's official changelog, which enumerates every addition, removal and deprecation relative to this revision. This file is the denominator: what the protocol defines, independent of what we have measured.",
+  "omissions": [
+    "Skills over MCP is not listed. The spec index advertises it, but /extensions/skills/overview 404s and the only published material is a working-group charter, so there is no wire contract to measure against.",
+    "Features removed in this revision (initialize, ping, logging/setLevel, resources/subscribe, notifications/roots/list_changed, Mcp-Session-Id, SSE resumability) are absent by design. They belong to the 2025-11-25 snapshot, not this one."
+  ],
+  "areas": [
+    "Tool definition",
+    "Tool results",
+    "Resources",
+    "Prompts",
+    "Client features",
+    "Server utilities",
+    "Base protocol",
+    "Transports",
+    "Authorization"
+  ],
+  "features": [
+    {
+      "id": "additional-properties",
+      "area": "Tool definition",
+      "title": "`additionalProperties`",
+      "status": "stable"
+    },
+    {
+      "id": "arrays-of-objects",
+      "area": "Tool definition",
+      "title": "Arrays of Objects",
+      "status": "stable"
+    },
+    {
+      "id": "default-value",
+      "area": "Tool definition",
+      "title": "`default`",
+      "status": "stable"
+    },
+    {
+      "id": "description-fidelity",
+      "area": "Tool definition",
+      "title": "`description`",
+      "status": "stable"
+    },
+    {
+      "id": "destructive-hint",
+      "area": "Tool definition",
+      "title": "`destructiveHint`",
+      "status": "stable"
+    },
+    {
+      "id": "enum",
+      "area": "Tool definition",
+      "title": "`enum`",
+      "status": "stable"
+    },
+    {
+      "id": "format",
+      "area": "Tool definition",
+      "title": "`format`",
+      "status": "stable"
+    },
+    {
+      "id": "idempotent-hint",
+      "area": "Tool definition",
+      "title": "`idempotentHint`",
+      "status": "stable"
+    },
+    {
+      "id": "long-descriptions",
+      "area": "Tool definition",
+      "title": "Long Descriptions",
+      "status": "stable"
+    },
+    {
+      "id": "nested-objects",
+      "area": "Tool definition",
+      "title": "Nested Objects",
+      "status": "stable"
+    },
+    {
+      "id": "null-acceptance",
+      "area": "Tool definition",
+      "title": "Null Acceptance",
+      "status": "stable"
+    },
+    {
+      "id": "numeric-range",
+      "area": "Tool definition",
+      "title": "Numeric Ranges",
+      "status": "stable"
+    },
+    {
+      "id": "one-of-any-of",
+      "area": "Tool definition",
+      "title": "`oneOf` / `anyOf`",
+      "status": "stable"
+    },
+    {
+      "id": "open-world-hint",
+      "area": "Tool definition",
+      "title": "`openWorldHint`",
+      "status": "stable"
+    },
+    {
+      "id": "property-descriptions",
+      "area": "Tool definition",
+      "title": "Property Descriptions",
+      "status": "stable"
+    },
+    {
+      "id": "read-only-hint",
+      "area": "Tool definition",
+      "title": "`readOnlyHint`",
+      "status": "stable"
+    },
+    {
+      "id": "required",
+      "area": "Tool definition",
+      "title": "`required`",
+      "status": "stable"
+    },
+    {
+      "id": "title-annotation",
+      "area": "Tool definition",
+      "title": "`title`",
+      "status": "stable"
+    },
+    {
+      "id": "tool-icons",
+      "area": "Tool definition",
+      "title": "`icons`",
+      "status": "stable",
+      "categories": [
+        "Tool definition"
+      ],
+      "wire": [
+        "tools/list"
+      ],
+      "keywords": "icons,icon,src,mimeType,sizes,tool display,branding",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool",
+      "docs_label": "MCP Docs",
+      "description": "An optional array of display icons on a tool definition, each with a source URL, MIME type and size list.",
+      "question": "Does the tool's icon set reach the agent's tool definition?",
+      "why": "Icons are the one part of a tool definition aimed at a human rather than a model. A framework that drops them removes the server's only way to identify its tools visually in any UI built on top of the adapter.",
+      "probe": "Declare `icons` on a fixture tool and look for the array in each framework's captured tool definition."
+    },
+    {
+      "id": "tool-name",
+      "area": "Tool definition",
+      "title": "`name`",
+      "status": "stable"
+    },
+    {
+      "id": "content-annotations",
+      "area": "Tool results",
+      "title": "Content `annotations`",
+      "status": "stable",
+      "categories": [
+        "Tool results",
+        "Resources"
+      ],
+      "wire": [
+        "tools/call",
+        "resources/read",
+        "prompts/get"
+      ],
+      "keywords": "annotations,audience,priority,lastModified,context filtering",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#annotations",
+      "docs_label": "MCP Docs",
+      "description": "The `audience`, `priority` and `lastModified` hints that content blocks, resources and prompt messages may carry.",
+      "question": "Do content annotations survive to the agent?",
+      "why": "Annotations are how a server says who a piece of content is for and how much it matters. A client that drops them cannot filter assistant-only content out of a user view, cannot prioritise what to keep when context runs short, and cannot sort by recency.",
+      "probe": "Attach `audience`, `priority` and `lastModified` to fixture content and check which of the three survive each adapter."
+    },
+    {
+      "id": "embedded-resource-content",
+      "area": "Tool results",
+      "title": "Embedded resources",
+      "status": "stable",
+      "categories": [
+        "Tool results",
+        "Resources"
+      ],
+      "wire": [
+        "tools/call"
+      ],
+      "keywords": "embedded resource,resource content block,inline resource,uri,mimeType",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#embedded-resources",
+      "docs_label": "MCP Docs",
+      "description": "A tool result block that inlines a resource's contents together with its URI and MIME type.",
+      "question": "Does an embedded resource keep its identity, or arrive as anonymous text?",
+      "why": "The URI and MIME type are what let a caller cite, cache or re-read the content. Stripping them to the inner text leaves the agent holding data it cannot attribute to a source.",
+      "probe": "Return an embedded `resource` block from a fixture tool and check whether the adapter preserves the URI and MIME type alongside the contents."
+    },
+    {
+      "id": "resource-link-content",
+      "area": "Tool results",
+      "title": "`resource_link`",
+      "status": "stable",
+      "categories": [
+        "Tool results",
+        "Resources"
+      ],
+      "wire": [
+        "tools/call"
+      ],
+      "keywords": "resource_link,resource link,uri,reference,large results",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#resource-links",
+      "docs_label": "MCP Docs",
+      "description": "A tool result block that points at a resource URI instead of inlining its contents.",
+      "question": "Does a resource link reach the agent as a reference it can follow?",
+      "why": "Resource links are how a large result stays out of the context window until something asks for it. A framework that flattens the link to text keeps the URI as prose and loses the ability to fetch what it points at.",
+      "probe": "Return a `resource_link` block from a fixture tool and check whether the adapter preserves it as a followable reference."
+    },
+    {
+      "id": "structured-content",
+      "area": "Tool results",
+      "title": "`structuredContent`",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "wire": [
+        "tools/call"
+      ],
+      "keywords": "structuredContent,structured content,json result,typed result",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#structured-content",
+      "docs_label": "MCP Docs",
+      "description": "A JSON result value returned alongside `content`, conforming to the tool's `outputSchema` when one is declared.",
+      "question": "Does the agent receive the structured value, or only its text rendering?",
+      "why": "The spec asks servers to mirror structured results into a text block for backwards compatibility. That mirror makes a dropped `structuredContent` invisible: the call still looks successful, and typed data quietly becomes a string the model has to re-parse.",
+      "probe": "Return `structuredContent` from a fixture tool and check whether each adapter's result exposes the JSON value or only the text mirror."
+    },
+    {
+      "id": "tool-audio-content",
+      "area": "Tool results",
+      "title": "Audio content",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "wire": [
+        "tools/call"
+      ],
+      "keywords": "audio content,AudioContent,base64,mimeType,multimodal",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#audio-content",
+      "docs_label": "MCP Docs",
+      "description": "The `audio` content block, carrying base64-encoded audio data and its MIME type.",
+      "question": "Does an audio result survive adaptation?",
+      "why": "Audio is the least-implemented content type in the union, which makes it the sharpest test of whether a framework handles the content list generically or only the cases it happened to code for.",
+      "probe": "Return an audio block from a fixture tool and inspect what each adapter produces in its place."
+    },
+    {
+      "id": "tool-execution-errors",
+      "area": "Tool results",
+      "title": "`isError`",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "wire": [
+        "tools/call"
+      ],
+      "keywords": "isError,tool execution error,protocol error,self-correction,retry",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling",
+      "docs_label": "MCP Docs",
+      "description": "The in-band flag marking a tool result as a tool execution error, which the spec expects clients to pass to the model so it can correct itself.",
+      "question": "Can the agent tell a tool execution error from a successful result?",
+      "why": "MCP separates protocol errors from tool execution errors precisely so a model can retry the second kind with better arguments. A framework that raises both as exceptions, or reports both as success, collapses that distinction and removes the recovery path the spec designed.",
+      "probe": "Return `isError: true` from a fixture tool and check whether the adapter surfaces the flag, raises, or reports plain success."
+    },
+    {
+      "id": "tool-image-content",
+      "area": "Tool results",
+      "title": "Image content",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "wire": [
+        "tools/call"
+      ],
+      "keywords": "image content,ImageContent,base64,mimeType,multimodal",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#image-content",
+      "docs_label": "MCP Docs",
+      "description": "The `image` content block, carrying base64-encoded data and its MIME type.",
+      "question": "Does an image result survive adaptation, or is it dropped or flattened to text?",
+      "why": "A dropped image block is a silent failure: the call succeeds, the result arrives, and the payload the tool existed to return is simply gone.",
+      "probe": "Return an image block from a fixture tool and inspect what each adapter produces in its place."
+    },
+    {
+      "id": "tool-output-schema",
+      "area": "Tool results",
+      "title": "`outputSchema`",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "wire": [
+        "tools/list"
+      ],
+      "keywords": "outputSchema,output schema,result schema,typed results,validation",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#output-schema",
+      "docs_label": "MCP Docs",
+      "description": "An optional JSON Schema on the tool definition describing the shape of the tool's structured result.",
+      "question": "Does the output schema survive to the agent's tool definition?",
+      "why": "Without it a caller cannot validate a tool result or generate types for it, and the model is given no advance description of what the tool returns. The spec asks clients to validate structured results against this schema; a client that never received it cannot.",
+      "probe": "Declare `outputSchema` on a fixture tool and look for it in each framework's captured tool definition."
+    },
+    {
+      "id": "tool-text-content",
+      "area": "Tool results",
+      "title": "Text content",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "wire": [
+        "tools/call"
+      ],
+      "keywords": "text content,TextContent,result text,content block",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#text-content",
+      "docs_label": "MCP Docs",
+      "description": "The `text` content block, the baseline result type that every tool result may carry.",
+      "question": "Does text content reach the agent unchanged?",
+      "why": "This is the one content type every framework is expected to handle, so it is the control row: the other content types can only be read as losses against a text block that survives.",
+      "probe": "Return a text block from a fixture tool and compare it character for character with what the adapter hands the agent."
+    },
+    {
+      "id": "tools-call",
+      "area": "Tool results",
+      "title": "`tools/call`",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "wire": [
+        "tools/call"
+      ],
+      "keywords": "tools/call,invoke,execute,call tool,arguments",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#calling-tools",
+      "docs_label": "MCP Docs",
+      "description": "The request that invokes a tool by name with an arguments object and returns its result.",
+      "question": "Can the framework invoke an MCP tool and hand the result back to the agent?",
+      "why": "Every tool-definition row in this table is inert if the adapter never reaches this call. This is the floor of MCP support: a framework that renders a tool definition but cannot invoke it has integrated a catalogue, not a protocol.",
+      "probe": "Invoke a fixture tool through each adapter's own invocation path and compare what the agent receives with the server's `tools/call` result."
+    },
+    {
+      "id": "tools-list-changed",
+      "area": "Tool results",
+      "title": "`notifications/tools/list_changed`",
+      "status": "stable",
+      "categories": [
+        "Tool results"
+      ],
+      "wire": [
+        "notifications/tools/list_changed"
+      ],
+      "keywords": "list_changed,listChanged,tool list,refresh,invalidation",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#list-changed-notification",
+      "docs_label": "MCP Docs",
+      "description": "The notification a server sends when its tool list changes, delivered on a subscription stream the client opted into with `toolsListChanged`.",
+      "question": "Does the framework refresh its tool list when the server says it changed?",
+      "why": "Adapters cache the tool list at startup. Without this, an agent keeps offering tools the server has withdrawn and never sees the ones it added, and the mismatch only shows up as a failed call much later.",
+      "probe": "Change the fixture server's tool list mid-session, emit the notification, and check whether each adapter's tool list follows."
+    },
+    {
+      "id": "resource-binary-contents",
+      "area": "Resources",
+      "title": "`blob` contents",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "wire": [
+        "resources/read"
+      ],
+      "keywords": "blob,binary,base64,resource contents,mimeType",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#binary-content",
+      "docs_label": "MCP Docs",
+      "description": "The base64 `blob` form of resource contents, used for anything that is not text.",
+      "question": "Can the agent read a binary resource without corrupting it?",
+      "why": "Text and binary contents are different fields, not different encodings of one field. A framework that assumes `text` either drops binary resources or turns them into mojibake, and both failures look like a successful read.",
+      "probe": "Serve a binary fixture resource and compare the bytes each adapter returns with the source."
+    },
+    {
+      "id": "resource-subscriptions",
+      "area": "Resources",
+      "title": "`notifications/resources/updated`",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "wire": [
+        "subscriptions/listen",
+        "notifications/resources/updated"
+      ],
+      "keywords": "resource subscription,updated,watch,resourceSubscriptions,subscriptions/listen",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#subscriptions",
+      "docs_label": "MCP Docs",
+      "description": "Per-resource change notifications, opted into by listing URIs in a `subscriptions/listen` request and delivered as `notifications/resources/updated`.",
+      "question": "Can the agent watch a single resource for changes?",
+      "why": "This is the difference between an agent that re-reads everything on a timer and one that reacts when a specific thing changes. In 2026-07-28 it also requires the new subscription stream, so a framework still written against `resources/subscribe` cannot do it at all.",
+      "probe": "Subscribe to a fixture resource, mutate it, and check whether each adapter delivers the update."
+    },
+    {
+      "id": "resource-templates",
+      "area": "Resources",
+      "title": "`resources/templates/list`",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "wire": [
+        "resources/templates/list"
+      ],
+      "keywords": "resource templates,uriTemplate,RFC 6570,parameterised resources",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#resource-templates",
+      "docs_label": "MCP Docs",
+      "description": "Lists parameterised resources as RFC 6570 URI templates whose arguments can be completed through the completion API.",
+      "question": "Does the framework expose resource templates as templates, or not at all?",
+      "why": "Templates are how a server exposes an unbounded resource space without enumerating it. A framework that only handles the concrete list sees an empty server whenever the interesting content is parameterised.",
+      "probe": "Serve a URI template from the fixture and check whether each adapter enumerates it and can expand it with arguments."
+    },
+    {
+      "id": "resources-list",
+      "area": "Resources",
+      "title": "`resources/list`",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "wire": [
+        "resources/list"
+      ],
+      "keywords": "resources/list,resources,context,uri,discovery",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#listing-resources",
+      "docs_label": "MCP Docs",
+      "description": "Lists the resources a server exposes, each identified by a URI and described with a name, title, MIME type and optional size.",
+      "question": "Can the agent discover the server's resources at all?",
+      "why": "Resources are one of the three server primitives, and the only one designed for application-controlled context rather than model-controlled action. A framework that exposes tools but not resources supports one third of what MCP servers publish.",
+      "probe": "Serve resources from the fixture and check whether each adapter offers any path to enumerate them."
+    },
+    {
+      "id": "resources-list-changed",
+      "area": "Resources",
+      "title": "`notifications/resources/list_changed`",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "wire": [
+        "notifications/resources/list_changed"
+      ],
+      "keywords": "list_changed,listChanged,resource list,refresh",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#list-changed-notification",
+      "docs_label": "MCP Docs",
+      "description": "The notification a server sends when the set of available resources changes.",
+      "question": "Does the framework notice when the resource list changes?",
+      "why": "Resource sets change far more often than tool sets, because they track real files and records. A stale list means the agent offers context that no longer exists.",
+      "probe": "Add and remove fixture resources mid-session and check whether each adapter's list follows."
+    },
+    {
+      "id": "resources-read",
+      "area": "Resources",
+      "title": "`resources/read`",
+      "status": "stable",
+      "categories": [
+        "Resources"
+      ],
+      "wire": [
+        "resources/read"
+      ],
+      "keywords": "resources/read,read resource,contents,text,blob",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/resources#reading-resources",
+      "docs_label": "MCP Docs",
+      "description": "Reads the contents behind a resource URI, which may return several contents for one request.",
+      "question": "Can the agent read a resource's contents through the framework?",
+      "why": "Listing resources without reading them is a catalogue with no way to open anything. This row is where the primitive becomes usable, and it is also where a framework that returns only the first of several contents starts losing data.",
+      "probe": "Read a fixture resource that returns multiple contents and check what each adapter returns."
+    },
+    {
+      "id": "prompt-arguments",
+      "area": "Prompts",
+      "title": "Prompt `arguments`",
+      "status": "stable",
+      "categories": [
+        "Prompts"
+      ],
+      "wire": [
+        "prompts/list",
+        "prompts/get"
+      ],
+      "keywords": "prompt arguments,required,argument description,completion",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/prompts#prompt",
+      "docs_label": "MCP Docs",
+      "description": "The declared arguments of a prompt, each with a name, description and required flag.",
+      "question": "Does the argument contract of a prompt survive to the agent?",
+      "why": "Without the argument list a host cannot build a form, cannot validate before calling, and cannot offer completion. The prompt degrades from a parameterised template to a fixed string.",
+      "probe": "Declare required and optional arguments on a fixture prompt and check which parts of the contract each adapter preserves."
+    },
+    {
+      "id": "prompts-get",
+      "area": "Prompts",
+      "title": "`prompts/get`",
+      "status": "stable",
+      "categories": [
+        "Prompts"
+      ],
+      "wire": [
+        "prompts/get"
+      ],
+      "keywords": "prompts/get,resolve prompt,messages,role,content",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/prompts#getting-a-prompt",
+      "docs_label": "MCP Docs",
+      "description": "Resolves one prompt with arguments into a list of messages, each with a role and a content block.",
+      "question": "Can the agent resolve a prompt into messages it can actually send?",
+      "why": "A prompt is only useful once it is expanded. This row is where a framework either produces messages in its own conversation format or hands back a structure the caller has to translate by hand.",
+      "probe": "Resolve a fixture prompt with arguments and compare the messages each adapter produces with the server's response."
+    },
+    {
+      "id": "prompts-list",
+      "area": "Prompts",
+      "title": "`prompts/list`",
+      "status": "stable",
+      "categories": [
+        "Prompts"
+      ],
+      "wire": [
+        "prompts/list"
+      ],
+      "keywords": "prompts/list,prompts,templates,slash commands,user-controlled",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/prompts#listing-prompts",
+      "docs_label": "MCP Docs",
+      "description": "Lists the prompt templates a server exposes, with their names, titles, descriptions and argument definitions.",
+      "question": "Can the agent discover the server's prompts?",
+      "why": "Prompts are the user-controlled primitive: the slash commands and menu entries a server contributes to the host. A framework that ignores them silently discards a third of what the server publishes, and the omission is invisible because nothing errors.",
+      "probe": "Serve prompts from the fixture and check whether each adapter offers any path to enumerate them."
+    },
+    {
+      "id": "prompts-list-changed",
+      "area": "Prompts",
+      "title": "`notifications/prompts/list_changed`",
+      "status": "stable",
+      "categories": [
+        "Prompts"
+      ],
+      "wire": [
+        "notifications/prompts/list_changed"
+      ],
+      "keywords": "list_changed,listChanged,prompt list,refresh",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/prompts#list-changed-notification",
+      "docs_label": "MCP Docs",
+      "description": "The notification a server sends when the set of available prompts changes.",
+      "question": "Does the framework notice when the prompt list changes?",
+      "why": "Prompts are surfaced directly to users as commands. A stale list means a command menu that offers entries the server has withdrawn.",
+      "probe": "Change the fixture server's prompt list mid-session and check whether each adapter's list follows."
+    },
+    {
+      "id": "elicitation-form-mode",
+      "area": "Client features",
+      "title": "`elicitation/create` (form)",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "wire": [
+        "elicitation/create"
+      ],
+      "keywords": "elicitation,form mode,requestedSchema,user input,accept decline cancel",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/elicitation#form-mode-elicitation-requests",
+      "docs_label": "MCP Docs",
+      "description": "A server request for structured user input, described by a restricted flat JSON Schema and answered with accept, decline or cancel.",
+      "question": "Can a server ask the user a question through this framework?",
+      "why": "Elicitation is the only client feature the 2026-07-28 index still recommends, and it is what lets a tool ask for the one missing detail instead of failing. A framework without it forces every server to guess or error.",
+      "probe": "Have a fixture tool return a form-mode elicitation request and check whether each adapter surfaces it and can return a response."
+    },
+    {
+      "id": "elicitation-url-mode",
+      "area": "Client features",
+      "title": "`elicitation/create` (URL)",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "wire": [
+        "elicitation/create"
+      ],
+      "keywords": "elicitation,url mode,out of band,oauth,sensitive data,consent",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/elicitation#url-mode-elicitation-requests",
+      "docs_label": "MCP Docs",
+      "description": "A server request that sends the user out of band to a URL, for interactions such as sign-in that must not pass through the client.",
+      "question": "Can the framework hand a user off to an external URL and resume?",
+      "why": "Form mode is explicitly forbidden from collecting credentials, so URL mode is the sanctioned path for sign-in flows. A framework that implements only form mode leaves servers with no compliant way to authenticate a user mid-task.",
+      "probe": "Have a fixture tool return a URL-mode elicitation request and check whether each adapter surfaces the URL and reports the user's action."
+    },
+    {
+      "id": "roots-list",
+      "area": "Client features",
+      "title": "`roots/list`",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "wire": [
+        "roots/list"
+      ],
+      "keywords": "roots,roots/list,file uri,workspace,boundaries",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/roots#listing-roots",
+      "docs_label": "MCP Docs",
+      "description": "A server request for the client's filesystem roots, offered as informational guidance rather than as access control.",
+      "question": "Can a server learn which directories the client is working in?",
+      "why": "Roots tell a server where to look without it guessing paths.",
+      "probe": "Have a fixture tool return a roots request and check whether each adapter answers with the client's roots."
+    },
+    {
+      "id": "roots-list-changed",
+      "area": "Client features",
+      "title": "`notifications/roots/list_changed`",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "wire": [
+        "notifications/roots/list_changed"
+      ],
+      "keywords": "roots,list_changed,notification,filesystem roots",
+      "description": "A client notification telling the server its exposed filesystem roots have changed.",
+      "question": "Does this framework emit the notification when its roots change?",
+      "why": "It is the only client-to-server change notification in the revision, and 2026-07-28 removed it along with the rest of the roots machinery.",
+      "probe": "Change the client's roots mid-session and check whether the fixture receives the notification.",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/roots#root-list-changes",
+      "docs_label": "MCP Docs"
+    },
+    {
+      "id": "sampling-create-message",
+      "area": "Client features",
+      "title": "`sampling/createMessage`",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "wire": [
+        "sampling/createMessage"
+      ],
+      "keywords": "sampling,createMessage,modelPreferences,maxTokens,server-initiated generation",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/sampling#creating-messages",
+      "docs_label": "MCP Docs",
+      "description": "A server request asking the client's model for a generation, so the server can use an LLM without holding model credentials of its own.",
+      "question": "Can a server borrow the client's model through this framework?",
+      "why": "Sampling inverts the usual direction of control, which is why it is both powerful and rarely implemented.",
+      "probe": "Have a fixture tool return a sampling request and check whether each adapter routes it to a model and returns the completion."
+    },
+    {
+      "id": "sampling-tools",
+      "area": "Client features",
+      "title": "Sampling `tools` / `toolChoice`",
+      "status": "stable",
+      "categories": [
+        "Client features"
+      ],
+      "wire": [
+        "sampling/createMessage"
+      ],
+      "keywords": "sampling tools,toolChoice,tool_use,tool_result,multi-turn loop",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/client/sampling#sampling-with-tools",
+      "docs_label": "MCP Docs",
+      "description": "Request-scoped tool use inside a sampling call, driving a multi-turn tool loop with `tool_use` and `tool_result` content and a `toolUse` stop reason.",
+      "question": "Does the framework run the sampling tool loop, or only single-shot generation?",
+      "why": "This was added in the same revision that deprecated sampling, so it is the least likely feature in the protocol to be implemented anywhere. It is catalogued so that absence is recorded rather than assumed.",
+      "probe": "Issue a sampling request carrying `tools` and a `toolChoice` mode and check whether each adapter completes the tool loop."
+    },
+    {
+      "id": "completion-complete",
+      "area": "Server utilities",
+      "title": "`completion/complete`",
+      "status": "stable",
+      "categories": [
+        "Server utilities"
+      ],
+      "wire": [
+        "completion/complete"
+      ],
+      "keywords": "completion,autocomplete,ref/prompt,ref/resource,argument suggestions",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/completion#requesting-completions",
+      "docs_label": "MCP Docs",
+      "description": "Returns autocomplete suggestions for a prompt argument or a resource template variable, capped at 100 values per response.",
+      "question": "Can the framework ask the server to complete an argument value?",
+      "why": "Completion is what makes prompt arguments and resource templates usable by a human rather than only by a program that already knows the valid values.",
+      "probe": "Request completions for a fixture prompt argument and a template variable and check whether each adapter exposes the call."
+    },
+    {
+      "id": "logging-notifications",
+      "area": "Server utilities",
+      "title": "`notifications/message`",
+      "status": "stable",
+      "categories": [
+        "Server utilities"
+      ],
+      "wire": [
+        "notifications/message"
+      ],
+      "keywords": "logging,notifications/message,log level,RFC 5424,diagnostics",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/logging#log-message-notifications",
+      "docs_label": "MCP Docs",
+      "description": "Structured server log records at RFC 5424 levels, enabled per request through a log level in that request's `_meta`.",
+      "question": "Can a developer see the server's own logs through the framework?",
+      "why": "This is the only channel through which a server explains itself while a call is in flight, and it is the difference between debugging a failing integration and guessing at it. Note that the connection-wide `logging/setLevel` was removed in this revision: log level is now per request, so a framework that sets it once at startup gets nothing.",
+      "probe": "Set a log level in request `_meta` against the fixture and check whether each adapter surfaces the resulting notifications."
+    },
+    {
+      "id": "logging-set-level",
+      "area": "Server utilities",
+      "title": "`logging/setLevel`",
+      "status": "stable",
+      "categories": [
+        "Server utilities"
+      ],
+      "wire": [
+        "logging/setLevel"
+      ],
+      "keywords": "logging,setLevel,log level,notifications/message",
+      "description": "A request setting the minimum severity the server should emit for the rest of the session.",
+      "question": "Does this framework let a caller set the server log level?",
+      "why": "Session-scoped log level is a stateful control. 2026-07-28 replaced it with a per-request `_meta` field.",
+      "probe": "Call logging/setLevel through each adapter and check which notifications the fixture is then asked to emit.",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/logging#setting-log-level",
+      "docs_label": "MCP Docs"
+    },
+    {
+      "id": "pagination-cursor",
+      "area": "Server utilities",
+      "title": "Cursor pagination",
+      "status": "stable",
+      "categories": [
+        "Server utilities"
+      ],
+      "wire": [
+        "tools/list",
+        "resources/list",
+        "resources/templates/list",
+        "prompts/list"
+      ],
+      "keywords": "pagination,cursor,nextCursor,paging,large catalogues",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/pagination#pagination-model",
+      "docs_label": "MCP Docs",
+      "description": "Opaque forward-only cursor paging on every list operation, where the client passes `cursor` and the server returns `nextCursor`.",
+      "question": "Does the framework follow the cursor, or stop after the first page?",
+      "why": "This failure is quiet and severe: an adapter that ignores `nextCursor` reports a server's first page as its entire catalogue, so tools simply do not exist as far as the agent is concerned. The spec also warns that an empty-string cursor is valid and must not be read as the end.",
+      "probe": "Serve a fixture catalogue across several pages and compare each adapter's enumerated set with the full set."
+    },
+    {
+      "id": "tasks-experimental",
+      "area": "Server utilities",
+      "title": "Experimental tasks",
+      "status": "draft",
+      "categories": [
+        "Server utilities"
+      ],
+      "wire": [
+        "tasks/result",
+        "tasks/list"
+      ],
+      "keywords": "tasks,long running,tasks/result,tasks/list,experimental",
+      "description": "The in-core experimental mechanism for long-running work, using a blocking `tasks/result` call and a `tasks/list` enumeration.",
+      "question": "Does this framework drive a task to completion?",
+      "why": "This is the shape long-running work took before 2026-07-28 moved it into an extension and replaced blocking retrieval with polling.",
+      "probe": "Return a task from a fixture tool and check whether each adapter blocks on tasks/result and surfaces the outcome.",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/tasks",
+      "docs_label": "MCP Docs"
+    },
+    {
+      "id": "cancellation",
+      "area": "Base protocol",
+      "title": "`notifications/cancelled`",
+      "status": "stable",
+      "categories": [
+        "Base protocol"
+      ],
+      "wire": [
+        "notifications/cancelled"
+      ],
+      "keywords": "cancellation,notifications/cancelled,requestId,abort,timeout",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/patterns/cancellation#cancellation-flow",
+      "docs_label": "MCP Docs",
+      "description": "Abandons an in-flight request, signalled by notification on stdio and by closing the response stream on Streamable HTTP.",
+      "question": "Can the agent abandon a call and have the server hear about it?",
+      "why": "An agent that stops waiting but never says so leaves the server doing work nobody will read, holding whatever the call was holding. The signalling is transport-specific, so a framework can be correct on one transport and silently wrong on the other.",
+      "probe": "Cancel a long-running fixture call on each transport and check what the server observes."
+    },
+    {
+      "id": "initialize-handshake",
+      "area": "Base protocol",
+      "title": "`initialize`",
+      "status": "stable",
+      "categories": [
+        "Base protocol"
+      ],
+      "wire": [
+        "initialize",
+        "notifications/initialized"
+      ],
+      "keywords": "initialize,initialized,handshake,capability negotiation,protocolVersion",
+      "description": "The opening exchange in which client and server agree a protocol version and declare their capabilities once for the whole connection.",
+      "question": "Does this framework complete the handshake and act on the negotiated version?",
+      "why": "Statefulness starts here. Every capability the rest of the session relies on is settled in this one exchange, which is why 2026-07-28 removed it in favour of per-request metadata.",
+      "probe": "Connect each adapter to the fixture and capture the initialize request and result, checking the negotiated version it settles on.",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle#initialization",
+      "docs_label": "MCP Docs"
+    },
+    {
+      "id": "json-schema-dialect",
+      "area": "Base protocol",
+      "title": "JSON Schema dialect",
+      "status": "stable",
+      "categories": [
+        "Base protocol",
+        "Tool definition"
+      ],
+      "wire": [
+        "tools/list"
+      ],
+      "keywords": "$schema,2020-12,draft-07,dialect,$ref resolution,validation",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic#schema-dialect",
+      "docs_label": "MCP Docs",
+      "description": "The rule that schemas default to JSON Schema 2020-12 unless a `$schema` field declares another dialect, such as draft-07.",
+      "question": "Does the framework honour the declared dialect, or assume one?",
+      "why": "Dialects disagree about details that change validation outcomes. A framework that assumes 2020-12 will mis-handle a draft-07 schema that says so explicitly, and the resulting failures look like the server sent a bad schema.",
+      "probe": "Serve fixture tools with a default schema and an explicit draft-07 schema and compare how each adapter validates them."
+    },
+    {
+      "id": "ping",
+      "area": "Base protocol",
+      "title": "`ping`",
+      "status": "stable",
+      "categories": [
+        "Base protocol"
+      ],
+      "wire": [
+        "ping"
+      ],
+      "keywords": "ping,keepalive,liveness,heartbeat",
+      "description": "A liveness check either side may send to confirm the peer is still responsive.",
+      "question": "Does this framework answer or issue a ping?",
+      "why": "A keepalive matters only for long-lived connections, which is exactly what the stateless 2026-07-28 revision removed.",
+      "probe": "Send a ping from the fixture and check whether the adapter replies, and whether it issues pings of its own.",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/ping",
+      "docs_label": "MCP Docs"
+    },
+    {
+      "id": "progress-notifications",
+      "area": "Base protocol",
+      "title": "`notifications/progress`",
+      "status": "stable",
+      "categories": [
+        "Base protocol"
+      ],
+      "wire": [
+        "notifications/progress"
+      ],
+      "keywords": "progress,progressToken,long running,notifications/progress",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/patterns/progress#progress-flow",
+      "docs_label": "MCP Docs",
+      "description": "Server-pushed progress updates for a request that opted in by supplying a progress token, reporting a monotonically increasing value with an optional total and message.",
+      "question": "Can the agent observe progress on a long-running call?",
+      "why": "Without it every slow tool is indistinguishable from a hung one, and the only tuning available is the timeout. The client has to send the token first, so this is a capability the framework must actively opt into.",
+      "probe": "Emit progress from a slow fixture tool and check whether each adapter sends a token and surfaces the updates."
+    },
+    {
+      "id": "session-identifier",
+      "area": "Transports",
+      "title": "`Mcp-Session-Id`",
+      "status": "stable",
+      "categories": [
+        "Transports"
+      ],
+      "wire": [
+        "Mcp-Session-Id"
+      ],
+      "keywords": "session,Mcp-Session-Id,sticky routing,stateful,streamable http",
+      "description": "A server-minted session header that binds subsequent Streamable HTTP requests to server-side state.",
+      "question": "Does this framework return the session header on later requests?",
+      "why": "Sessions force sticky routing and a shared session store on every deployment. 2026-07-28 removed them outright, so support here is a marker of the older era.",
+      "probe": "Issue a session-minting response from the fixture and check whether the adapter echoes the header on its next request.",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#session-management",
+      "docs_label": "MCP Docs"
+    },
+    {
+      "id": "sse-resumability",
+      "area": "Transports",
+      "title": "`Last-Event-ID` resumability",
+      "status": "stable",
+      "categories": [
+        "Transports"
+      ],
+      "wire": [
+        "Last-Event-ID"
+      ],
+      "keywords": "resumability,Last-Event-ID,SSE,redelivery,reconnect",
+      "description": "Stream resumption in which a client reconnects with the last event id it saw and the server redelivers what it missed.",
+      "question": "Does this framework resume a broken stream rather than losing the request?",
+      "why": "Redelivery is the difference between a dropped connection costing nothing and costing an in-flight call. 2026-07-28 removed it, making every broken stream a lost request.",
+      "probe": "Break the fixture's response stream mid-call and check whether the adapter reconnects with Last-Event-ID.",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#resumability-and-redelivery",
+      "docs_label": "MCP Docs"
+    },
+    {
+      "id": "transport-http-sse",
+      "area": "Transports",
+      "title": "HTTP+SSE transport",
+      "status": "deprecated",
+      "categories": [
+        "Transports"
+      ],
+      "wire": [
+        "GET /sse",
+        "POST /messages"
+      ],
+      "keywords": "HTTP+SSE,legacy transport,deprecated transport,sse endpoint",
+      "description": "The original two-endpoint HTTP transport, superseded by Streamable HTTP and kept only for backwards compatibility.",
+      "question": "Does this framework still connect over the legacy transport?",
+      "why": "Deprecated since 2025-03-26 but still widely deployed, so whether an adapter can reach an old server is a real migration question.",
+      "probe": "Serve the fixture over the legacy two-endpoint transport and check whether each adapter completes a request.",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#backwards-compatibility",
+      "docs_label": "MCP Docs"
+    },
+    {
+      "id": "transport-stdio",
+      "area": "Transports",
+      "title": "stdio transport",
+      "status": "stable",
+      "categories": [
+        "Transports"
+      ],
+      "wire": [
+        "stdio"
+      ],
+      "keywords": "stdio,subprocess,newline delimited,local server,transport",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports/stdio",
+      "docs_label": "MCP Docs",
+      "description": "Newline-delimited JSON-RPC over the standard streams of a subprocess the client launches.",
+      "question": "Can the framework talk to a local subprocess server?",
+      "why": "This is how nearly every local MCP server is run, and how this project's own fixture is scanned. It is the baseline transport row.",
+      "probe": "Connect each adapter to the fixture over stdio and confirm a completed request."
+    },
+    {
+      "id": "transport-streamable-http",
+      "area": "Transports",
+      "title": "Streamable HTTP transport",
+      "status": "stable",
+      "categories": [
+        "Transports"
+      ],
+      "wire": [
+        "streamable-http"
+      ],
+      "keywords": "streamable http,POST,SSE,Mcp-Method,Mcp-Name,remote server",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports/streamable-http",
+      "docs_label": "MCP Docs",
+      "description": "One HTTP POST per message to a single endpoint, answered with a JSON object or a request-scoped SSE stream, and carrying the required `Mcp-Method` and `Mcp-Name` headers.",
+      "question": "Can the framework talk to a remote server on this revision's terms?",
+      "why": "Every remote MCP server uses this transport, and 2026-07-28 changed it substantially: sessions and the `Mcp-Session-Id` header are gone, SSE resumability is gone, and two new headers are required. An adapter written for the old shape may connect and still be non-conformant.",
+      "probe": "Connect each adapter to the fixture over Streamable HTTP and inspect the outgoing headers and stream handling."
+    },
+    {
+      "id": "authorization-oauth",
+      "area": "Authorization",
+      "title": "OAuth 2.1 authorization",
+      "status": "stable",
+      "categories": [
+        "Authorization"
+      ],
+      "wire": [
+        "Authorization"
+      ],
+      "keywords": "oauth,oauth 2.1,bearer token,access token,resource parameter,RFC 8707",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization#protocol-requirements",
+      "docs_label": "MCP Docs",
+      "description": "Transport-level OAuth 2.1 for HTTP transports, including the RFC 8707 `resource` parameter on both authorization and token requests.",
+      "question": "Can the framework authorize against a protected MCP server?",
+      "why": "Almost every hosted MCP server is protected, so this row decides whether a framework can reach real servers or only local ones. The `resource` parameter is what binds a token to one server; omitting it produces tokens that a careful server will refuse and a careless one will over-accept.",
+      "probe": "Point each adapter at an OAuth-protected fixture and inspect the authorization requests it makes."
+    },
+    {
+      "id": "authorization-resource-metadata",
+      "area": "Authorization",
+      "title": "Protected Resource Metadata",
+      "status": "stable",
+      "categories": [
+        "Authorization"
+      ],
+      "wire": [
+        "WWW-Authenticate"
+      ],
+      "keywords": "RFC 9728,protected resource metadata,WWW-Authenticate,discovery,scope,step-up",
+      "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization#authorization-server-discovery",
+      "docs_label": "MCP Docs",
+      "description": "RFC 9728 discovery, where the server advertises its authorization server through a `WWW-Authenticate` challenge and clients follow it rather than being configured by hand.",
+      "question": "Does the framework discover the authorization server from the challenge?",
+      "why": "This is what makes connecting to an unfamiliar protected server possible without out-of-band setup. A framework that requires hand-configured endpoints cannot connect to a server it was not told about in advance, and cannot handle a step-up scope challenge when one arrives.",
+      "probe": "Return a `WWW-Authenticate` challenge with `resource_metadata` from the fixture and check whether each adapter follows it."
+    }
+  ]
+}

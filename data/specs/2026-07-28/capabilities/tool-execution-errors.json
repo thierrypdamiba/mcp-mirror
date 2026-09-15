@@ -1,0 +1,64 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "tool-execution-errors",
+  "title": "`isError`",
+  "description": "The in-band flag marking a tool result as a tool execution error, which the spec expects clients to pass to the model so it can correct itself.",
+  "question": "Can the agent tell a tool execution error from a successful result?",
+  "spec": "https://modelcontextprotocol.io/specification/2026-07-28",
+  "status": "stable",
+  "categories": [
+    "Tool results"
+  ],
+  "keywords": "isError,tool execution error,protocol error,self-correction,retry",
+  "stats": {
+    "crewai": {
+      "1.15.1": "x #1"
+    },
+    "langchain": {
+      "0.3.2": "x #2"
+    },
+    "openai-agents": {
+      "0.22.0": "n #3"
+    },
+    "pydantic-ai": {
+      "2.40.0": "a #4"
+    },
+    "mastra": {
+      "1.17.3": "x #5"
+    }
+  },
+  "notes": "Pydantic AI surfaces the failure through a different channel; the OpenAI Agents SDK loses it entirely. 3 cannot reach the revision.",
+  "notes_by_num": {
+    "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
+    "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
+    "3": "OpenAI Agents SDK 0.22.0: a result flagged `isError` is returned as an ordinary text output with no error signal. The agent cannot distinguish it from a successful call.",
+    "4": "Pydantic AI 2.40.0: the failure is raised as a `ModelRetry` carrying the error text. The agent learns the call failed, but through an exception that prompts a retry rather than through the result's error flag.",
+    "5": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "Visible in Pydantic AI through a changed channel, invisible in the OpenAI Agents SDK.",
+    "detail": "This is the most consequential split in the result boundary. On Pydantic AI 2.40.0 a failed tool call raises `ModelRetry`, so the agent reacts. On OpenAI Agents SDK 0.22.0 the same call returns the error text as a normal success, so an agent can act on a failure believing it worked. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#error-handling",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "MCP separates protocol errors from tool execution errors precisely so a model can retry the second kind with better arguments. A framework that raises both as exceptions, or reports both as success, collapses that distinction and removes the recovery path the spec designed.",
+  "reproduce": "python scripts/measure_results.py",
+  "measured": {
+    "run_date": "2026-09-11",
+    "mcp_spec": "2026-07-28",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2026-07-28",
+  "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#error-handling",
+  "docs_label": "MCP Docs"
+}

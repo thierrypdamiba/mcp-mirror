@@ -1,0 +1,61 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "tool-image-content",
+  "title": "Image content",
+  "description": "The `image` content block, carrying base64-encoded data and its MIME type.",
+  "question": "Does an image result survive adaptation, or is it dropped or flattened to text?",
+  "spec": "https://modelcontextprotocol.io/specification/2025-11-25",
+  "status": "stable",
+  "categories": [
+    "Tool results"
+  ],
+  "keywords": "image content,ImageContent,base64,mimeType,multimodal",
+  "stats": {
+    "crewai": {
+      "1.15.1": "n #1"
+    },
+    "langchain": {
+      "0.3.2": "u"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "n #2"
+    }
+  },
+  "notes": "The two adapters built around multimodal model APIs pass images through; the two that flatten results to text or to structured data drop them. LangChain is unmeasured here: its audio conversion raises on the same result, so the call aborts before this block can be observed. Isolating it needs a fixture that returns one block at a time.",
+  "notes_by_num": {
+    "1": "CrewAI: the image block is dropped from the result.",
+    "2": "Mastra: all content blocks are dropped, images included."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "Delivered by two, dropped by two, unmeasured at one.",
+    "detail": "A tool that returns a chart or a screenshot is only useful if the image reaches a model that can see it."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP servers using this capability. Not estimated, so the panel stays empty until the corpus is scanned.",
+  "links": [
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#image-content",
+      "title": "MCP Docs"
+    }
+  ],
+  "known_issues": [],
+  "why": "A dropped image block is a silent failure: the call succeeds, the result arrives, and the payload the tool existed to return is simply gone.",
+  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "measured": {
+    "run_date": "2026-09-14",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "MCP 2025-11-25",
+  "docs_url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#image-content",
+  "docs_label": "MCP Docs"
+}

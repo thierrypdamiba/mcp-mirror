@@ -21,8 +21,19 @@ Complete this section for a new or changed renderer. Otherwise write
 ## Compatibility data
 
 - Capability files changed:
-- Every retained (`a`) or dropped (`n`) cell cites a mechanism note:
+- Every retained (`a`), dropped (`n`) or unreachable (`x`) cell cites a mechanism note:
 - Known but unmeasured releases remain visible as `u`:
+- Adapters that cannot negotiate the revision are `x`, not `u`:
+
+## News feed
+
+Complete this section when `site/src/data/news.json` or its automation changes.
+Otherwise write `Not applicable`.
+
+- Approved sources queried:
+- Headlines added or removed:
+- Source titles and descriptions preserved without LLM rewriting:
+- Link and freshness validation result:
 
 ## Verification
 
@@ -33,6 +44,8 @@ not run.
 - [ ] `npm ci --prefix src/mcp_mirror/renderers/mastra_node`
 - [ ] `uv run pytest tests -q`
 - [ ] `python3 data/validator/validate.py data`
+- [ ] `npm run news:test`
+- [ ] `npm run news:validate`
 - [ ] `npm run build`
 
 ## Deliberately not changed

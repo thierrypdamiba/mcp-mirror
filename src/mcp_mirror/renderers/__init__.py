@@ -16,6 +16,7 @@ from importlib import import_module
 from typing import Protocol, runtime_checkable
 
 from ..models import RendererEvidence, ToolRep
+from ..runner_manifests import load_runner_manifests
 from ..source import ServerHandle
 
 
@@ -34,13 +35,10 @@ class RenderError(RuntimeError):
     """Raised when a framework adapter fails to render the server's tools."""
 
 
-# id -> (module suffix, callable name returning a Renderer)
+# The manifest registry is the single source of truth for runner IDs and modules.
 _RENDERER_MODULES: dict[str, str] = {
-    "langchain": ".langchain_renderer",
-    "pydantic_ai": ".pydantic_ai_renderer",
-    "crewai": ".crewai_renderer",
-    "openai_agents": ".openai_agents_renderer",
-    "mastra": ".mastra_renderer",
+    renderer_id: manifest.module
+    for renderer_id, manifest in load_runner_manifests().items()
 }
 
 # Friendly aliases users might pass on the CLI.
@@ -54,6 +52,13 @@ _ALIASES = {
     "agents": "openai_agents",
 }
 
+_EXTRAS = {
+    "langchain": "langchain",
+    "pydantic_ai": "pydantic-ai",
+    "crewai": "crewai",
+    "openai_agents": "openai-agents",
+}
+
 
 def canonical_id(name: str) -> str:
     name = name.strip().lower()
@@ -62,6 +67,21 @@ def canonical_id(name: str) -> str:
 
 def all_renderer_ids() -> list[str]:
     return list(_RENDERER_MODULES)
+
+
+def install_hint(renderer_id: str) -> str:
+    """Return the shortest supported setup path for one renderer."""
+
+    renderer_id = canonical_id(renderer_id)
+    extra = _EXTRAS.get(renderer_id)
+    if extra:
+        return f"python -m pip install 'mcp-mirror[{extra}]'"
+    if renderer_id == "mastra":
+        return (
+            "set up the bundled Mastra Node runner from a source checkout "
+            "(src/mcp_mirror/renderers/mastra_node)"
+        )
+    return f"unknown renderer {renderer_id!r}"
 
 
 def available_renderers() -> dict[str, Renderer]:

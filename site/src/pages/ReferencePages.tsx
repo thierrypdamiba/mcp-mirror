@@ -1,6 +1,12 @@
 import {Card, Chip, Link} from "@heroui/react";
 
-import {capabilityHref, currentSupport, shortDate, titleCaseRule} from "../lib/data";
+import {
+  capabilityHref,
+  isMeasured,
+  parseSupport,
+  shortDate,
+  titleCaseRule,
+} from "../lib/data";
 import type {Capability, MirrorDatabase, SupportCode} from "../types";
 import {ArrowUpRightIcon, ChevronRightIcon} from "../components/Icons";
 
@@ -52,10 +58,11 @@ export function ChangesPage({
 }) {
   const byDate = new Map<string, Capability[]>();
   for (const capability of capabilities) {
-    byDate.set(capability.measured.run_date, [
-      ...(byDate.get(capability.measured.run_date) ?? []),
-      capability,
-    ]);
+    const date = capability.measured.run_date;
+    if (!isMeasured(capability) || !date) {
+      continue;
+    }
+    byDate.set(date, [...(byDate.get(date) ?? []), capability]);
   }
 
   return (
@@ -100,6 +107,88 @@ export function ChangesPage({
   );
 }
 
+export function FrameworkComparison({
+  database,
+  capabilities,
+  versions,
+}: {
+  database: MirrorDatabase;
+  capabilities: Capability[];
+  versions?: Record<string, string>;
+}) {
+  return (
+    <div className="framework-card-grid">
+      {Object.entries(database.agents).map(([agentId, agent]) => {
+        const counts: Record<SupportCode, number> = {y: 0, a: 0, n: 0, x: 0, u: 0};
+        const version = versions?.[agentId] ?? agent.current_version;
+        const measurementStatus = agent.measurement_status ?? "measured";
+        for (const capability of capabilities) {
+          counts[parseSupport(capability.stats[agentId]?.[version]).code] += 1;
+        }
+        const release = agent.version_list.find(
+          (entry) => entry.version === version,
+        );
+
+        return (
+          <Card className="framework-card" key={agentId}>
+            <Card.Header>
+              <span className={`framework-avatar language-${agent.type}`}>
+                {agent.abbr}
+              </span>
+              <div>
+                <Card.Title>{agent.name}</Card.Title>
+                <Card.Description>
+                  {agent.package} {version}
+                </Card.Description>
+              </div>
+            </Card.Header>
+            <Card.Content>
+              <DistributionBar counts={counts} />
+              <div className="distribution-tally">
+                <span><b>{counts.y}</b> present</span>
+                <span><b>{counts.a}</b> changed/retained</span>
+                <span><b>{counts.n}</b> dropped</span>
+                {counts.u ? <span><b>{counts.u}</b> unmeasured</span> : null}
+              </div>
+              <p className="adapter-name">{agent.adapter}</p>
+              <p className="adapter-name">
+                Capture: {agent.capture_boundary.capture_api} →{" "}
+                {agent.capture_boundary.capture_object}
+              </p>
+              <p className="adapter-name">
+                Provider request:{" "}
+                {agent.capture_boundary.provider_request_captured
+                  ? "captured"
+                  : "not captured"}{" "}
+                · Adapter-negotiated MCP spec:{" "}
+                {agent.capture_boundary.negotiated_mcp_spec_version ??
+                  "not established"}
+              </p>
+              {measurementStatus !== "measured" ? (
+                <p
+                  className="framework-measurement-note"
+                  data-measurement-status={measurementStatus}
+                >
+                  Not measured for MCP {database.mcp_spec}.{" "}
+                  {agent.measurement_note}
+                </p>
+              ) : null}
+            </Card.Content>
+            <Card.Footer>
+              <Chip size="sm" variant="tertiary">{agent.type}</Chip>
+              <span>
+                {release?.release_date
+                  ? `released ${shortDate(release.release_date)}`
+                  : "release date unavailable"}
+              </span>
+            </Card.Footer>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ComparePage({
   database,
   capabilities,
@@ -113,61 +202,7 @@ export function ComparePage({
         A distribution of observed transformations, not a score. Retaining a
         value out of band and dropping it are shown as different facts.
       </PageIntro>
-
-      <div className="framework-card-grid">
-        {Object.entries(database.agents).map(([agentId, agent]) => {
-          const counts: Record<SupportCode, number> = {y: 0, a: 0, n: 0, u: 0};
-          for (const capability of capabilities) {
-            counts[currentSupport(database, capability, agentId).code] += 1;
-          }
-          const release = agent.version_list.find(
-            (version) => version.era === 0,
-          );
-
-          return (
-            <Card className="framework-card" key={agentId}>
-              <Card.Header>
-                <span className={`framework-avatar language-${agent.type}`}>
-                  {agent.abbr}
-                </span>
-                <div>
-                  <Card.Title>{agent.name}</Card.Title>
-                  <Card.Description>
-                    {agent.package} {agent.current_version}
-                  </Card.Description>
-                </div>
-              </Card.Header>
-              <Card.Content>
-                <DistributionBar counts={counts} />
-                <div className="distribution-tally">
-                  <span><b>{counts.y}</b> present</span>
-                  <span><b>{counts.a}</b> changed/retained</span>
-                  <span><b>{counts.n}</b> dropped</span>
-                  {counts.u ? <span><b>{counts.u}</b> unmeasured</span> : null}
-                </div>
-                <p className="adapter-name">{agent.adapter}</p>
-                <p className="adapter-name">
-                  Capture: {agent.capture_boundary.capture_api} →{" "}
-                  {agent.capture_boundary.capture_object}
-                </p>
-                <p className="adapter-name">
-                  Provider request:{" "}
-                  {agent.capture_boundary.provider_request_captured
-                    ? "captured"
-                    : "not captured"}{" "}
-                  · Adapter-negotiated MCP spec:{" "}
-                  {agent.capture_boundary.negotiated_mcp_spec_version ??
-                    "not exposed"}
-                </p>
-              </Card.Content>
-              <Card.Footer>
-                <Chip size="sm" variant="tertiary">{agent.type}</Chip>
-                <span>released {shortDate(release?.release_date)}</span>
-              </Card.Footer>
-            </Card>
-          );
-        })}
-      </div>
+      <FrameworkComparison database={database} capabilities={capabilities} />
     </main>
   );
 }
@@ -189,7 +224,7 @@ export function MethodPage({database}: {database: MirrorDatabase}) {
     {
       title: "Protocol versions stay separate",
       body:
-        "The scan records the version negotiated by its direct source connection. A framework adapter's independently negotiated version is recorded only when the adapter exposes it; unknown is never filled from the source by assumption.",
+        "The scan records the version established by its direct source connection through initialize or server/discover. A framework adapter's independently established version is recorded only when the adapter exposes it; unknown is never filled from the source by assumption.",
       variant: "secondary" as const,
     },
     {

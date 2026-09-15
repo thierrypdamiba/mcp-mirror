@@ -31,6 +31,8 @@ function baselineHeadline(counts: Record<SupportCode, number>) {
   if (counts.y) return "Present across tested releases";
   if (counts.a) return "Changed or retained elsewhere";
   if (counts.n) return "Dropped across tested releases";
+  // Nothing observed, but a row where every adapter is blocked is answered, not open.
+  if (counts.x && !counts.u) return "No adapter can reach this revision";
   return "Not yet measured";
 }
 
@@ -77,6 +79,26 @@ function TestPanel({
   const [version, setVersion] = useState(testedVersion);
 
   useEffect(() => setVersion(testedVersion), [agentId, testedVersion]);
+
+  // Offering a scan command here would imply the command reproduces a measurement. For a
+  // feature no scan covers, it would just run and quietly produce nothing for this row.
+  if (capability.measurement_state === "not_measured") {
+    return (
+      <div className="feature-test-panel">
+        <p>
+          No scan produces this row yet, so there is nothing to reproduce. The
+          feature is listed because MCP {capability.measured.mcp_spec} defines
+          it, not because anything has been observed about these frameworks.
+        </p>
+        {capability.probe ? (
+          <>
+            <p>Measuring it would take a probe that does this:</p>
+            <blockquote className="feature-probe">{capability.probe}</blockquote>
+          </>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div className="feature-test-panel">
@@ -183,6 +205,7 @@ export function FeatureModule({
     <article
       className={`feature-module${detail ? " is-detail" : " is-search-result"}`}
       data-capability-id={capability.id}
+      data-measurement-state={capability.measurement_state ?? "measured"}
       aria-labelledby={`${scope}-title`}
     >
       <aside className="feature-action-rail" aria-label="Capability actions">
@@ -232,20 +255,34 @@ export function FeatureModule({
               data-region="measurement-baseline"
             >
               <strong>{baselineHeadline(counts)}</strong>
-              <span>
-                MCP {capability.measured.mcp_spec} · tested{" "}
-                <time dateTime={capability.measured.run_date}>
-                  {shortDate(capability.measured.run_date)}
-                </time>{" "}
-                · {frameworkCount} releases ·{" "}
-                <code>{capability.measured.fixture ?? "custom fixture"}</code>
-              </span>
+              {capability.measured.run_date ? (
+                <span>
+                  MCP {capability.measured.mcp_spec} · tested{" "}
+                  <time dateTime={capability.measured.run_date}>
+                    {shortDate(capability.measured.run_date)}
+                  </time>{" "}
+                  · {frameworkCount - counts.x} releases ·{" "}
+                  <code>{capability.measured.fixture ?? "custom fixture"}</code>
+                </span>
+              ) : (
+                <span>
+                  MCP {capability.measured.mcp_spec} · defined by the
+                  specification · no scan covers it yet ·{" "}
+                  {counts.x > 0
+                    ? `${counts.u} releases unmeasured, ${counts.x} cannot reach this revision`
+                    : `${frameworkCount} releases unmeasured`}
+                </span>
+              )}
             </section>
           </div>
           <p className="feature-observed-summary" aria-label="Observed support summary">
             <span>Observed</span>
             <strong>{counts.y} present · {counts.a} changed/retained · {counts.n} dropped</strong>
-            <small>{frameworkCount} tested releases</small>
+            <small>
+              {counts.x > 0
+                ? `${frameworkCount - counts.x} of ${frameworkCount} releases reach this revision`
+                : `${frameworkCount} tested releases`}
+            </small>
           </p>
         </header>
 

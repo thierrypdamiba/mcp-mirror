@@ -17,13 +17,13 @@ function stripLabel(
   if (route.name === "capability") {
     return "Capability support table";
   }
-  if (route.name === "compare") {
-    return "Compare frameworks";
+  if (route.name === "stats") {
+    return "Capability statistics";
   }
   if (route.name === "changes") {
     return "Measurement changes";
   }
-  return "About MCP Mirror";
+  return "About Can AI use";
 }
 
 export function FeatureStrip({

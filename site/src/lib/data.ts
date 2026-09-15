@@ -26,6 +26,11 @@ export const SUPPORT_META: Record<
     shortLabel: "Dropped",
     symbol: "×",
   },
+  x: {
+    label: "Adapter cannot negotiate this revision",
+    shortLabel: "Unreachable",
+    symbol: "⊘",
+  },
   u: {
     label: "Not yet measured",
     shortLabel: "Unmeasured",
@@ -38,7 +43,7 @@ export function parseSupport(raw?: string): ParsedSupport {
     return {code: "u", noteRefs: []};
   }
 
-  const match = raw.trim().match(/^([yanu])((?:\s+#\d+)*)$/);
+  const match = raw.trim().match(/^([yanxu])((?:\s+#\d+)*)$/);
   if (!match) {
     return {code: "u", noteRefs: []};
   }
@@ -64,11 +69,23 @@ export function supportCounts(
   database: MirrorDatabase,
   capability: Capability,
 ): Record<SupportCode, number> {
-  const counts: Record<SupportCode, number> = {y: 0, a: 0, n: 0, u: 0};
+  const counts: Record<SupportCode, number> = {y: 0, a: 0, n: 0, x: 0, u: 0};
   for (const agentId of Object.keys(database.agents)) {
     counts[currentSupport(database, capability, agentId).code] += 1;
   }
   return counts;
+}
+
+/**
+ * A row backed by an actual adapter run. Rows the protocol defines but no scan has
+ * exercised are published with every cell unmeasured, and they have no run date, so they
+ * are excluded anywhere the page is reporting measurement history.
+ */
+export function isMeasured(capability: Capability): boolean {
+  return (
+    capability.measurement_state !== "not_measured" &&
+    Boolean(capability.measured.run_date)
+  );
 }
 
 export function shownCapabilities(database: MirrorDatabase): Capability[] {
@@ -120,19 +137,20 @@ export function titleCaseRule(name: string): string {
 }
 
 export function routeFromHash(hash: string): Route {
-  if (hash.startsWith("#/cap/")) {
+  const path = hash.split("?")[0];
+  if (path.startsWith("#/cap/")) {
     return {
       name: "capability",
-      capabilityId: decodeURIComponent(hash.slice("#/cap/".length)),
+      capabilityId: decodeURIComponent(path.slice("#/cap/".length)),
     };
   }
-  if (hash === "#/changes") {
+  if (path === "#/stats" || path === "#/compare") {
+    return {name: "stats"};
+  }
+  if (path === "#/changes") {
     return {name: "changes"};
   }
-  if (hash === "#/compare") {
-    return {name: "compare"};
-  }
-  if (hash === "#/method") {
+  if (path === "#/method") {
     return {name: "method"};
   }
   return {name: "index"};
@@ -148,11 +166,17 @@ export function reproduceCommand(
   version: string,
   capability?: Capability,
 ): string {
+  if (capability?.reproduce && !capability.reproduce.includes("mcp-mirror scan")) {
+    return capability.reproduce;
+  }
   const job = capability?.reproduce?.match(/--job\s+(\S+)/)?.[1];
   const jobArgument = job ? ` --job ${job}` : "";
+  const specArgument = capability?.measured.mcp_spec
+    ? ` --spec-version ${capability.measured.mcp_spec}`
+    : "";
 
   if (agent.registry === "npm") {
-    return `npm i ${agent.package}@${version} && uvx mcp-mirror scan "python your_server.py" --frameworks ${agentId}${jobArgument}`;
+    return `npm i ${agent.package}@${version} && uv run mcp-mirror scan "python3 your_server.py" --frameworks ${agentId}${jobArgument}${specArgument}`;
   }
-  return `uvx --with ${agent.package}==${version} mcp-mirror scan "python your_server.py" --frameworks ${agentId}${jobArgument}`;
+  return `uv run --with ${agent.package}==${version} mcp-mirror scan "python3 your_server.py" --frameworks ${agentId}${jobArgument}${specArgument}`;
 }

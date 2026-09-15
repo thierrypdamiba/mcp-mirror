@@ -1,0 +1,62 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "null-acceptance",
+  "title": "Null Acceptance",
+  "description": "Distinguishes an optional parameter that may be omitted from a parameter that explicitly accepts null.",
+  "question": "Does adaptation preserve whether each parameter accepts null?",
+  "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+  "status": "stable",
+  "categories": [
+    "Parameter contract"
+  ],
+  "keywords": "null,nullable,optional,anyOf,type union,parameter",
+  "stats": {
+    "crewai": {
+      "1.15.1": "a #1"
+    },
+    "langchain": {
+      "0.3.2": "y"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "y"
+    }
+  },
+  "notes": "Four capture boundaries preserve the source nullability. CrewAI wraps optional fields in unions that newly accept null.",
+  "notes_by_num": {
+    "1": "CrewAI: optional fields are emitted through nullable anyOf wrappers, broadening the accepted values beyond omission alone."
+  },
+  "verdict": {
+    "code": "a",
+    "headline": "Preserved at four boundaries, broadened at one.",
+    "detail": "CrewAI adds null acceptance to optional fields that the source schema does not declare nullable."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP tool schemas distinguishing omission from null.",
+  "links": [
+    {
+      "url": "https://json-schema.org/understanding-json-schema/reference/null",
+      "title": "JSON Schema Docs"
+    }
+  ],
+  "known_issues": [
+    "A server may reject explicit null even when omission is valid, creating avoidable validation failures."
+  ],
+  "why": "Optional and nullable are different contracts. Conflating them lets a downstream caller express values the source never accepted.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+  "measured": {
+    "run_date": "2026-09-04",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "JSON Schema 2020-12",
+  "docs_url": "https://json-schema.org/understanding-json-schema/reference/null",
+  "docs_label": "JSON Schema Docs"
+}

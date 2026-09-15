@@ -8,9 +8,12 @@ Three output formats share one derived scorecard:
 
 from __future__ import annotations
 
+import re
+import shlex
 from typing import Any
 
 from rich.console import Console
+from rich.markup import escape
 from rich.table import Table
 from rich.text import Text
 
@@ -46,7 +49,7 @@ def _job_grid(findings):
 def report_to_dict(report: Report, jobs_filter: list[str] | None = None) -> dict[str, Any]:
     """Full report plus derived scorecard, JSON-serializable (the baseline shape)."""
 
-    data = report.model_dump(mode="json")
+    data = report.model_dump(mode="json", by_alias=True)
     scorecard = build_scorecard(report)
     if jobs_filter:
         scorecard = _filter_scorecard(scorecard, jobs_filter)
@@ -93,6 +96,48 @@ def _evidence_line(run) -> str | None:
     )
 
 
+def _observation_hash(run) -> str | None:
+    if not run.observations:
+        return None
+    return run.observations[-1].artifact_sha256
+
+
+def _status_label(status: str) -> str:
+    return status.replace("_", " ")
+
+
+def _reproduction_command(report: Report) -> str | None:
+    if report.scan is None:
+        return None
+
+    args = ["mcp-mirror", "scan", report.mcp_server]
+    if report.scan.frameworks:
+        args.extend(["--frameworks", ",".join(report.scan.frameworks)])
+    if report.scan.runner_mode == "managed":
+        args.extend(["--runner", "managed"])
+    args.extend(
+        [
+            "--spec-version",
+            report.scan.spec_version_assertion or report.mcp_spec_version,
+        ]
+    )
+    if report.scan.jobs:
+        args.extend(["--job", ",".join(report.scan.jobs)])
+    if report.scan.jtbd:
+        args.extend(["--jtbd", report.scan.jtbd])
+    for name in report.scan.header_names:
+        env_name = re.sub(r"[^A-Z0-9]+", "_", name.upper()).strip("_")
+        args.extend(["--header", f"{name}: ${{{env_name}}}"])
+    args.extend(
+        [
+            "--fail-on-incomplete",
+            "--out",
+            "mcp-mirror-report.json",
+        ]
+    )
+    return shlex.join(args)
+
+
 def render_table(report: Report, console: Console, jobs_filter: list[str] | None = None) -> None:
     scorecard = build_scorecard(report)
     if jobs_filter:
@@ -100,15 +145,49 @@ def render_table(report: Report, console: Console, jobs_filter: list[str] | None
 
     console.print(Text(_header(report), style="bold"))
     console.print(f"generated with {report.generated_with}", style="dim")
+    reproduction_command = _reproduction_command(report)
+    if reproduction_command:
+        console.print(
+            f"reproduce: {reproduction_command}",
+            style="dim",
+            soft_wrap=True,
+        )
+    if report.source_observation:
+        console.print(
+            f"source evidence sha256:{report.source_observation.artifact_sha256}",
+            style="dim",
+        )
     console.print(Text(MAIN_JOB, style="italic dim"))
     if report.runs:
         console.print(Text("\nCapture boundaries", style="bold"))
         for run in report.runs:
+            if run.status != "measured":
+                detail = f": {run.status_detail}" if run.status_detail else ""
+                console.print(
+                    escape(
+                        f"  {run.framework}: {_status_label(run.status)}{detail}"
+                    ),
+                    style="yellow",
+                )
             line = _evidence_line(run)
             if line:
                 console.print(f"  {run.framework}: {line}")
-                if run.evidence and run.evidence.limitation:
-                    console.print(f"    limitation: {run.evidence.limitation}", style="dim")
+            if run.runner_digest:
+                console.print(
+                    f"    runner manifest sha256:{run.runner_digest}",
+                    style="dim",
+                )
+            observation_hash = _observation_hash(run)
+            if observation_hash:
+                console.print(
+                    f"    evidence sha256:{observation_hash}",
+                    style="dim",
+                )
+            if run.evidence and run.evidence.limitation:
+                console.print(
+                    f"    limitation: {run.evidence.limitation}",
+                    style="dim",
+                )
 
     table = Table(show_lines=False, header_style="bold")
     table.add_column("framework", style="bold cyan", no_wrap=True)
@@ -117,7 +196,12 @@ def render_table(report: Report, console: Console, jobs_filter: list[str] | None
 
     if not scorecard["frameworks"]:
         console.print(table)
-        console.print("no frameworks scanned (install renderers, e.g. pip install 'mcp-mirror[all]')", style="yellow")
+        console.print(
+            "no frameworks scanned; run 'mcp-mirror frameworks' for local "
+            "setup, or select frameworks with --runner managed",
+            style="yellow",
+            markup=False,
+        )
         return
 
     for name, fw in scorecard["frameworks"].items():
@@ -182,6 +266,15 @@ def render_markdown(report: Report, jobs_filter: list[str] | None = None) -> str
     lines.append("")
     lines.append(f"_generated with {report.generated_with}_")
     lines.append("")
+    reproduction_command = _reproduction_command(report)
+    if reproduction_command:
+        lines.append(f"**Reproduce:** `{reproduction_command}`")
+        lines.append("")
+    if report.source_observation:
+        lines.append(
+            f"**Source evidence:** `sha256:{report.source_observation.artifact_sha256}`"
+        )
+        lines.append("")
     lines.append(f"**The job:** {MAIN_JOB}")
     lines.append("")
     lines.append(
@@ -253,13 +346,30 @@ def render_markdown(report: Report, jobs_filter: list[str] | None = None) -> str
     for run in report.runs:
         lines.append(f"### {run.framework} (`{run.framework_version}`)")
         lines.append("")
+        if run.status != "measured":
+            lines.append(f"**Status:** {_status_label(run.status)}.")
+            if run.status_detail:
+                lines.append("")
+                lines.append(run.status_detail)
+            lines.append("")
+        if run.runner_digest:
+            lines.append(
+                f"**Runner manifest:** `sha256:{run.runner_digest}`"
+            )
+            lines.append("")
         evidence_line = _evidence_line(run)
         if evidence_line:
             lines.append(f"**Capture boundary:** {evidence_line}.")
+            observation_hash = _observation_hash(run)
+            if observation_hash:
+                lines.append("")
+                lines.append(f"**Evidence:** `sha256:{observation_hash}`")
             if run.evidence and run.evidence.limitation:
                 lines.append("")
                 lines.append(f"**Limitation:** {run.evidence.limitation}")
             lines.append("")
+        if run.status != "measured":
+            continue
         if not run.differences:
             lines.append("_fully faithful, no differences._")
             lines.append("")
@@ -294,11 +404,114 @@ def compare_baseline(current: Report, baseline: Report) -> tuple[bool, list[str]
             "(baselines are only comparable within one spec version)"
         ]
 
+    incomplete_baseline = sorted(
+        run.framework for run in baseline.runs if run.status != "measured"
+    )
+    if incomplete_baseline:
+        return True, [
+            "baseline is incomplete for "
+            f"{', '.join(incomplete_baseline)}; re-record it before comparing, "
+            "because a framework that was never measured cannot establish the "
+            "equivalence this comparison would claim"
+        ]
+
     baseline_runs = {run.framework: run for run in baseline.runs}
     current_runs = {run.framework: run for run in current.runs}
+    drift = False
+
+    # The scanner and its interpreter are part of the capture boundary: a diff
+    # taken by different code on a different runtime is not the same experiment.
+    for field, label in (
+        ("scanner_version", "scanner version"),
+        ("python_version", "Python version"),
+        ("platform", "platform"),
+    ):
+        baseline_value = (
+            getattr(baseline.provenance, field) if baseline.provenance else None
+        )
+        current_value = (
+            getattr(current.provenance, field) if current.provenance else None
+        )
+        if baseline_value != current_value and (baseline_value or current_value):
+            drift = True
+            messages.append(
+                f"ENVIRONMENT {label} changed: {baseline_value} -> {current_value}"
+            )
+
+    baseline_source_digest = (
+        baseline.provenance.runner_digest
+        if baseline.provenance is not None
+        else None
+    )
+    current_source_digest = (
+        current.provenance.runner_digest
+        if current.provenance is not None
+        else None
+    )
+    if (
+        current_source_digest != baseline_source_digest
+        and (
+            baseline_source_digest is not None
+            or current_source_digest is not None
+        )
+    ):
+        drift = True
+        messages.append(
+            "ENVIRONMENT source runner changed: "
+            f"{baseline_source_digest} -> {current_source_digest}"
+        )
+
+    for framework in sorted(set(baseline_runs) - set(current_runs)):
+        drift = True
+        messages.append(f"INCOMPLETE [{framework}] missing framework run")
+
+    for framework, run in sorted(current_runs.items()):
+        if run.status == "measured":
+            continue
+        drift = True
+        detail = f": {run.status_detail}" if run.status_detail else ""
+        messages.append(
+            f"INCOMPLETE [{framework}] {run.status}{detail}"
+        )
+
     for framework in sorted(set(baseline_runs) & set(current_runs)):
-        baseline_evidence = baseline_runs[framework].evidence
-        current_evidence = current_runs[framework].evidence
+        if current_runs[framework].status != "measured":
+            continue
+        baseline_run = baseline_runs[framework]
+        current_run = current_runs[framework]
+        if current_run.framework_version != baseline_run.framework_version:
+            drift = True
+            messages.append(
+                f"ENVIRONMENT [{framework}] framework version changed: "
+                f"{baseline_run.framework_version} -> "
+                f"{current_run.framework_version}"
+            )
+        if current_run.adapter_version != baseline_run.adapter_version and (
+            baseline_run.adapter_version is not None
+            or current_run.adapter_version is not None
+        ):
+            drift = True
+            messages.append(
+                f"ENVIRONMENT [{framework}] adapter version changed: "
+                f"{baseline_run.adapter_version} -> "
+                f"{current_run.adapter_version}"
+            )
+        if (
+            current_run.runner_digest != baseline_run.runner_digest
+            and (
+                baseline_run.runner_digest is not None
+                or current_run.runner_digest is not None
+            )
+        ):
+            drift = True
+            messages.append(
+                f"ENVIRONMENT [{framework}] runner manifest changed: "
+                f"{baseline_run.runner_digest} -> "
+                f"{current_run.runner_digest}"
+            )
+
+        baseline_evidence = baseline_run.evidence
+        current_evidence = current_run.evidence
         # Two legacy reports without renderer evidence retain the v0.1 baseline
         # behavior. A mixed old/new comparison fails closed because equivalence
         # cannot be established.
@@ -326,10 +539,28 @@ def compare_baseline(current: Report, baseline: Report) -> tuple[bool, list[str]
                 f"baseline {baseline_version!r} vs current {current_version!r}"
             ]
 
+        # Reaching here means both evidences exist. An adapter that moved to a
+        # different capture object, or stopped serializing the provider request,
+        # changed what the diff is evidence of even when the diff itself is
+        # unchanged.
+        for field, label in (
+            ("capture_stage", "capture stage"),
+            ("capture_api", "capture API"),
+            ("capture_object", "capture object"),
+            ("provider_request_captured", "provider request capture"),
+        ):
+            baseline_value = getattr(baseline_evidence, field)
+            current_value = getattr(current_evidence, field)
+            if baseline_value != current_value:
+                drift = True
+                messages.append(
+                    f"ENVIRONMENT [{framework}] {label} changed: "
+                    f"{baseline_value!r} -> {current_value!r}"
+                )
+
     baseline_index = _index(baseline)
     current_index = _index(current)
 
-    drift = False
     for key, category in current_index.items():
         framework, tool, path, dimension = key
         if key not in baseline_index:

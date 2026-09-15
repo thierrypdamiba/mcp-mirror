@@ -1,0 +1,60 @@
+{
+  "schema": "mcp-mirror/capability@3",
+  "id": "default-value",
+  "title": "`default`",
+  "description": "Documents the value a server or client should assume when an optional parameter is omitted.",
+  "question": "Is the declared default value preserved at each capture boundary?",
+  "spec": "https://json-schema.org/draft/2020-12/json-schema-validation",
+  "status": "stable",
+  "categories": [
+    "Parameter contract"
+  ],
+  "keywords": "default,default value,optional parameter,schema annotation",
+  "stats": {
+    "crewai": {
+      "1.15.1": "y"
+    },
+    "langchain": {
+      "0.3.2": "y"
+    },
+    "openai-agents": {
+      "0.22.0": "y"
+    },
+    "pydantic-ai": {
+      "2.40.0": "y"
+    },
+    "mastra": {
+      "1.17.3": "y"
+    }
+  },
+  "notes": "Every adapter now hands the agent the source default of 20. CrewAI rewrote it as recently as crewai-tools 1.14.7; the generated args_schema preserves it at 1.15.1.",
+  "notes_by_num": {},
+  "verdict": {
+    "code": "y",
+    "headline": "Preserved at all five boundaries.",
+    "detail": "The default survives every adaptation measured here. This row changed when CrewAI moved from 1.14.7 to 1.15.1, which is the kind of silent repair that only shows up if you keep re-measuring."
+  },
+  "usage_perc_y": null,
+  "usage_perc_a": null,
+  "usage_note": "Not published. Candidate source: count of public MCP tool schemas declaring default values.",
+  "links": [
+    {
+      "url": "https://json-schema.org/understanding-json-schema/reference/annotations#default",
+      "title": "JSON Schema Docs"
+    }
+  ],
+  "known_issues": [
+    "A changed default can cause a caller and server to assume different behavior for the same omitted argument."
+  ],
+  "why": "Defaults communicate omission behavior. Losing or changing one can alter calls without changing the visible parameter type.",
+  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+  "measured": {
+    "run_date": "2026-09-14",
+    "mcp_spec": "2025-11-25",
+    "fixture": "fixtures/tricky_server.py"
+  },
+  "shown": true,
+  "spec_label": "JSON Schema 2020-12",
+  "docs_url": "https://json-schema.org/understanding-json-schema/reference/annotations#default",
+  "docs_label": "JSON Schema Docs"
+}
