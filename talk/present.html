@@ -88,7 +88,7 @@ footer { display: grid; grid-template-columns: auto 1fr auto; align-items: cente
 </main>
 
 <footer>
-  <div id="counter">1 / 23</div>
+  <div id="counter">1 / 39</div>
   <div id="heading"></div>
   <div class="nav">
     <button id="previous" type="button">← Previous</button>
@@ -170,7 +170,7 @@ footer { display: grid; grid-template-columns: auto 1fr auto; align-items: cente
     preview(nextFrame, Math.min(index + 1, slides.length - 1));
     counter.textContent = `${index + 1} / ${slides.length}`;
     heading.textContent = slide.heading;
-    renderNotes(scriptNotes.get(index + 1) || slide.notes || "No notes for this slide.");
+    renderNotes((slide.script === null ? "" : scriptNotes.get(slide.script)) || slide.notes || "No notes for this slide.");
     nextFrame.style.opacity = index === slides.length - 1 ? ".25" : "1";
     nextFrame.title = `Next slide: ${nextSlide.heading}`;
     saveAndBroadcast();
@@ -214,9 +214,10 @@ footer { display: grid; grid-template-columns: auto 1fr auto; align-items: cente
       fetch("script.md").then((response) => response.text()),
     ]);
     const deckDocument = new DOMParser().parseFromString(deckText, "text/html");
-    slides = [...deckDocument.querySelectorAll(".slide:not(.appendix)")].map((slide) => ({
+    slides = [...deckDocument.querySelectorAll(".slide")].map((slide) => ({
       heading: slide.querySelector("h1,h2,h3")?.textContent.replace(/\s+/g, " ").trim() || "Untitled slide",
       notes: slide.dataset.notes || "",
+      script: slide.dataset.script ? Number(slide.dataset.script) : null,
     }));
     for (const match of scriptText.matchAll(/^## (\d+) ·[^\n]*\n+([\s\S]*?)(?=^## |\n---)/gm)) {
       scriptNotes.set(Number(match[1]), match[2].trim().replace(/^_([^_]+)_$/gm, "$1"));

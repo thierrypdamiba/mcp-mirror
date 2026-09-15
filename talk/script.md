@@ -9,9 +9,9 @@ Run `npm run talk:present`, then click **Open audience**. Navigate from the
 presenter console; its current slide, next slide, full script, timer, and clean
 audience window stay synchronized.
 
-The HTML deck opens with 23 main slides. In its standalone mode, press `A` to
-include appendix slides, `N` for short presenter notes, `T` for the timer, or
-`P` to open the presenter console.
+The HTML deck runs 39 slides with no hidden appendix. In its standalone mode,
+press `N` for short presenter notes, `T` for the timer, or `P` to open the
+presenter console.
 
 The opening five slides rebuild the shape of Nate Barbettini's "MCP in plain
 English" explanation on purpose, using my own examples rather than his. The talk
@@ -522,9 +522,11 @@ Thank you.
 
 ---
 
-## Appendix controls
+## Former appendix slides, now in the running order
 
-Press `A` in the HTML deck to include the appendix slides. They contain:
+These sixteen slides used to be hidden behind `A`. They are now part of the
+single 39-slide run, and each one carries its own spoken notes in the presenter
+console. They are:
 
 - The agent-loop diagram.
 - The complete tool declaration.
@@ -550,20 +552,20 @@ Press `A` in the HTML deck to include the appendix slides. They contain:
 - Nate Barbettini, “Introducing the MCP Debugger”:
   <https://caffeinate.blog/post/introducing-mcp-debugger/>
 - MCP tool error semantics, including the tool-execution-error definition and
-  the client SHOULD quoted on slide 14:
+  the client SHOULD quoted on slide 19:
   <https://modelcontextprotocol.io/specification/2026-07-28/server/tools#error-handling>
 - Official MCP conformance:
   <https://github.com/modelcontextprotocol/conformance>
-- A2A Protocol specification, “What A2A is not,” quoted on slide 21. The
+- A2A Protocol specification, “What A2A is not,” quoted on slide 34. The
   sentence on the slide and the phrase “use your framework’s native primitives”
   are both verbatim; the slide elides only the dash between them. A2A reached
   v1.0 in 2026 and is hosted by the Linux Foundation:
   <https://a2a-protocol.org/latest/>
 - Agent Client Protocol, the Zed and JetBrains editor protocol referenced on
-  slide 21. Stable protocol version 1:
+  slide 34. Stable protocol version 1:
   <https://agentclientprotocol.com/>
 
-Slide 15 quotes these four merged pull-request titles verbatim. Re-verify before
+Slide 21 quotes these four merged pull-request titles verbatim. Re-verify before
 the talk with `gh pr view <url> --json title,state,mergedAt`.
 
 - Claude Agent SDK, merged 25 March 2026, “fix: propagate is_error flag from SDK
@@ -654,28 +656,40 @@ measurement of what five applications actually prepared from identical input.
 - The build-up is five slides and roughly four minutes. It earns the reveal; do
   not let it sprawl.
 - Let the five-way result sit before explaining it.
-- Slides 14 and 15 are the answer to “so what.” Do not rush them, and do not
+- Slides 19 and 21 are the answer to “so what.” Do not rush them, and do not
   editorialize past the commit titles.
 - Keep the live demo under three minutes.
 - The numbered sections are spoken words only, safe to read raw. Every stage
   direction lives here instead.
 - Pause after the last line of slides 6 and 8 before advancing.
-- Slide 12 is the second interaction. Stop talking after the question and take
+- Slide 17 is the second interaction. Stop talking after the question and take
   two or three shouted answers. Do not show choices.
-- Slide 17 demo command: `uv run python scripts/demo_mcp_server.py --first
+- Slide 25 demo command: `uv run python scripts/demo_mcp_server.py --first
   result`, or `--first definition`. Take the louder answer from the room. If the
   terminal misbehaves, jump back to the five-boundary-objects slide and do not
   debug on stage.
 - Timing gates: first data by 5:30, thesis by 7:30, significance by 15:45,
   demo by 16:50, recommendations by 24:35.
-- Slide 21 is the cheapest cut if you are behind. Drop the slide and say one
+- Slide 34 is the cheapest cut if you are behind. Drop the slide and say one
   sentence from the lectern: A2A and ACP standardize other boundaries between
   processes, and this one is inside a process, so neither reaches it.
 - If more than a minute behind at slide 5, cut slides 3 and 4 to one sentence
   each: you pass instructions for asking, and then you write that glue once per
   integration.
-- If more than two minutes behind later, skip slide 19 and state its conclusion
+- If more than two minutes behind later, skip slide 30 and state its conclusion
   in one sentence: structured JSON also lands in framework-specific
   destinations.
+- The deck now runs 39 slides in one continuous order with no hidden appendix,
+  so at a normal pace this runs past the 30 minute slot. Plan to go over, and
+  know the skip list before you start.
+- Safest slides to skip live, in order, because they are supporting material
+  rather than the core argument: 29 and 31 and 32, the test mechanics and the
+  detailed rich-content table; 11 and 12 and 28, the definitional slides for the
+  agent loop, the wire shape, and structured content; 22 and 23, the path
+  diagram and the capture-boundary slide, both of which the method slide already
+  covers; then 36 and 38, the conformance comparison and the coverage counts.
+- Slides worth keeping even when cutting hard: 13, 14, 20, 27, and 35. Those
+  carry the claim, the real tool declaration, the missing contract, the safety
+  point, and the study's limits.
 - Never describe the site’s support codes as framework scores.
 - Prefer “maps,” “converts,” “retains,” “omits,” and “at this boundary.”
