@@ -163,14 +163,14 @@ body.audience, body.preview { cursor: none; }
 <body>
 <main id="deck">
 
-<section class="slide center" data-script="1" data-notes="Start the timer with T. State the experiment in one sentence, then build from first principles: the intern, the note, the glue, MCP, and the one part MCP did not standardize. Five setup slides, about four minutes total. If you are behind, compress slides 3 and 4 to one sentence each.">
+<section class="slide center" data-script="1" data-notes="MCP promises that a tool built once can connect to many clients. This talk tests the next question: after an agent framework adapts that tool, does the same representation exist on the other side? The experiment is one test server, one shared MCP revision, five framework integrations, and a record of what changed. The opening rebuilds the clearest existing explanation of MCP from first principles, the intern, the note, the glue, and the standard interface, then goes one step past where that explanation stops.">
   <div class="kicker">MCP Community Connect · San Francisco</div>
   <h1>Your Tool Is in<br/>Another Castle</h1>
   <div class="sub">MCP makes tools portable. Does their meaning survive adaptation?</div>
   <div class="small" style="margin-top:4vh">Thierry Damiba · 14 September 2026</div>
 </section>
 
-<section class="slide" data-script="2" data-notes="Nate Barbettini's analogy, cited on the slide; say his name and the article title out loud. Assume no expertise. The model can read and write, and that is all. Everything it knows about your problem arrived as text somebody else prepared. The worked examples from here are yours, not his. Keep this to about forty-five seconds.">
+<section class="slide" data-script="2" data-notes="A model is a brilliant intern working in a windowless room. No internet, no phone, no library, and the only thing that fits under the door is a sheet of paper in one exact format. You slide a note in, the intern reads it and writes a reply, and you read the reply. That is a language model: it reads text and writes text, and everything it knows about your particular problem arrived as text somebody else prepared. The analogy is Nate Barbettini's, from his post 'Model Context Protocol in plain English', which is cited on the slide. The worked examples from here on are mine, not his.">
   <div class="kicker">Start with the model</div>
   <h3>A model is a very capable intern in a windowless room.</h3>
   <div class="flow">
@@ -222,7 +222,7 @@ shipped 11 Sep · arriving 16 Sep · carrier DHL</pre>
   <div class="sub">A description the model can read, plus code that performs the call. <span class="accent">Once per integration.</span></div>
 </section>
 
-<section class="slide" data-script="5" data-notes="MCP is the agreement that removes that duplication. Your application holds an MCP client; any MCP server exposes its tools through the same interface. Write the integration once and reuse it. Say plainly that this is the promise the rest of the talk tests.">
+<section class="slide" data-script="5" data-notes="MCP is the agreement that removes that duplication. Your application holds an MCP client, and any MCP server it connects to lists its tools and accepts calls through the same interface. Write the integration once and reuse it in any MCP client. It is standardization rather than AI magic, and that promise is what the rest of this talk tests.">
   <div class="kicker">MCP is a standard interface</div>
   <h3>Write the integration once. Any MCP client can use it.</h3>
   <div class="flow">
@@ -237,7 +237,7 @@ shipped 11 Sep · arriving 16 Sep · carrier DHL</pre>
   <div class="sub">The standardized conversation runs between your application and the MCP server.</div>
 </section>
 
-<section class="slide" data-script="6" data-notes="This is the hinge. Read the quote aloud. MCP standardized everything below the client. It did not standardize the note. Somebody still writes the note the model reads, and in an agent application that somebody is the framework adapter. Pause, then go straight to the experiment.">
+<section class="slide" data-script="6" data-notes="This is the hinge of the talk. The quoted line is that the model still only sees the get_weather tool, because the MCP conversation happens between the application and the MCP server. From the model's point of view nothing changed: it still sits in the windowless room reading a note somebody else wrote. MCP standardized everything below the client. It did not standardize the note, and in an agent application the thing writing that note is the framework adapter.">
   <div class="kicker">The part that stayed the same</div>
   <h3>From the model’s point of view, nothing changed.</h3>
   <div class="quote">“The model still only sees the <span class="mono">get_weather</span> tool. The MCP conversation happens between the application and the MCP server.”</div>
@@ -258,7 +258,7 @@ shipped 11 Sep · arriving 16 Sep · carrier DHL</pre>
   <div class="sub">Each part carries a different traceable marker so we can see where it lands.</div>
 </section>
 
-<section class="slide" data-script="8" data-notes="Say explicitly: the MCP response is identical in all five runs. These cards are what each adapter produced afterward, at the named capture API. They are not five different server responses and not equivalent final model payloads. LangChain receives the result but raises while converting the audio block.">
+<section class="slide" data-script="8" data-notes="The MCP response was identical in all five runs, and nothing on the server changed. The row at the top is that one response, and the five cards below are what each framework handed back afterward, at the integration API named on the card. They are not five different server responses and not equivalent final model payloads. LangChain receives the result but its measured conversion raises when it reaches the audio block.">
   <div class="kicker">Same response in · five objects out</div>
   <h3>Every framework received the identical MCP response.</h3>
   <div class="source-strip">
@@ -274,7 +274,7 @@ shipped 11 Sep · arriving 16 Sep · carrier DHL</pre>
   </div>
 </section>
 
-<section class="slide center" data-script="9" data-notes="This is the thesis. Pause after the first sentence. MCP successfully transported one valid result to every integration; the divergence appears in adaptation after that exchange. Call back to the glue: MCP removed it below the client, and above the client it is still written once per framework.">
+<section class="slide center" data-script="9" data-notes="This is the thesis. The connection was portable and the agent-facing contract was not. MCP successfully transported one valid result to every integration, and the divergence appears in adaptation after that exchange. MCP removed the duplicated glue below the client; above the client that glue is still written once per framework, and the five versions here do not agree. So supports MCP answers the connectivity question, not the question of what an application actually receives.">
   <div class="kicker">The interoperability gap</div>
   <h2 class="claim">The connection was portable.<br/><span class="accent">The agent-facing contract was not.</span></h2>
   <div class="portable">
@@ -393,7 +393,7 @@ OpenAI      ToolOutput = {"type": "text", ...}</div>
   <div class="sub">The protocol call succeeds. The requested operation does not run.</div>
 </section>
 
-<section class="slide" data-script="11" data-notes="Explain both layers, and name the boolean. The outer wrapper is JSON-RPC and it reports success. Nested inside it is a CallToolResult, which has a content array holding the prose and a boolean field called isError sitting right beside it. Point at isError and say plainly: this is the field, it is a boolean, and it is the only one MCP defines for 'the tool ran and the operation failed.'">
+<section class="slide" data-script="11" data-notes="Two layers report two different outcomes. The outer wrapper is JSON-RPC, and returning a result means the tools/call request was recognized and processed. Nested inside it is a CallToolResult, which has a content array holding the prose and a boolean field called isError sitting right beside it. Here that boolean is true. It is the only field MCP defines to mark a result as a tool execution error: the protocol exchange worked, and the requested operation did not run.">
   <div class="kicker">Two layers report two different outcomes</div>
   <h3>JSON-RPC says the request worked. MCP says the tool operation failed.</h3>
   <div class="layer-stack">
@@ -413,7 +413,7 @@ OpenAI      ToolOutput = {"type": "text", ...}</div>
   <div class="small" style="margin-top:2vh"><span style="color:var(--bright)">isError</span> is a boolean field on <span style="color:var(--bright)">CallToolResult</span>, sitting beside the content it explains. It is the only field MCP defines to mark a result as a tool execution error.</div>
 </section>
 
-<section class="slide center" data-script="12" data-notes="INTERACTIVE: ask the question and wait. Invite two or three shouted answers. Do not display choices or steer them toward the measured outcomes. Then say: there is no protocol-mandated framework answer.">
+<section class="slide center" data-script="12" data-notes="Now imagine writing the adapter yourself, because the adapter is the thing writing the note. The server says the requested operation failed. What would you hand the agent: a value, a message, an exception, or something else? There is no protocol-mandated framework representation, which is why the next slide shows what the pinned integrations actually expose.">
   <div class="kicker">Your turn · design the adapter</div>
   <h2 class="claim">The server says the operation failed.<br/><br/><span class="accent">What would you hand the agent?</span></h2>
   <div class="sub">There is no protocol-mandated framework representation.</div>
@@ -432,7 +432,7 @@ OpenAI      ToolOutput = {"type": "text", ...}</div>
   <div class="sub">No measured path returned the unchanged MCP result.</div>
 </section>
 
-<section class="slide" data-script="14" data-notes="This answers 'so what.' The specification singles out tool execution errors as a distinct class carrying actionable feedback, and puts a normative SHOULD on clients. In the three plain-result captures the explanatory text survives but no typed field marks the result as a failure. In the other two the signal survives as control flow. So one question, did this call fail, needs a different implementation per contract, and at three captures it has no typed answer at all. Say clearly that the prose still reaches the model; what is not portable is the machine-readable marking.">
+<section class="slide" data-script="14" data-notes="This answers the 'so what'. The specification singles out tool execution errors as a distinct class carrying actionable feedback a model can use to self-correct, and it puts a normative SHOULD on clients. In the three plain-result captures the explanatory text survives but no typed field marks the result as a failure. In the other two the signal survives as control flow. So one question, did this call fail, needs a different implementation per contract, and at three captures it has no typed answer at all. The prose still reaches the model; what is not portable is the machine-readable marking that surrounding code branches on.">
   <div class="kicker">What the flag was for</div>
   <h3>The explanation survived everywhere. The machine-readable marking did not.</h3>
   <div class="channels">
@@ -465,7 +465,7 @@ Thrown error     try / catch</div>
   <div class="sub">“Supports MCP” confirms the connection, not the contract the agent runtime receives.</div>
 </section>
 
-<section class="slide" data-script="15" data-notes="Do not argue significance; show it. These are merged commit titles from four independent maintainer teams, verified against the public repositories. Read the Mastra one aloud: failed MCP tool calls were being recorded as successes. Then make the fair point both ways. This predates the project, so claim no discovery. And each fix lands at a boundary that team chose, which is exactly why the location of the failure signal is not portable.">
+<section class="slide" data-script="15" data-notes="These are merged commit titles from four independent maintainer teams, quoted verbatim and verified against the public repositories. The Mastra one states the consequence directly: without honoring isError, failed MCP tool calls were being recorded as successes. The fair point runs both ways. This problem predates the project, so there is no discovery claim here. And each fix lands at a boundary that team chose, which is exactly why the location of the failure signal is a per-framework decision rather than a protocol guarantee.">
   <div class="kicker">Does it matter? Four teams already answered</div>
   <h3>Merged fixes, in their maintainers’ own words.</h3>
   <div class="timeline">
@@ -496,7 +496,7 @@ Thrown error     try / catch</div>
   <div class="sub">“What reaches the agent” is meaningful only when the exact framework boundary is stated.</div>
 </section>
 
-<section class="slide" data-script="16" data-notes="Be transparent: the project captures deterministic framework objects at declared boundaries. It does not yet capture one equivalent end-to-end model input across all five frameworks.">
+<section class="slide" data-script="16" data-notes="Everything runs on MCP 2025-11-25, for the boring reason that all five frameworks speak that version, and one test server hands every framework the same deliberately awkward tools and results. Every field carries its own marker, so it can be found again after adaptation. The conversions are each framework's own shipped code rather than an imitation of it. The last bullet is the honest limit: the project captures one deterministic framework object per framework, at a declared boundary, and does not yet capture one equivalent end-to-end model input across all five.">
   <div class="kicker">Method</div>
   <h3>One test server. One protocol version. And I say exactly where I looked.</h3>
   <ul>
@@ -509,7 +509,7 @@ Thrown error     try / catch</div>
   <div class="small" style="margin-top:2.5vh">“Where I looked” has a name here: the <span style="color:var(--bright)">capture boundary</span>, meaning the exact function I called and the exact object it handed back. Every published result is stamped with one.</div>
 </section>
 
-<section class="slide" data-script="17" data-notes="LIVE DEMO. Let the room choose. Run `uv run python scripts/demo_mcp_server.py --first result` or replace result with definition. The script connects to mcp-mirror serve over stdio and prints published evidence. If the terminal fails, jump back to the five-boundary-objects slide; those captures are the visual fallback.">
+<section class="slide" data-script="17" data-notes="The measurements are also available through mcp-mirror itself, which now runs as a read-only MCP server. Connecting from Cursor is one command, uv run mcp-mirror serve. From there the delete_account tool definition or the earlier result can be submitted back to it, asking which protocol features it uses, where destructiveHint lands, and what the published framework observations say about an isError result. The inspection tools return versioned evidence. They do not execute the submitted tool and do not call a model.">
   <div class="kicker">Use it while you build</div>
   <h3>mcp-mirror is now a read-only MCP server.</h3>
   <pre class="large"><span class="comment"># Connect from Cursor</span>
@@ -568,7 +568,7 @@ and what happens to an <span class="key">isError</span> result?</pre>
   </div>
 </section>
 
-<section class="slide" data-script="19" data-notes="Describe destinations, not winners. Current LangChain documentation explicitly stores structured content as an artifact separate from model-visible content. Other rows remain scoped to the measured or documented path.">
+<section class="slide" data-script="19" data-notes="The same translation question applies to typed results. After adaptation the structured JSON can land in an artifact, become framework output, appear as model-visible JSON when configured, or fall back to text-oriented output. Current LangChain documentation explicitly stores it as an artifact separate from model-visible content. The evidence column matters: some rows are what this run captured, and others are the documented behavior of a path this study did not capture directly. These are different destinations, not a support ladder.">
   <div class="kicker">A third translation · structured content</div>
   <h3>Typed results can become content, artifacts, or framework output.</h3>
   <table>
@@ -607,7 +607,7 @@ and what happens to an <span class="key">isError</span> result?</pre>
   </table>
 </section>
 
-<section class="slide" data-script="20" data-notes="This is the fairness slide. Say every sentence.">
+<section class="slide" data-script="20" data-notes="The framework names stay in the talk because the observations would be unverifiable without them, but this is a record of where things landed and not an overall ranking. Each framework exposes a different agent abstraction. Some transformations are intentional and some are configurable, and some have changed between releases, including the four merged fixes just shown. A changed field is not automatically a bug. The operational question is whether server authors and application developers know which contract exists after conversion.">
   <div class="kicker">Interpretation</div>
   <h3>This is a record of where things landed, not a scoreboard.</h3>
   <ul>
@@ -618,7 +618,7 @@ and what happens to an <span class="key">isError</span> result?</pre>
   </ul>
 </section>
 
-<section class="slide" data-script="21" data-notes="Preempt the obvious objection: isn't the ecosystem already fixing this? Name the three things people are thinking of. MCP standardizes application to server. A2A standardizes agent to agent. ACP, the Zed and JetBrains editor protocol, standardizes editor to coding agent. All three are wire protocols between processes, and the boundary measured in this talk is inside one process. Then read the A2A line aloud, because A2A itself declines to cover this and points at framework native primitives, which is the exact thing that turned out not to be portable. Forty seconds. Do not linger and do not editorialize about any of these projects.">
+<section class="slide" data-script="21" data-notes="The fair objection here is whether the ecosystem is already fixing this. Three things usually come up. MCP standardizes application to server. A2A standardizes agent to agent. ACP, the Zed and JetBrains editor protocol, standardizes editor to coding agent. All three are wire protocols between two processes, and the boundary measured in this talk is inside one process, between the adapter and the runtime's own objects. A2A declines to cover it explicitly: it does not specify how an agent invokes tools, and its guidance is to use your framework's native primitives. That last phrase is the exact thing that turned out not to be portable.">
   <div class="kicker">What about the other protocols</div>
   <h3>The newer standards cover different boundaries. Not this one.</h3>
   <div class="flow">
@@ -679,7 +679,7 @@ and what happens to an <span class="key">isError</span> result?</pre>
   </ul>
 </section>
 
-<section class="slide center" data-script="23" data-notes="End on the transferable question. No accusation and no framework callout.">
+<section class="slide center" data-script="23" data-notes="The talk started with an intern in a windowless room who can only read notes somebody else wrote. MCP standardized how we fetch what goes into that note; it did not standardize the note. So the question to add to every MCP integration test is not only what did the server send, but also what reached the agent, at which boundary and in which representation. The tool can be in every castle; the thing to check is what survived the journey. Both links are on the slide: the browsable index of every measurement, and the repository holding the test server, the fixtures, the captures, and the mcp-mirror MCP server.">
   <div class="kicker">The question to add to every MCP integration test</div>
   <h2 class="claim">Not only: “What did the server send?”<br/><br/><span class="accent">Also: “What reached the agent?”</span></h2>
   <div class="small" style="margin-top:6vh">Browse the measurements: <span class="mono" style="color:var(--bright)">thierrypdamiba.github.io/mcp-mirror</span></div>
@@ -697,8 +697,7 @@ and what happens to an <span class="key">isError</span> result?</pre>
   const mode = params.get("mode") || "deck";
   document.body.classList.add(mode);
   const allSlides = [...document.querySelectorAll(".slide")];
-  let includeAppendix = false;
-  let slides = allSlides.filter((slide) => !slide.classList.contains("appendix"));
+  const slides = allSlides.filter((slide) => !slide.classList.contains("appendix"));
   const hud = document.querySelector("#hud");
   const bar = document.querySelector("#bar");
   const notes = document.querySelector("#notes");
@@ -714,7 +713,7 @@ and what happens to an <span class="key">isError</span> result?</pre>
     index = Math.max(0, Math.min(slides.length - 1, next));
     allSlides.forEach((slide) => slide.classList.remove("on"));
     slides[index].classList.add("on");
-    hud.textContent = `${index + 1} / ${slides.length} · N notes · T timer · A appendix · F fullscreen`;
+    hud.textContent = `${index + 1} / ${slides.length} · N notes · T timer · F fullscreen`;
     bar.style.width = `${((index + 1) / slides.length) * 100}%`;
     notes.textContent = slides[index].dataset.notes || "(no notes)";
     history.replaceState(null, "", `${location.pathname}${location.search}#${index + 1}`);
@@ -750,12 +749,6 @@ and what happens to an <span class="key">isError</span> result?</pre>
       elapsed = 0;
       if (running) toggleTimer();
       paintClock();
-    } else if (event.key.toLowerCase() === "a") {
-      const current = slides[index];
-      includeAppendix = !includeAppendix;
-      slides = includeAppendix ? allSlides : allSlides.filter((slide) => !slide.classList.contains("appendix"));
-      const currentIndex = slides.indexOf(current);
-      show(currentIndex >= 0 ? currentIndex : 0);
     } else if (event.key.toLowerCase() === "f") {
       document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
     } else if (event.key.toLowerCase() === "p") {
