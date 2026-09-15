@@ -49,8 +49,8 @@ dev = [
 mcp-mirror = "mcp_mirror.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/mcp-mirror/mcp-mirror"
-Documentation = "https://github.com/mcp-mirror/mcp-mirror/blob/main/DESIGN.md"
+Homepage = "https://github.com/thierrypdamiba/mcp-mirror"
+Documentation = "https://github.com/thierrypdamiba/mcp-mirror/blob/main/DESIGN.md"
 
 [build-system]
 requires = ["hatchling"]

@@ -40,7 +40,8 @@ Imagine you hire a brilliant intern.
 Great writer, great education, enormous amount of knowledge in their head. One
 catch: they work in a windowless room. No internet, no phone, no library.
 
-The only thing that fits under the door is a sheet of paper.
+The only thing that fits under the door is a sheet of paper. Not a database,
+not a file, not an object.
 
 You slide a note in. They read it, write a reply, and slide it back out.
 
@@ -61,7 +62,8 @@ So you find a workaround.
 You cannot pass the order database under the door, but you can pass
 instructions for asking it something.
 
-You write: if you need the order system, write `LOOKUP(order_id)`.
+You write: if you need the order system, write `LOOKUP(order_id)`. Exactly that
+format. Everything has to be flattened to fit.
 
 The intern writes back `LOOKUP(4417)`.
 
@@ -512,9 +514,9 @@ Also ask:
 
 The tool can be in every castle. Check what survived the journey.
 
-Everything behind this talk is on GitHub: the test server, the captures, the
-published data, and the mcp-mirror MCP server you just watched me query. The
-link is on the slide.
+Both links are on the slide. The first one is the browsable index of every
+measurement. The second is the repository: the test server, the captures, the
+published data, and the mcp-mirror MCP server you just watched me query.
 
 Thank you.
 
