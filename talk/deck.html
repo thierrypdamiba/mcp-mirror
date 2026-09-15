@@ -34,6 +34,10 @@ h3 { color: var(--bright); font-size: 2.5vw; font-weight: 400; line-height: 1.25
 .sub { margin-top: 2.6vh; color: var(--text); font-size: 2vw; line-height: 1.38; max-width: 82%; }
 .small { color: var(--muted); font: 1.15vw/1.5 var(--mono); }
 .claim { max-width: 88%; font-size: 5vw; line-height: 1.14; color: var(--bright); }
+.close-share { display: flex; align-items: center; justify-content: center; gap: 2.8vw; margin-top: 4vh; }
+.qr-plate { flex: none; padding: 1.2vh; border-radius: 4px; background: #ffffff; }
+.qr-plate svg { display: block; width: 32vh; height: 32vh; }
+.close-links { text-align: left; }
 /* Even out wrapped display text so a two-line sub or headline does not leave a
    one-word last line. Applies only to prose blocks, never to code or payloads. */
 h1, h2, h3, .sub, .claim, .definition, .meaning { text-wrap: balance; }
@@ -679,11 +683,17 @@ and what happens to an <span class="key">isError</span> result?</pre>
   </ul>
 </section>
 
-<section class="slide center" data-script="23" data-notes="The talk started with an intern in a windowless room who can only read notes somebody else wrote. MCP standardized how we fetch what goes into that note; it did not standardize the note. So the question to add to every MCP integration test is not only what did the server send, but also what reached the agent, at which boundary and in which representation. The tool can be in every castle; the thing to check is what survived the journey. Both links are on the slide: the browsable index of every measurement, and the repository holding the test server, the fixtures, the captures, and the mcp-mirror MCP server.">
+<section class="slide center" data-script="23" data-notes="The talk started with an intern in a windowless room who can only read notes somebody else wrote. MCP standardized how we fetch what goes into that note; it did not standardize the note. So the question to add to every MCP integration test is not only what did the server send, but also what reached the agent, at which boundary and in which representation. The tool can be in every castle; the thing to check is what survived the journey. Both links are on the slide: the browsable index of every measurement, and the repository holding the test server, the fixtures, the captures, and the mcp-mirror MCP server. The QR code goes to that repository, and if the work is useful a star helps.">
   <div class="kicker">The question to add to every MCP integration test</div>
   <h2 class="claim">Not only: “What did the server send?”<br/><br/><span class="accent">Also: “What reached the agent?”</span></h2>
-  <div class="small" style="margin-top:6vh">Browse the measurements: <span class="mono" style="color:var(--bright)">thierrypdamiba.github.io/mcp-mirror</span></div>
-  <div class="small" style="margin-top:1.4vh">Fixtures, captures, and the MCP server: <span class="mono" style="color:var(--bright)">github.com/thierrypdamiba/mcp-mirror</span></div>
+  <div class="close-share">
+    <div class="qr-plate"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 41"><path fill="#fff" d="M0 0h41v41h-41z"/><path stroke="#000" d="M4 4.5h7m1 0h2m1 0h1m5 0h2m2 0h2m3 0h7m-33 1h1m5 0h1m1 0h2m1 0h1m1 0h4m1 0h1m7 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m3 0h1m1 0h3m1 0h1m1 0h1m2 0h1m4 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m2 0h1m1 0h2m3 0h1m1 0h5m3 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m2 0h1m1 0h1m2 0h1m2 0h2m2 0h1m1 0h1m2 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m2 0h2m1 0h1m1 0h1m1 0h1m1 0h1m2 0h1m4 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-24 1h1m1 0h1m1 0h1m5 0h1m3 0h2m-24 1h1m4 0h4m2 0h1m1 0h1m1 0h2m7 0h1m5 0h2m-32 1h5m1 0h3m1 0h3m1 0h1m1 0h3m1 0h3m4 0h4m-32 1h2m2 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h4m3 0h2m1 0h1m1 0h1m1 0h1m1 0h2m-29 1h2m2 0h1m1 0h1m2 0h2m2 0h3m1 0h1m1 0h1m1 0h2m1 0h4m1 0h1m-30 1h4m2 0h1m4 0h1m1 0h2m1 0h1m4 0h1m1 0h2m3 0h2m-32 1h2m7 0h1m2 0h9m1 0h1m2 0h2m3 0h2m-32 1h2m3 0h1m3 0h1m1 0h1m1 0h1m2 0h1m2 0h1m1 0h1m2 0h2m2 0h3m-29 1h2m4 0h4m1 0h4m1 0h1m2 0h1m2 0h1m1 0h1m1 0h2m1 0h1m-33 1h3m1 0h3m1 0h4m3 0h1m2 0h3m1 0h4m1 0h3m2 0h1m-32 1h1m3 0h1m2 0h1m1 0h2m2 0h1m1 0h2m1 0h3m1 0h1m2 0h1m2 0h4m-30 1h1m2 0h4m1 0h2m6 0h1m1 0h1m1 0h5m1 0h2m1 0h1m-33 1h2m2 0h2m1 0h3m2 0h2m3 0h1m1 0h2m1 0h1m3 0h1m1 0h3m1 0h1m-32 1h3m2 0h1m4 0h1m1 0h1m1 0h2m1 0h2m2 0h1m1 0h2m1 0h3m-30 1h1m1 0h1m1 0h2m3 0h2m1 0h3m4 0h1m2 0h2m3 0h2m1 0h1m-31 1h1m2 0h5m5 0h1m1 0h3m7 0h1m4 0h2m-32 1h1m1 0h2m1 0h1m4 0h5m2 0h1m1 0h1m2 0h2m1 0h2m2 0h2m-31 1h2m1 0h2m1 0h1m2 0h4m3 0h2m1 0h2m3 0h6m-22 1h3m3 0h1m1 0h4m1 0h1m1 0h2m3 0h1m1 0h3m-33 1h7m1 0h2m1 0h1m2 0h3m1 0h1m1 0h2m1 0h2m1 0h1m1 0h1m1 0h2m-32 1h1m5 0h1m4 0h3m3 0h2m4 0h2m3 0h5m-33 1h1m1 0h3m1 0h1m3 0h3m3 0h5m1 0h1m1 0h6m1 0h1m-32 1h1m1 0h3m1 0h1m2 0h2m1 0h1m1 0h3m2 0h7m1 0h4m1 0h1m-33 1h1m1 0h3m1 0h1m3 0h2m2 0h2m1 0h1m1 0h2m2 0h1m1 0h1m1 0h6m-33 1h1m5 0h1m1 0h2m2 0h1m3 0h4m2 0h1m4 0h4m-31 1h7m3 0h5m2 0h2m3 0h1m1 0h2m1 0h1m3 0h1"/></svg></div>
+    <div class="close-links">
+      <div class="small">Browse the measurements: <span class="mono" style="color:var(--bright)">thierrypdamiba.github.io/mcp-mirror</span></div>
+      <div class="small" style="margin-top:1.4vh">Fixtures, captures, and the MCP server: <span class="mono" style="color:var(--bright)">github.com/thierrypdamiba/mcp-mirror</span></div>
+      <div class="small" style="margin-top:2.2vh">If this is useful to you, a star helps.</div>
+    </div>
+  </div>
 </section>
 
 </main>
