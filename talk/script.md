@@ -512,6 +512,10 @@ Also ask:
 
 The tool can be in every castle. Check what survived the journey.
 
+Everything behind this talk is on GitHub: the test server, the captures, the
+published data, and the mcp-mirror MCP server you just watched me query. The
+link is on the slide.
+
 Thank you.
 
 ---

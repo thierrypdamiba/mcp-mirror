@@ -16,7 +16,7 @@ dist/
 node_modules/
 
 # Generated compatibility-site output (`npm run build`)
-docs/
+# docs/ is published to GitHub Pages
 
 # mcp-mirror run artifacts
 baseline.json
