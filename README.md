@@ -2,6 +2,12 @@
 
 > An open compatibility tracker and deterministic scanner for the Model Context Protocol across agent frameworks.
 
+- **Live site**: <https://thierrypdamiba.github.io/mcp-mirror>
+- **Talk deck**: <https://thierrypdamiba.github.io/mcp-mirror/talk/>. "Your Tool
+  Is in Another Castle", from MCP Community Connect at GitHub in San Francisco,
+  on why MCP's `isError` failure signal does not survive the framework adapter
+  boundary. Arrow keys advance the 39 slides.
+
 MCP defines three server primitives, a set of client features, and a base
 protocol of transports, notifications and authorization. An agent framework
 adapts some part of that into its own objects. `mcp-mirror` records the source
@@ -307,7 +313,10 @@ snapshot selector.
 The site uses React 19, HeroUI v3, Tailwind CSS 4, and Vite. The production build
 is written to `docs/` for static hosting. The build also inlines the compiled
 CSS, JavaScript, and support data into `docs/standalone.html`, which opens
-directly from `file://` without a server.
+directly from `file://` without a server. Because the Vite build empties
+`docs/`, `scripts/publish_deck.mjs` republishes `talk/deck.html` to
+`docs/talk/index.html` on every run rather than leaving a copy the next build
+would delete.
 
 ```bash
 npm install
