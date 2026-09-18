@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -29,6 +30,23 @@ from mcp_mirror.source import SourceConnectionError, load_source, parse_server
 ROOT = Path(__file__).resolve().parents[1]
 HTTP_FIXTURE = ROOT / "fixtures" / "http_server.py"
 RUNNER = CliRunner()
+
+_ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*m")
+_RICH_BOX = re.compile(r"[\u2500\u2502\u256d\u256e\u256f\u2570]+")
+
+
+def _plain(text: str) -> str:
+    """Return CLI text with rich's presentation removed.
+
+    Typer forces rich to colorize whenever ``GITHUB_ACTIONS`` is set, so the
+    same error reads as ``--baseline`` locally and as
+    ``\\x1b[1m-\\x1b[0m\\x1b[1m-baseline\\x1b[0m`` under CI, and long messages
+    additionally wrap inside a box. Assertions here are about the words a
+    reader sees, so compare against styling-free, single-spaced text.
+    """
+    without_style = _ANSI_ESCAPE.sub("", text)
+    without_box = _RICH_BOX.sub(" ", without_style)
+    return " ".join(without_box.split())
 
 
 def _unused_port() -> int:
@@ -98,7 +116,7 @@ def test_cli_returns_2_for_connection_failure(monkeypatch):
     result = RUNNER.invoke(app, ["scan", "missing-command"])
 
     assert result.exit_code == 2
-    assert "connection/handshake error" in result.stderr
+    assert "connection/handshake error" in _plain(result.stderr)
 
 
 def test_cli_rejects_malformed_headers_before_connecting(monkeypatch):
@@ -121,7 +139,7 @@ def test_cli_rejects_malformed_headers_before_connecting(monkeypatch):
     )
 
     assert result.exit_code == 2
-    assert "Name: Value" in result.stderr
+    assert "Name: Value" in _plain(result.stderr)
     assert connected is False
 
 
@@ -153,8 +171,8 @@ def test_cli_rejects_an_unset_header_environment_variable(
     )
 
     assert result.exit_code == 2
-    assert "MCP_MIRROR_MISSING_TOKEN" in result.stderr
-    assert "not set" in result.stderr
+    assert "MCP_MIRROR_MISSING_TOKEN" in _plain(result.stderr)
+    assert "not set" in _plain(result.stderr)
     assert connected is False
 
 
@@ -178,7 +196,7 @@ def test_cli_rejects_ci_drift_flag_without_a_baseline(monkeypatch):
     )
 
     assert result.exit_code == 2
-    assert "--fail-on-drift requires --baseline" in result.stderr
+    assert "--fail-on-drift requires --baseline" in _plain(result.stderr)
     assert connected is False
 
 
@@ -198,7 +216,7 @@ def test_cli_returns_3_for_spec_version_mismatch(monkeypatch):
     )
 
     assert result.exit_code == 3
-    assert "spec-version assertion failed" in result.stderr
+    assert "spec-version assertion failed" in _plain(result.stderr)
 
 
 def test_cli_returns_3_when_renderer_negotiates_another_spec(monkeypatch):
@@ -233,7 +251,7 @@ def test_cli_returns_3_when_renderer_negotiates_another_spec(monkeypatch):
     result = RUNNER.invoke(app, ["scan", "unused-command"])
 
     assert result.exit_code == 3
-    assert "renderer spec-version mismatch" in result.stderr
+    assert "renderer spec-version mismatch" in _plain(result.stderr)
 
 
 def test_cli_writes_protocol_mismatch_evidence_before_exiting(
@@ -535,7 +553,7 @@ def test_cli_redacts_header_secrets_from_adapter_errors(monkeypatch):
     )
 
     assert result.exit_code == 0
-    rendered = f"{result.stdout}\n{result.stderr}"
+    rendered = _plain(f"{result.stdout}\n{result.stderr}")
     assert "leaked-secret" not in rendered
     assert "<redacted>" in rendered
 
