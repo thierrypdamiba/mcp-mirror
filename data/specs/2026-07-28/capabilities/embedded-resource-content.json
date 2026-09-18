@@ -52,7 +52,7 @@
   ],
   "known_issues": [],
   "why": "The URI and MIME type are what let a caller cite, cache or re-read the content. Stripping them to the inner text leaves the agent holding data it cannot attribute to a source.",
-  "reproduce": "python scripts/measure_results.py",
+  "reproduce": "uv run python scripts/measure_results.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

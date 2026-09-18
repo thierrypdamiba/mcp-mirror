@@ -49,7 +49,7 @@
   ],
   "known_issues": [],
   "why": "Every tool-definition row in this table is inert if the adapter never reaches this call. This is the floor of MCP support: a framework that renders a tool definition but cannot invoke it has integrated a catalogue, not a protocol.",
-  "reproduce": "python scripts/measure_results.py",
+  "reproduce": "uv run python scripts/measure_results.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

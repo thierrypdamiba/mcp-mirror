@@ -63,7 +63,7 @@
     ]
   },
   "why": "If passed downstream, injected text spends context tokens and can steer a model in ways the tool author did not write.",
-  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J4",
+  "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J4",
   "measured": {
     "run_date": "2026-09-04",
     "mcp_spec": "2025-11-25",

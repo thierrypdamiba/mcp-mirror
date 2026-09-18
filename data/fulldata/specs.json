@@ -6,7 +6,7 @@
       "id": "2026-07-28",
       "label": "MCP 2026-07-28",
       "file": "data-2026-07-28.json",
-      "updated": "2026-09-06",
+      "updated": "2026-09-18",
       "measured_frameworks": 2,
       "total_frameworks": 5,
       "coverage": {
@@ -78,7 +78,7 @@
       "id": "2025-11-25",
       "label": "MCP 2025-11-25",
       "file": "data-2025-11-25.json",
-      "updated": "2026-09-04",
+      "updated": "2026-09-18",
       "measured_frameworks": 5,
       "total_frameworks": 5,
       "coverage": {

@@ -52,7 +52,7 @@
   ],
   "known_issues": [],
   "why": "Annotations are how a server says who a piece of content is for and how much it matters. A client that drops them cannot filter assistant-only content out of a user view, cannot prioritise what to keep when context runs short, and cannot sort by recency.",
-  "reproduce": "python scripts/measure_results.py",
+  "reproduce": "uv run python scripts/measure_results.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

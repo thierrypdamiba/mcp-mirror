@@ -51,7 +51,7 @@
   ],
   "known_issues": [],
   "why": "Icons are the one part of a tool definition aimed at a human rather than a model. A framework that drops them removes the server's only way to identify its tools visually in any UI built on top of the adapter.",
-  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5 --spec-version 2026-07-28",
+  "reproduce": "uv run mcp-mirror scan \"python fixtures/tricky_server.py\" --runner managed --frameworks openai_agents,pydantic_ai --spec-version 2026-07-28 --job J5",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

@@ -52,7 +52,7 @@
   ],
   "known_issues": [],
   "why": "Resource links are how a large result stays out of the context window until something asks for it. A framework that flattens the link to text keeps the URI as prose and loses the ability to fetch what it points at.",
-  "reproduce": "python scripts/measure_results.py",
+  "reproduce": "uv run python scripts/measure_results.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

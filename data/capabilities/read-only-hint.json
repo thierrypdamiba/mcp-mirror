@@ -55,7 +55,7 @@
   ],
   "known_issues": [],
   "why": "A downstream consumer relying only on the captured tool definition cannot use this structured hint to distinguish a safe read from a risky write.",
-  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+  "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J5",
   "measured": {
     "run_date": "2026-09-04",
     "mcp_spec": "2025-11-25",

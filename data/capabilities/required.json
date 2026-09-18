@@ -49,7 +49,7 @@
   ],
   "known_issues": [],
   "why": "If the required list shrank, a downstream model could omit parameters your server depends on.",
-  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+  "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J2",
   "measured": {
     "run_date": "2026-09-04",
     "mcp_spec": "2025-11-25",

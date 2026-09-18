@@ -49,7 +49,7 @@
   ],
   "known_issues": [],
   "why": "This is the one content type every framework is expected to handle, so it is the control row: the other content types can only be read as losses against a text block that survives.",
-  "reproduce": "python scripts/measure_results.py",
+  "reproduce": "uv run python scripts/measure_results.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

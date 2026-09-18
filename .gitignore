@@ -8,6 +8,8 @@ dist/
 
 # Virtual env / tooling
 .venv/
+# Fixture interpreters built on demand by scripts/measure_results.py
+.mcp-mirror/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
@@ -21,3 +23,7 @@ node_modules/
 # mcp-mirror run artifacts
 baseline.json
 report.json
+# Published snapshot evidence, not a scratch run. The bare rule above matched it by
+# name and kept it out of the repository, so a fresh clone was missing the report
+# tests/test_spec_snapshots.py reads.
+!data/specs/*/report.json

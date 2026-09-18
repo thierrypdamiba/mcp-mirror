@@ -49,7 +49,7 @@
   ],
   "known_issues": [],
   "why": "A prompt is only useful once it is expanded. This row is where a framework either produces messages in its own conversation format or hands back a structure the caller has to translate by hand.",
-  "reproduce": "python scripts/probe_surface.py",
+  "reproduce": "uv run python scripts/probe_surface.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

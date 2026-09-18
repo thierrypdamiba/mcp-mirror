@@ -49,7 +49,7 @@
   ],
   "known_issues": [],
   "why": "Text and binary contents are different fields, not different encodings of one field. A framework that assumes `text` either drops binary resources or turns them into mojibake, and both failures look like a successful read.",
-  "reproduce": "python scripts/probe_surface.py",
+  "reproduce": "uv run python scripts/probe_surface.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

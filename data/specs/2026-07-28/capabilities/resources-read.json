@@ -50,7 +50,7 @@
   ],
   "known_issues": [],
   "why": "Listing resources without reading them is a catalogue with no way to open anything. This row is where the primitive becomes usable, and it is also where a framework that returns only the first of several contents starts losing data.",
-  "reproduce": "python scripts/probe_surface.py",
+  "reproduce": "uv run python scripts/probe_surface.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

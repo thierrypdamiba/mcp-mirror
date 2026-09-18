@@ -1,6 +1,6 @@
 {
   "schema": "mcp-mirror/data@1.0",
-  "updated": "2026-09-04",
+  "updated": "2026-09-18",
   "mcp_spec": "2025-11-25",
   "repo": "https://github.com/thierrypdamiba/mcp-mirror",
   "eras": {
@@ -9,7 +9,26 @@
     "e-1": "1 release(s) before current",
     "e0": "current release",
     "e1": "1 release(s) after current",
-    "e2": "2 release(s) after current"
+    "e2": "2 release(s) after current",
+    "e3": "3 release(s) after current",
+    "e4": "4 release(s) after current",
+    "e5": "5 release(s) after current",
+    "e6": "6 release(s) after current",
+    "e7": "7 release(s) after current",
+    "e8": "8 release(s) after current",
+    "e9": "9 release(s) after current",
+    "e10": "10 release(s) after current",
+    "e11": "11 release(s) after current",
+    "e12": "12 release(s) after current",
+    "e13": "13 release(s) after current",
+    "e14": "14 release(s) after current",
+    "e15": "15 release(s) after current",
+    "e16": "16 release(s) after current",
+    "e17": "17 release(s) after current",
+    "e18": "18 release(s) after current",
+    "e19": "19 release(s) after current",
+    "e20": "20 release(s) after current",
+    "e21": "21 release(s) after current"
   },
   "agents": {
     "crewai": {
@@ -46,7 +65,7 @@
         }
       ],
       "current_version": "1.15.1",
-      "stable_version": "1.15.3",
+      "stable_version": "1.15.22",
       "dev_version": null,
       "version_list": [
         {
@@ -84,6 +103,120 @@
           "release_date": "2026-07-16T19:43:55Z",
           "era": 2,
           "release_date_unix": 1784231035
+        },
+        {
+          "version": "1.15.4",
+          "release_date": "2026-07-17T14:34:29Z",
+          "era": 3,
+          "release_date_unix": 1784298869
+        },
+        {
+          "version": "1.15.5",
+          "release_date": "2026-07-20T16:34:24Z",
+          "era": 4,
+          "release_date_unix": 1784565264
+        },
+        {
+          "version": "1.15.6",
+          "release_date": "2026-07-24T20:31:27Z",
+          "era": 5,
+          "release_date_unix": 1784925087
+        },
+        {
+          "version": "1.15.7",
+          "release_date": "2026-07-26T18:20:51Z",
+          "era": 6,
+          "release_date_unix": 1785090051
+        },
+        {
+          "version": "1.15.8",
+          "release_date": "2026-07-28T15:07:13Z",
+          "era": 7,
+          "release_date_unix": 1785251233
+        },
+        {
+          "version": "1.15.9",
+          "release_date": "2026-07-30T05:46:28Z",
+          "era": 8,
+          "release_date_unix": 1785390388
+        },
+        {
+          "version": "1.15.10",
+          "release_date": "2026-07-31T14:58:33Z",
+          "era": 9,
+          "release_date_unix": 1785509913
+        },
+        {
+          "version": "1.15.11",
+          "release_date": "2026-08-05T06:30:52Z",
+          "era": 10,
+          "release_date_unix": 1785911452
+        },
+        {
+          "version": "1.15.12",
+          "release_date": "2026-08-05T22:57:17Z",
+          "era": 11,
+          "release_date_unix": 1785970637
+        },
+        {
+          "version": "1.15.13",
+          "release_date": "2026-08-07T21:14:16Z",
+          "era": 12,
+          "release_date_unix": 1786137256
+        },
+        {
+          "version": "1.15.14",
+          "release_date": "2026-08-08T22:58:41Z",
+          "era": 13,
+          "release_date_unix": 1786229921
+        },
+        {
+          "version": "1.15.15",
+          "release_date": "2026-08-12T01:28:18Z",
+          "era": 14,
+          "release_date_unix": 1786498098
+        },
+        {
+          "version": "1.15.16",
+          "release_date": "2026-08-14T00:09:03Z",
+          "era": 15,
+          "release_date_unix": 1786666143
+        },
+        {
+          "version": "1.15.17",
+          "release_date": "2026-08-20T00:28:21Z",
+          "era": 16,
+          "release_date_unix": 1787185701
+        },
+        {
+          "version": "1.15.18",
+          "release_date": "2026-08-27T18:11:59Z",
+          "era": 17,
+          "release_date_unix": 1787854319
+        },
+        {
+          "version": "1.15.19",
+          "release_date": "2026-09-04T11:29:24Z",
+          "era": 18,
+          "release_date_unix": 1788521364
+        },
+        {
+          "version": "1.15.20",
+          "release_date": "2026-09-04T12:43:07Z",
+          "era": 19,
+          "release_date_unix": 1788525787
+        },
+        {
+          "version": "1.15.21",
+          "release_date": "2026-09-09T22:55:04Z",
+          "era": 20,
+          "release_date_unix": 1788994504
+        },
+        {
+          "version": "1.15.22",
+          "release_date": "2026-09-16T22:10:51Z",
+          "era": 21,
+          "release_date_unix": 1789596651
         }
       ]
     },
@@ -184,7 +317,7 @@
         }
       ],
       "current_version": "0.22.0",
-      "stable_version": "0.22.2",
+      "stable_version": "0.22.3",
       "dev_version": null,
       "version_list": [
         {
@@ -222,6 +355,12 @@
           "release_date": "2026-09-09T12:37:23Z",
           "era": 2,
           "release_date_unix": 1788957443
+        },
+        {
+          "version": "0.22.3",
+          "release_date": "2026-09-17T22:20:42Z",
+          "era": 3,
+          "release_date_unix": 1789683642
         }
       ]
     },
@@ -259,7 +398,7 @@
         }
       ],
       "current_version": "2.40.0",
-      "stable_version": "2.42.0",
+      "stable_version": "2.45.0",
       "dev_version": null,
       "version_list": [
         {
@@ -297,6 +436,24 @@
           "release_date": "2026-09-09T03:48:43Z",
           "era": 2,
           "release_date_unix": 1788925723
+        },
+        {
+          "version": "2.43.0",
+          "release_date": "2026-09-12T01:05:30Z",
+          "era": 3,
+          "release_date_unix": 1789175130
+        },
+        {
+          "version": "2.44.0",
+          "release_date": "2026-09-17T04:11:23Z",
+          "era": 4,
+          "release_date_unix": 1789618283
+        },
+        {
+          "version": "2.45.0",
+          "release_date": "2026-09-18T04:50:07Z",
+          "era": 5,
+          "release_date_unix": 1789707007
         }
       ]
     },
@@ -335,7 +492,7 @@
         }
       ],
       "current_version": "1.17.3",
-      "stable_version": "1.17.3",
+      "stable_version": "1.18.0",
       "dev_version": null,
       "version_list": [
         {
@@ -361,6 +518,12 @@
           "release_date": "2026-09-03T04:14:30Z",
           "era": 0,
           "release_date_unix": 1788408870
+        },
+        {
+          "version": "1.18.0",
+          "release_date": "2026-09-15T09:12:29Z",
+          "era": 1,
+          "release_date_unix": 1789463549
         }
       ]
     }
@@ -890,7 +1053,7 @@
         "A changed policy can make a downstream caller reject valid extension keys or send keys the server rejects."
       ],
       "why": "Object openness is part of the parameter contract. Changing it can alter which calls validate before they reach the server.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2,J3",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J2,J3",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -954,7 +1117,7 @@
       ],
       "known_issues": [],
       "why": "Item schema loss can let a downstream model produce malformed list entries.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J3",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1016,7 +1179,7 @@
         "A changed default can cause a caller and server to assume different behavior for the same omitted argument."
       ],
       "why": "Defaults communicate omission behavior. Losing or changing one can alter calls without changing the visible parameter type.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J2",
       "measured": {
         "run_date": "2026-09-14",
         "mcp_spec": "2025-11-25",
@@ -1094,7 +1257,7 @@
         ]
       },
       "why": "If passed downstream, injected text spends context tokens and can steer a model in ways the tool author did not write.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J4",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J4",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1186,7 +1349,7 @@
         ]
       },
       "why": "A guardrail reading only the captured tool definition receives no structured destructive signal. Two frameworks still hold the value where an application policy layer can read it; three do not. This measurement does not claim what a later provider request contains.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J5",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1252,7 +1415,7 @@
       ],
       "known_issues": [],
       "why": "If it were lost, a downstream model could pass values your server rejects, producing a failed call the agent must recover from.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J2",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1318,7 +1481,7 @@
       ],
       "known_issues": [],
       "why": "Losing it can allow malformed emails, timestamps, or URIs to reach your server.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J2",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1388,7 +1551,7 @@
       ],
       "known_issues": [],
       "why": "Retry behavior relying only on the captured tool definition has no structured idempotency signal to key on.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J5",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1454,7 +1617,7 @@
       ],
       "known_issues": [],
       "why": "Silent truncation would remove exactly the caveats authors tend to put at the end of a description.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J1",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J1",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1520,7 +1683,7 @@
       ],
       "known_issues": [],
       "why": "If nested structure were flattened or dropped, complex calls would silently degrade.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J3",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1584,7 +1747,7 @@
         "A server may reject explicit null even when omission is valid, creating avoidable validation failures."
       ],
       "why": "Optional and nullable are different contracts. Conflating them lets a downstream caller express values the source never accepted.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J2",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1650,7 +1813,7 @@
       ],
       "known_issues": [],
       "why": "Without bounds a downstream model may request out-of-range values.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J2",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1716,7 +1879,7 @@
       ],
       "known_issues": [],
       "why": "Collapse would silently narrow what the agent is able to express.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J3",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J3",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1786,7 +1949,7 @@
       ],
       "known_issues": [],
       "why": "The captured tool definitions contain no structured signal that a call escapes the local system.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J5",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1851,7 +2014,7 @@
         "A retained type without its property description can still leave a model unable to choose the intended value."
       ],
       "why": "Property descriptions carry the author's parameter-level intent. Losing them can make a structurally valid tool call semantically wrong.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J2",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1921,7 +2084,7 @@
       ],
       "known_issues": [],
       "why": "A downstream consumer relying only on the captured tool definition cannot use this structured hint to distinguish a safe read from a risky write.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J5",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -1985,7 +2148,7 @@
       ],
       "known_issues": [],
       "why": "If the required list shrank, a downstream model could omit parameters your server depends on.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J2",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -2055,7 +2218,7 @@
       ],
       "known_issues": [],
       "why": "Low stakes. Included for completeness rather than concern.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J5",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",
@@ -2121,7 +2284,7 @@
       ],
       "known_issues": [],
       "why": "Icons are the one part of a tool definition aimed at a human rather than a model. A framework that drops them removes the server's only way to identify its tools visually in any UI built on top of the adapter.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J5",
       "measured": {
         "run_date": "2026-09-11",
         "mcp_spec": "2025-11-25",
@@ -2192,7 +2355,7 @@
         "A prefixed name changes between server configurations, so a hard coded allowlist can silently stop matching."
       ],
       "why": "Name based routing, allowlists, and eval fixtures that match exact tool names break under prefixing.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J1",
+      "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J1",
       "measured": {
         "run_date": "2026-09-04",
         "mcp_spec": "2025-11-25",

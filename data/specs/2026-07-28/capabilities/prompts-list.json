@@ -49,7 +49,7 @@
   ],
   "known_issues": [],
   "why": "Prompts are the user-controlled primitive: the slash commands and menu entries a server contributes to the host. A framework that ignores them silently discards a third of what the server publishes, and the omission is invisible because nothing errors.",
-  "reproduce": "python scripts/probe_surface.py",
+  "reproduce": "uv run python scripts/probe_surface.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

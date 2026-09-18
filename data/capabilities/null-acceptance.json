@@ -49,7 +49,7 @@
     "A server may reject explicit null even when omission is valid, creating avoidable validation failures."
   ],
   "why": "Optional and nullable are different contracts. Conflating them lets a downstream caller express values the source never accepted.",
-  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+  "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J2",
   "measured": {
     "run_date": "2026-09-04",
     "mcp_spec": "2025-11-25",

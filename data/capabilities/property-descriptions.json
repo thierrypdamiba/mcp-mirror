@@ -50,7 +50,7 @@
     "A retained type without its property description can still leave a model unable to choose the intended value."
   ],
   "why": "Property descriptions carry the author's parameter-level intent. Losing them can make a structurally valid tool call semantically wrong.",
-  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J2",
+  "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J2",
   "measured": {
     "run_date": "2026-09-04",
     "mcp_spec": "2025-11-25",

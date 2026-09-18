@@ -4,7 +4,7 @@ The scan pipeline diffs tool *definitions*. This drives the same managed runner
 environments to diff tool *results*, which is a second capture per renderer and needs
 the pinned framework versions rather than whatever happens to be in the local venv.
 
-    python scripts/measure_results.py
+    uv run python scripts/measure_results.py
 
 Prints one section per tool call: the source result, each adapter's rendering, and the
 differences between them.
@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -25,13 +26,55 @@ sys.path.insert(0, str(ROOT / "src"))
 from mcp_mirror.cli import _managed_import_root  # noqa: E402
 from mcp_mirror.diff import diff_result  # noqa: E402
 from mcp_mirror.models import ResultRep  # noqa: E402
-from mcp_mirror.runner_manifests import build_managed_worker_command  # noqa: E402
+from mcp_mirror.runner_manifests import (  # noqa: E402
+    build_managed_worker_command,
+    managed_source_profile,
+)
 
 # The fixture must speak the same revision as the adapters under test. 2026-07-28 needs
-# MCP SDK 2.x, which is not what the project venv is pinned to, so that run supplies its
-# own interpreter. Pointing both variables at the 1.26 venv measures 2025-11-25 instead,
-# where all five adapters can negotiate.
-FIXTURE_PYTHON = os.environ.get("MCP_MIRROR_FIXTURE_PYTHON", "/tmp/fixture-v2/bin/python")
+# MCP SDK 2.x, which is not what the project venv is pinned to, so that run gets its own
+# interpreter, built here from the same profile the managed source connection uses.
+# Pointing MCP_MIRROR_FIXTURE_PYTHON at the 1.26 venv measures 2025-11-25 instead, where
+# all five adapters can negotiate; scripts/measure_2025_results.py does exactly that.
+FIXTURE_SPEC = os.environ.get("MCP_MIRROR_FIXTURE_SPEC", "2026-07-28")
+FIXTURE_VENV = ROOT / ".mcp-mirror" / f"fixture-{FIXTURE_SPEC}"
+
+
+def fixture_python() -> str:
+    """Locate the fixture interpreter, building it on first use.
+
+    The alternative is a path the caller has to create by hand, which is a setup step
+    nothing in the repository performs and nothing checks, so it rots silently.
+    """
+
+    override = os.environ.get("MCP_MIRROR_FIXTURE_PYTHON")
+    if override:
+        return override
+
+    executable = FIXTURE_VENV / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+    if executable.exists():
+        return str(executable)
+
+    uv = shutil.which("uv")
+    if not uv:
+        raise SystemExit(
+            "building the fixture environment requires uv: https://docs.astral.sh/uv/\n"
+            "Set MCP_MIRROR_FIXTURE_PYTHON to an interpreter with the MCP SDK instead."
+        )
+    profile = managed_source_profile(FIXTURE_SPEC)
+    print(f"building the {FIXTURE_SPEC} fixture environment in {FIXTURE_VENV} ...")
+    subprocess.run(
+        [uv, "venv", "--python", str(profile["python"]), str(FIXTURE_VENV)],
+        check=True,
+    )
+    subprocess.run(
+        [uv, "pip", "install", "--python", str(executable), *profile["packages"]],
+        check=True,
+    )
+    return str(executable)
+
+
+FIXTURE_PYTHON = fixture_python()
 SERVER = f"{FIXTURE_PYTHON} fixtures/tricky_server.py"
 
 LIVE_RENDERERS = (

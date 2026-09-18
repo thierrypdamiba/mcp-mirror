@@ -58,7 +58,7 @@
     "Three framework adapters could not be measured against 2026-07-28, so missing evidence is not a support result."
   ],
   "why": "Retry behavior relying only on the captured tool definition has no structured idempotency signal to key on.",
-  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5 --spec-version 2026-07-28",
+  "reproduce": "uv run mcp-mirror scan \"python fixtures/tricky_server.py\" --runner managed --frameworks openai_agents,pydantic_ai --spec-version 2026-07-28 --job J5",
   "measured": {
     "run_date": "2026-09-06",
     "mcp_spec": "2026-07-28",

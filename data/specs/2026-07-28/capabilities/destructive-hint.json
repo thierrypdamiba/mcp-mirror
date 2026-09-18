@@ -65,19 +65,19 @@
     "before_label": "server sends (tools/list)",
     "before": [
       "{ \"name\": \"delete_account\",",
-      "  \"description\": \"Permanently deletes an account…\",",
+      "  \"description\": \"Permanently deletes an account\u2026\",",
       "  \"annotations\": { \"destructiveHint\": true } }"
     ],
     "after_label": "captured definition (both measured frameworks)",
     "after": [
       "{ \"name\": \"delete_account\",",
-      "  \"description\": \"Permanently deletes an account…\",",
-      "  \"parameters\": { … } }",
+      "  \"description\": \"Permanently deletes an account\u2026\",",
+      "  \"parameters\": { \u2026 } }",
       ": no annotations field exists in this format"
     ]
   },
   "why": "A guardrail reading only either measured capture object receives no structured destructive signal. Pydantic AI still holds the value where an application policy layer can read it; OpenAI Agents SDK does not. This measurement does not claim what a later provider request contains.",
-  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5 --spec-version 2026-07-28",
+  "reproduce": "uv run mcp-mirror scan \"python fixtures/tricky_server.py\" --runner managed --frameworks openai_agents,pydantic_ai --spec-version 2026-07-28 --job J5",
   "measured": {
     "run_date": "2026-09-06",
     "mcp_spec": "2026-07-28",

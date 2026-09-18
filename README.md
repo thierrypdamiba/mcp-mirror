@@ -36,7 +36,7 @@ framework docs, and CI checks can consume it directly.
 
 ## Read a result
 
-Every framework-version cell has one of four factual states:
+Every framework-version cell has one of five factual states:
 
 - **Present at the capture boundary**: the value survives in the exact adapted
   tool definition named by that framework's measurement.
@@ -91,18 +91,32 @@ boundary, not the final bytes sent to OpenAI, Anthropic, or another provider.
 
 ## Install
 
+`mcp-mirror` is not published to PyPI, so it runs from a source checkout.
+`uv run` builds the environment on first use, which is why every reproduce
+command the site publishes starts with it. Later examples name the bare
+`mcp-mirror` command; prefix them the same way unless the project environment
+is already active.
+
 ```bash
-pip install mcp-mirror
-pip install "mcp-mirror[langchain]"
-pip install "mcp-mirror[pydantic-ai]"
-pip install "mcp-mirror[crewai]"
-pip install "mcp-mirror[openai-agents]"
+git clone https://github.com/thierrypdamiba/mcp-mirror
+cd mcp-mirror
+
+uv run mcp-mirror version               # base install, no renderers
+uv run --extra all mcp-mirror version   # every renderer
+uv run --extra langchain mcp-mirror version
+uv run --extra pydantic-ai mcp-mirror version
+uv run --extra crewai mcp-mirror version
+uv run --extra openai-agents mcp-mirror version
 ```
 
 Renderers are optional so a scan installs only the frameworks it needs.
-Python 3.11 or newer is required. Run `mcp-mirror frameworks` for the exact
-setup command for every missing renderer. Install framework extras separately
-when their MCP SDK constraints conflict.
+Python 3.11 or newer is required. Run `uv run mcp-mirror frameworks` for the
+exact setup command for every missing renderer. Install framework extras
+separately when their MCP SDK constraints conflict.
+
+`--runner managed` needs none of these extras: it reads
+`runner-manifests.json` and builds one pinned environment per adapter, which is
+why the published reproduce commands use it rather than a local install.
 
 Mastra is a TypeScript framework. Its renderer drives the real `@mastra/mcp`
 client through the included Node worker:
@@ -255,7 +269,11 @@ unmeasured in the 2026 snapshot.
 
 The saved same-protocol report can be reproduced without changing the locked
 2025 development environment. Failed same-protocol attempts are recorded in
-`data/specs/2026-07-28/attempts.json`.
+`data/specs/2026-07-28/attempts.json`. That saved report was written before the
+`@2` schema and the per-run manifest digest existed, so it carries neither; a
+report generated today does. Re-running the scan would rewrite it, which is a
+re-measurement rather than a formatting change, so the stale artifact is left
+as the record of what that run actually produced.
 
 ```bash
 PYTHONPATH="$PWD/src" uv run --isolated --no-project \

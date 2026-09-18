@@ -5,7 +5,7 @@ measured by diffing a tool definition: the question is whether the adapter offer
 agent any route to them at all. That is answered by inspecting the adapter's own API in
 the version the snapshot pins, which is what this does.
 
-    python scripts/probe_surface.py
+    uv run python scripts/probe_surface.py
 """
 
 from __future__ import annotations

@@ -77,7 +77,7 @@
     ]
   },
   "why": "A guardrail reading only the captured tool definition receives no structured destructive signal. Two frameworks still hold the value where an application policy layer can read it; three do not. This measurement does not claim what a later provider request contains.",
-  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J5",
+  "reproduce": "uv run mcp-mirror scan \"uv run python fixtures/tricky_server.py\" --runner managed --frameworks crewai,langchain,openai_agents,pydantic_ai --spec-version 2025-11-25 --job J5",
   "measured": {
     "run_date": "2026-09-04",
     "mcp_spec": "2025-11-25",

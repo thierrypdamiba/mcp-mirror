@@ -55,7 +55,7 @@
     "A prefixed name changes between server configurations, so a hard coded allowlist can silently stop matching."
   ],
   "why": "Name based routing, allowlists, and eval fixtures that match exact tool names break under prefixing.",
-  "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J1 --spec-version 2026-07-28",
+  "reproduce": "uv run mcp-mirror scan \"python fixtures/tricky_server.py\" --runner managed --frameworks openai_agents,pydantic_ai --spec-version 2026-07-28 --job J1",
   "measured": {
     "run_date": "2026-09-06",
     "mcp_spec": "2026-07-28",

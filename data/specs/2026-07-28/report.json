@@ -1,0 +1,417 @@
+{
+  "mcp_server": "python fixtures/tricky_server.py",
+  "mcp_spec_version": "2026-07-28",
+  "mcp_spec_version_evidence": "direct source connection server/discover result",
+  "generated_with": "mcp-mirror/0.1.0",
+  "tools": [
+    "search_records",
+    "create_report",
+    "deliver_payload",
+    "delete_account",
+    "explain_topic"
+  ],
+  "runs": [
+    {
+      "framework": "pydantic_ai",
+      "framework_version": "2.40.0",
+      "adapter_version": "2.40.0",
+      "evidence": {
+        "capture_api": "pydantic_ai.mcp.MCPToolset.get_tools",
+        "capture_object": "pydantic_ai.tools.ToolDefinition",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2026-07-28",
+        "protocol_version_evidence": "protocol version exposed by MCPToolset.client",
+        "limitation": "No Pydantic AI model adapter or serialized provider request was captured."
+      },
+      "differences": [
+        {
+          "tool": "search_records",
+          "framework": "pydantic_ai",
+          "path": "annotations.title",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'title' retained in framework metadata but absent from the captured tool definition",
+          "source_value": "Search records",
+          "rendered_value": "Search records"
+        },
+        {
+          "tool": "search_records",
+          "framework": "pydantic_ai",
+          "path": "annotations.readOnlyHint",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'readOnlyHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "source_value": true,
+          "rendered_value": true
+        },
+        {
+          "tool": "create_report",
+          "framework": "pydantic_ai",
+          "path": "annotations.title",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'title' retained in framework metadata but absent from the captured tool definition",
+          "source_value": "Create report",
+          "rendered_value": "Create report"
+        },
+        {
+          "tool": "deliver_payload",
+          "framework": "pydantic_ai",
+          "path": "annotations.title",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'title' retained in framework metadata but absent from the captured tool definition",
+          "source_value": "Deliver payload",
+          "rendered_value": "Deliver payload"
+        },
+        {
+          "tool": "deliver_payload",
+          "framework": "pydantic_ai",
+          "path": "annotations.idempotentHint",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'idempotentHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "source_value": false,
+          "rendered_value": false
+        },
+        {
+          "tool": "delete_account",
+          "framework": "pydantic_ai",
+          "path": "annotations.title",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'title' retained in framework metadata but absent from the captured tool definition",
+          "source_value": "Delete account",
+          "rendered_value": "Delete account"
+        },
+        {
+          "tool": "delete_account",
+          "framework": "pydantic_ai",
+          "path": "annotations.readOnlyHint",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'readOnlyHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "source_value": false,
+          "rendered_value": false
+        },
+        {
+          "tool": "delete_account",
+          "framework": "pydantic_ai",
+          "path": "annotations.destructiveHint",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'destructiveHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "source_value": true,
+          "rendered_value": true
+        },
+        {
+          "tool": "delete_account",
+          "framework": "pydantic_ai",
+          "path": "annotations.idempotentHint",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'idempotentHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "source_value": false,
+          "rendered_value": false
+        },
+        {
+          "tool": "delete_account",
+          "framework": "pydantic_ai",
+          "path": "annotations.openWorldHint",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'openWorldHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "source_value": false,
+          "rendered_value": false
+        },
+        {
+          "tool": "explain_topic",
+          "framework": "pydantic_ai",
+          "path": "annotations.title",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'title' retained in framework metadata but absent from the captured tool definition",
+          "source_value": "Explain topic",
+          "rendered_value": "Explain topic"
+        },
+        {
+          "tool": "explain_topic",
+          "framework": "pydantic_ai",
+          "path": "annotations.readOnlyHint",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'readOnlyHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "source_value": true,
+          "rendered_value": true
+        }
+      ]
+    },
+    {
+      "framework": "openai_agents",
+      "framework_version": "0.22.0",
+      "adapter_version": "0.22.0",
+      "evidence": {
+        "capture_api": "agents.mcp.util.MCPUtil.to_function_tool",
+        "capture_object": "agents.tool.FunctionTool",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2026-07-28",
+        "protocol_version_evidence": "protocol version exposed by the MCPServer client session",
+        "limitation": "No Agents SDK model implementation or serialized provider request was captured."
+      },
+      "differences": [
+        {
+          "tool": "search_records",
+          "framework": "openai_agents",
+          "path": "annotations.title",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'title' retained in framework metadata but absent from the captured tool definition",
+          "source_value": "Search records",
+          "rendered_value": "Search records"
+        },
+        {
+          "tool": "search_records",
+          "framework": "openai_agents",
+          "path": "annotations.readOnlyHint",
+          "category": "lossy",
+          "dimension": "annotation",
+          "detail": "annotation 'readOnlyHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "source_value": true,
+          "rendered_value": null
+        },
+        {
+          "tool": "create_report",
+          "framework": "openai_agents",
+          "path": "annotations.title",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'title' retained in framework metadata but absent from the captured tool definition",
+          "source_value": "Create report",
+          "rendered_value": "Create report"
+        },
+        {
+          "tool": "deliver_payload",
+          "framework": "openai_agents",
+          "path": "annotations.title",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'title' retained in framework metadata but absent from the captured tool definition",
+          "source_value": "Deliver payload",
+          "rendered_value": "Deliver payload"
+        },
+        {
+          "tool": "deliver_payload",
+          "framework": "openai_agents",
+          "path": "annotations.idempotentHint",
+          "category": "lossy",
+          "dimension": "annotation",
+          "detail": "annotation 'idempotentHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "source_value": false,
+          "rendered_value": null
+        },
+        {
+          "tool": "delete_account",
+          "framework": "openai_agents",
+          "path": "annotations.title",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'title' retained in framework metadata but absent from the captured tool definition",
+          "source_value": "Delete account",
+          "rendered_value": "Delete account"
+        },
+        {
+          "tool": "delete_account",
+          "framework": "openai_agents",
+          "path": "annotations.readOnlyHint",
+          "category": "lossy",
+          "dimension": "annotation",
+          "detail": "annotation 'readOnlyHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "source_value": false,
+          "rendered_value": null
+        },
+        {
+          "tool": "delete_account",
+          "framework": "openai_agents",
+          "path": "annotations.destructiveHint",
+          "category": "lossy",
+          "dimension": "annotation",
+          "detail": "annotation 'destructiveHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "source_value": true,
+          "rendered_value": null
+        },
+        {
+          "tool": "delete_account",
+          "framework": "openai_agents",
+          "path": "annotations.idempotentHint",
+          "category": "lossy",
+          "dimension": "annotation",
+          "detail": "annotation 'idempotentHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "source_value": false,
+          "rendered_value": null
+        },
+        {
+          "tool": "delete_account",
+          "framework": "openai_agents",
+          "path": "annotations.openWorldHint",
+          "category": "lossy",
+          "dimension": "annotation",
+          "detail": "annotation 'openWorldHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "source_value": false,
+          "rendered_value": null
+        },
+        {
+          "tool": "explain_topic",
+          "framework": "openai_agents",
+          "path": "annotations.title",
+          "category": "transformative",
+          "dimension": "annotation",
+          "detail": "annotation 'title' retained in framework metadata but absent from the captured tool definition",
+          "source_value": "Explain topic",
+          "rendered_value": "Explain topic"
+        },
+        {
+          "tool": "explain_topic",
+          "framework": "openai_agents",
+          "path": "annotations.readOnlyHint",
+          "category": "lossy",
+          "dimension": "annotation",
+          "detail": "annotation 'readOnlyHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "source_value": true,
+          "rendered_value": null
+        }
+      ]
+    }
+  ],
+  "job_findings": [],
+  "scorecard": {
+    "jobs": [
+      {
+        "id": "J1",
+        "label": "identity",
+        "title": "When a tool is adapted, its name and full description remain in the captured definition so downstream consumers retain its identity and the author's intent."
+      },
+      {
+        "id": "J2",
+        "label": "params",
+        "title": "When a tool is adapted, its parameter contract (types, required, enums, formats) remains intact at the capture boundary."
+      },
+      {
+        "id": "J3",
+        "label": "struct",
+        "title": "When a tool takes nested or structured input, that structure survives adaptation so complex calls do not silently degrade."
+      },
+      {
+        "id": "J4",
+        "label": "inject",
+        "title": "At the capture boundary, a tool carries nothing the author did not write, so framework-injected text and phantom tools stay visible as changes."
+      },
+      {
+        "id": "J5",
+        "label": "authz",
+        "title": "When a tool is adapted, structured danger and scope signals remain at the declared capture boundary or in explicit retained metadata."
+      }
+    ],
+    "frameworks": {
+      "pydantic_ai": {
+        "framework_version": "2.40.0",
+        "adapter_version": "2.40.0",
+        "jobs": {
+          "J1": {
+            "verdict": "faithful",
+            "count": 0,
+            "details": []
+          },
+          "J2": {
+            "verdict": "faithful",
+            "count": 0,
+            "details": []
+          },
+          "J3": {
+            "verdict": "faithful",
+            "count": 0,
+            "details": []
+          },
+          "J4": {
+            "verdict": "faithful",
+            "count": 0,
+            "details": []
+          },
+          "J5": {
+            "verdict": "transformative",
+            "count": 7,
+            "details": [
+              "annotation 'readOnlyHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+              "annotation 'idempotentHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+              "annotation 'readOnlyHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+              "annotation 'destructiveHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+              "annotation 'idempotentHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+              "annotation 'openWorldHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+              "annotation 'readOnlyHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition"
+            ]
+          }
+        },
+        "total_differences": 12,
+        "authz_flags": [
+          "search_records: annotation 'readOnlyHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "deliver_payload: annotation 'idempotentHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "delete_account: annotation 'readOnlyHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "delete_account: annotation 'destructiveHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "delete_account: annotation 'idempotentHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "delete_account: annotation 'openWorldHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition",
+          "explain_topic: annotation 'readOnlyHint' (authorization-relevant) retained in framework metadata but absent from the captured tool definition"
+        ]
+      },
+      "openai_agents": {
+        "framework_version": "0.22.0",
+        "adapter_version": "0.22.0",
+        "jobs": {
+          "J1": {
+            "verdict": "faithful",
+            "count": 0,
+            "details": []
+          },
+          "J2": {
+            "verdict": "faithful",
+            "count": 0,
+            "details": []
+          },
+          "J3": {
+            "verdict": "faithful",
+            "count": 0,
+            "details": []
+          },
+          "J4": {
+            "verdict": "faithful",
+            "count": 0,
+            "details": []
+          },
+          "J5": {
+            "verdict": "lossy",
+            "count": 7,
+            "details": [
+              "annotation 'readOnlyHint' (authorization-relevant) destroyed (not retained by the framework)",
+              "annotation 'idempotentHint' (authorization-relevant) destroyed (not retained by the framework)",
+              "annotation 'readOnlyHint' (authorization-relevant) destroyed (not retained by the framework)",
+              "annotation 'destructiveHint' (authorization-relevant) destroyed (not retained by the framework)",
+              "annotation 'idempotentHint' (authorization-relevant) destroyed (not retained by the framework)",
+              "annotation 'openWorldHint' (authorization-relevant) destroyed (not retained by the framework)",
+              "annotation 'readOnlyHint' (authorization-relevant) destroyed (not retained by the framework)"
+            ]
+          }
+        },
+        "total_differences": 12,
+        "authz_flags": [
+          "search_records: annotation 'readOnlyHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "deliver_payload: annotation 'idempotentHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "delete_account: annotation 'readOnlyHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "delete_account: annotation 'destructiveHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "delete_account: annotation 'idempotentHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "delete_account: annotation 'openWorldHint' (authorization-relevant) destroyed (not retained by the framework)",
+          "explain_topic: annotation 'readOnlyHint' (authorization-relevant) destroyed (not retained by the framework)"
+        ]
+      }
+    }
+  }
+}

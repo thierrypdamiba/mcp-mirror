@@ -283,7 +283,7 @@ export function IndexPage({
           </p>
           <CopyCodeBlock
             className="home-command"
-            value={`uvx mcp-mirror scan "python your_server.py" --spec-version ${database.mcp_spec}`}
+            value={`uv run mcp-mirror scan "python your_server.py" --runner managed --spec-version ${database.mcp_spec}`}
           />
           <Link href="#/method">How measurements work</Link>
         </section>

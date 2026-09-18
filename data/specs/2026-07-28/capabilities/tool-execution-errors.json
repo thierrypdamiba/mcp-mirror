@@ -51,7 +51,7 @@
   ],
   "known_issues": [],
   "why": "MCP separates protocol errors from tool execution errors precisely so a model can retry the second kind with better arguments. A framework that raises both as exceptions, or reports both as success, collapses that distinction and removes the recovery path the spec designed.",
-  "reproduce": "python scripts/measure_results.py",
+  "reproduce": "uv run python scripts/measure_results.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

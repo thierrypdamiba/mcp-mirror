@@ -49,7 +49,7 @@
   ],
   "known_issues": [],
   "why": "Resources are one of the three server primitives, and the only one designed for application-controlled context rather than model-controlled action. A framework that exposes tools but not resources supports one third of what MCP servers publish.",
-  "reproduce": "python scripts/probe_surface.py",
+  "reproduce": "uv run python scripts/probe_surface.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

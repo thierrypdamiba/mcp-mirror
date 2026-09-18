@@ -51,7 +51,7 @@
   ],
   "known_issues": [],
   "why": "The spec asks servers to mirror structured results into a text block for backwards compatibility. That mirror makes a dropped `structuredContent` invisible: the call still looks successful, and typed data quietly becomes a string the model has to re-parse.",
-  "reproduce": "python scripts/measure_results.py",
+  "reproduce": "uv run python scripts/measure_results.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",

@@ -1,10 +1,31 @@
 {
   "schema": "mcp-mirror/data@1.0",
-  "updated": "2026-09-06",
+  "updated": "2026-09-18",
   "mcp_spec": "2026-07-28",
   "repo": "https://github.com/thierrypdamiba/mcp-mirror",
   "eras": {
-    "e0": "current release"
+    "e0": "current release",
+    "e1": "1 release(s) after current",
+    "e2": "2 release(s) after current",
+    "e3": "3 release(s) after current",
+    "e4": "4 release(s) after current",
+    "e5": "5 release(s) after current",
+    "e6": "6 release(s) after current",
+    "e7": "7 release(s) after current",
+    "e8": "8 release(s) after current",
+    "e9": "9 release(s) after current",
+    "e10": "10 release(s) after current",
+    "e11": "11 release(s) after current",
+    "e12": "12 release(s) after current",
+    "e13": "13 release(s) after current",
+    "e14": "14 release(s) after current",
+    "e15": "15 release(s) after current",
+    "e16": "16 release(s) after current",
+    "e17": "17 release(s) after current",
+    "e18": "18 release(s) after current",
+    "e19": "19 release(s) after current",
+    "e20": "20 release(s) after current",
+    "e21": "21 release(s) after current"
   },
   "agents": {
     "crewai": {
@@ -41,7 +62,7 @@
         }
       ],
       "current_version": "1.15.1",
-      "stable_version": "1.15.1",
+      "stable_version": "1.15.22",
       "dev_version": null,
       "version_list": [
         {
@@ -49,6 +70,132 @@
           "era": 0,
           "release_date": "2026-06-27T06:51:32Z",
           "release_date_unix": 1782543092
+        },
+        {
+          "version": "1.15.2",
+          "release_date": "2026-07-08T02:06:14Z",
+          "era": 1,
+          "release_date_unix": 1783476374
+        },
+        {
+          "version": "1.15.3",
+          "release_date": "2026-07-16T19:43:55Z",
+          "era": 2,
+          "release_date_unix": 1784231035
+        },
+        {
+          "version": "1.15.4",
+          "release_date": "2026-07-17T14:34:29Z",
+          "era": 3,
+          "release_date_unix": 1784298869
+        },
+        {
+          "version": "1.15.5",
+          "release_date": "2026-07-20T16:34:24Z",
+          "era": 4,
+          "release_date_unix": 1784565264
+        },
+        {
+          "version": "1.15.6",
+          "release_date": "2026-07-24T20:31:27Z",
+          "era": 5,
+          "release_date_unix": 1784925087
+        },
+        {
+          "version": "1.15.7",
+          "release_date": "2026-07-26T18:20:51Z",
+          "era": 6,
+          "release_date_unix": 1785090051
+        },
+        {
+          "version": "1.15.8",
+          "release_date": "2026-07-28T15:07:13Z",
+          "era": 7,
+          "release_date_unix": 1785251233
+        },
+        {
+          "version": "1.15.9",
+          "release_date": "2026-07-30T05:46:28Z",
+          "era": 8,
+          "release_date_unix": 1785390388
+        },
+        {
+          "version": "1.15.10",
+          "release_date": "2026-07-31T14:58:33Z",
+          "era": 9,
+          "release_date_unix": 1785509913
+        },
+        {
+          "version": "1.15.11",
+          "release_date": "2026-08-05T06:30:52Z",
+          "era": 10,
+          "release_date_unix": 1785911452
+        },
+        {
+          "version": "1.15.12",
+          "release_date": "2026-08-05T22:57:17Z",
+          "era": 11,
+          "release_date_unix": 1785970637
+        },
+        {
+          "version": "1.15.13",
+          "release_date": "2026-08-07T21:14:16Z",
+          "era": 12,
+          "release_date_unix": 1786137256
+        },
+        {
+          "version": "1.15.14",
+          "release_date": "2026-08-08T22:58:41Z",
+          "era": 13,
+          "release_date_unix": 1786229921
+        },
+        {
+          "version": "1.15.15",
+          "release_date": "2026-08-12T01:28:18Z",
+          "era": 14,
+          "release_date_unix": 1786498098
+        },
+        {
+          "version": "1.15.16",
+          "release_date": "2026-08-14T00:09:03Z",
+          "era": 15,
+          "release_date_unix": 1786666143
+        },
+        {
+          "version": "1.15.17",
+          "release_date": "2026-08-20T00:28:21Z",
+          "era": 16,
+          "release_date_unix": 1787185701
+        },
+        {
+          "version": "1.15.18",
+          "release_date": "2026-08-27T18:11:59Z",
+          "era": 17,
+          "release_date_unix": 1787854319
+        },
+        {
+          "version": "1.15.19",
+          "release_date": "2026-09-04T11:29:24Z",
+          "era": 18,
+          "release_date_unix": 1788521364
+        },
+        {
+          "version": "1.15.20",
+          "release_date": "2026-09-04T12:43:07Z",
+          "era": 19,
+          "release_date_unix": 1788525787
+        },
+        {
+          "version": "1.15.21",
+          "release_date": "2026-09-09T22:55:04Z",
+          "era": 20,
+          "release_date_unix": 1788994504
+        },
+        {
+          "version": "1.15.22",
+          "release_date": "2026-09-16T22:10:51Z",
+          "era": 21,
+          "release_date_unix": 1789596651
         }
       ],
       "measurement_status": "sdk_incompatible",
@@ -135,7 +282,7 @@
         }
       ],
       "current_version": "0.22.0",
-      "stable_version": "0.22.0",
+      "stable_version": "0.22.3",
       "dev_version": null,
       "version_list": [
         {
@@ -143,6 +290,24 @@
           "era": 0,
           "release_date": "2026-08-19T13:45:19Z",
           "release_date_unix": 1787147119
+        },
+        {
+          "version": "0.22.1",
+          "release_date": "2026-09-08T09:22:16Z",
+          "era": 1,
+          "release_date_unix": 1788859336
+        },
+        {
+          "version": "0.22.2",
+          "release_date": "2026-09-09T12:37:23Z",
+          "era": 2,
+          "release_date_unix": 1788957443
+        },
+        {
+          "version": "0.22.3",
+          "release_date": "2026-09-17T22:20:42Z",
+          "era": 3,
+          "release_date_unix": 1789683642
         }
       ],
       "measurement_status": "measured",
@@ -182,13 +347,43 @@
         }
       ],
       "current_version": "2.40.0",
-      "stable_version": "2.40.0",
+      "stable_version": "2.45.0",
       "dev_version": null,
       "version_list": [
         {
           "version": "2.40.0",
           "era": 0,
           "release_date_unix": null
+        },
+        {
+          "version": "2.41.0",
+          "release_date": "2026-09-08T04:25:57Z",
+          "era": 1,
+          "release_date_unix": 1788841557
+        },
+        {
+          "version": "2.42.0",
+          "release_date": "2026-09-09T03:48:43Z",
+          "era": 2,
+          "release_date_unix": 1788925723
+        },
+        {
+          "version": "2.43.0",
+          "release_date": "2026-09-12T01:05:30Z",
+          "era": 3,
+          "release_date_unix": 1789175130
+        },
+        {
+          "version": "2.44.0",
+          "release_date": "2026-09-17T04:11:23Z",
+          "era": 4,
+          "release_date_unix": 1789618283
+        },
+        {
+          "version": "2.45.0",
+          "release_date": "2026-09-18T04:50:07Z",
+          "era": 5,
+          "release_date_unix": 1789707007
         }
       ],
       "measurement_status": "measured",
@@ -229,7 +424,7 @@
         }
       ],
       "current_version": "1.17.3",
-      "stable_version": "1.17.3",
+      "stable_version": "1.18.0",
       "dev_version": null,
       "version_list": [
         {
@@ -237,6 +432,12 @@
           "era": 0,
           "release_date": "2026-09-03T04:14:30Z",
           "release_date_unix": 1788408870
+        },
+        {
+          "version": "1.18.0",
+          "release_date": "2026-09-15T09:12:29Z",
+          "era": 1,
+          "release_date_unix": 1789463549
         }
       ],
       "measurement_status": "protocol_mismatch",
@@ -510,7 +711,7 @@
         "A prefixed name changes between server configurations, so a hard coded allowlist can silently stop matching."
       ],
       "why": "Name based routing, allowlists, and eval fixtures that match exact tool names break under prefixing.",
-      "reproduce": "uvx mcp-mirror scan \"python fixtures/tricky_server.py\" --job J1 --spec-version 2026-07-28",
+      "reproduce": "uv run mcp-mirror scan \"python fixtures/tricky_server.py\" --runner managed --frameworks openai_agents,pydantic_ai --spec-version 2026-07-28 --job J1",
       "measured": {
         "run_date": "2026-09-06",
         "mcp_spec": "2026-07-28",

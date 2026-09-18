@@ -8,6 +8,8 @@
     "build:data": "python3 scripts/build_data.py",
     "build": "npm run build:data && npm run news:validate && npm run typecheck && vite build && node scripts/build_standalone.mjs && node scripts/publish_deck.mjs",
     "audit:links": "node scripts/audit_links.mjs",
+    "check:reproduce": "npm run build:data && uv run python scripts/check_reproduce_commands.py",
+    "check:versions": "uv run python scripts/refresh_versions.py --check",
     "dev": "npm run build:data && vite",
     "preview": "vite preview",
     "news:refresh": "node scripts/refresh_news.mjs",

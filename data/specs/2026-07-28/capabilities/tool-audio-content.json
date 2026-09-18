@@ -50,7 +50,7 @@
   ],
   "known_issues": [],
   "why": "Audio is the least-implemented content type in the union, which makes it the sharpest test of whether a framework handles the content list generically or only the cases it happened to code for.",
-  "reproduce": "python scripts/measure_results.py",
+  "reproduce": "uv run python scripts/measure_results.py",
   "measured": {
     "run_date": "2026-09-11",
     "mcp_spec": "2026-07-28",
