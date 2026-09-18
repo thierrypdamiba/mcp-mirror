@@ -38,7 +38,7 @@
   },
   "verdict": {
     "code": "n",
-    "headline": "Destroyed by both adapters that reach 2026-07-28.",
+    "headline": "Absent from the delivered block in both adapters that reach 2026-07-28.",
     "detail": "`audience` and `priority` are the server's only way to say who a piece of content is for and how much it matters. Both adapters discard them, so a UI built on either cannot honour the distinction. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
   },
   "usage_perc_y": null,
