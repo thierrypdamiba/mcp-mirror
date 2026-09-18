@@ -38,7 +38,7 @@
   "verdict": {
     "code": "n",
     "headline": "Dropped by both adapters that reach 2026-07-28.",
-    "detail": "Neither drop is unconditional, which makes this harder to notice than a flat refusal: OpenAI Agents SDK 0.22.0 needs an opt-in flag, and Pydantic AI 2.40.0 silently skips the typed value as soon as the result is not all text. In both cases the agent gets characters where the server offered structure. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+    "detail": "Neither drop is unconditional: OpenAI Agents SDK 0.22.0 uses `structuredContent` only when the server object sets `use_structured_content`, which is off by default, and Pydantic AI 2.40.0 returns it only when every content part is text. In both cases the agent gets characters where the server offered structure. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,
@@ -60,5 +60,6 @@
   "shown": true,
   "spec_label": "MCP 2026-07-28",
   "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#structured-content",
-  "docs_label": "MCP Docs"
+  "docs_label": "MCP Docs",
+  "boundary_dependent": []
 }

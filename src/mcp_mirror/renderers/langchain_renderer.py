@@ -14,7 +14,7 @@ from typing import Any
 
 import anyio
 
-from ..models import RendererEvidence, ResultRep, ToolRep
+from ..models import RendererEvidence, ResultBoundary, ResultRep, ToolRep
 from ..normalize import normalize_framework_result, normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
@@ -109,26 +109,63 @@ class LangChainRenderer:
 
         return self._to_reps(tools)
 
-    # Result capture boundary: direct StructuredTool invocation. LangChain's
-    # ToolNode may subsequently convert this return or a ToolException into a
-    # ToolMessage, so this is not claimed as the final model-visible boundary.
-    result_capture_api = "langchain_core.tools.StructuredTool.ainvoke"
-    result_capture_object = (
-        "direct tool return before ToolNode creates the agent ToolMessage"
-    )
+    # LangChain is the one adapter measured here whose result boundaries disagree.
+    # `load_mcp_tools` builds the StructuredTool with
+    # `handle_tool_error=_handle_mcp_tool_error`, and an `isError` result raises the
+    # internal `_MCPToolExecutionError`. Invoked with a plain argument dict the tool
+    # returns the handler's content blocks, so the failure reads as ordinary text.
+    # Invoked with a ToolCall, which is the shape an agent and ToolNode use, the same
+    # call returns a ToolMessage carrying `status="error"`. Both are published.
+    DEFAULT_RESULT_BOUNDARY = "direct"
+
+    def result_boundaries(self) -> list[ResultBoundary]:
+        return [
+            ResultBoundary(
+                id="direct",
+                label="Direct tool invocation",
+                capture_api="langchain_core.tools.StructuredTool.ainvoke(dict)",
+                capture_object="the tool return value, before any ToolMessage is built",
+                agent_path=False,
+            ),
+            ResultBoundary(
+                id="agent",
+                label="Agent tool invocation",
+                capture_api="langchain_core.tools.StructuredTool.ainvoke(ToolCall)",
+                capture_object="the ToolMessage an agent or ToolNode puts in the message list",
+                agent_path=True,
+                limitation=(
+                    "The ToolMessage is built by langchain_core from the same call a "
+                    "ToolNode makes. No chat model was bound and no provider request "
+                    "was captured."
+                ),
+            ),
+        ]
 
     def render_result(
-        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+        self,
+        server: ServerHandle,
+        tool: str,
+        arguments: dict[str, Any],
+        boundary: str | None = None,
     ) -> ResultRep:
-        """Invoke one tool and capture the declared framework-result boundary."""
+        """Invoke one tool and capture one declared framework-result boundary."""
 
-        return anyio.run(self._render_result_async, server, tool, arguments)
+        return anyio.run(
+            self._render_result_async,
+            server,
+            tool,
+            arguments,
+            boundary or self.DEFAULT_RESULT_BOUNDARY,
+        )
 
     async def _render_result_async(
-        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+        self, server: ServerHandle, tool: str, arguments: dict[str, Any], boundary: str
     ) -> ResultRep:
         from langchain_mcp_adapters.client import create_session
         from langchain_mcp_adapters.tools import load_mcp_tools
+
+        if boundary not in {"direct", "agent"}:
+            raise RenderError(f"langchain renderer has no result boundary {boundary!r}")
 
         connection = _connection(server)
         async with create_session(connection) as session:
@@ -140,8 +177,20 @@ class LangChainRenderer:
                 raise RenderError(
                     f"langchain renderer found no tool named {tool!r} (has: {available})"
                 )
+            # A ToolCall is what makes BaseTool.ainvoke return a ToolMessage, which is
+            # the object an agent reads. A plain dict returns the raw tool value.
+            payload: Any = (
+                arguments
+                if boundary == "direct"
+                else {
+                    "name": tool,
+                    "args": dict(arguments),
+                    "id": "mcp_mirror_result_capture",
+                    "type": "tool_call",
+                }
+            )
             try:
-                returned = await target.ainvoke(arguments)
+                returned = await target.ainvoke(payload)
             except Exception as exc:  # noqa: BLE001 - the failure mode is the observation
                 # A tool that reported failure through `isError` may surface here as a
                 # raised exception instead, which is a different contract for the agent
@@ -163,6 +212,24 @@ class LangChainRenderer:
         carries the blocks that did not fit into the content string. Both halves are
         recorded, because which half a block landed in is the finding.
         """
+
+        # At the agent boundary the adapter's content and artifact arrive already
+        # assembled into a ToolMessage. `status` is the field that carries MCP's
+        # isError across that boundary, so it is read before the shape is unpacked.
+        status = getattr(returned, "status", None)
+        if status is not None and hasattr(returned, "content"):
+            message = returned
+            blocks = [_block_of(item) for item in message.content] if isinstance(
+                message.content, (list, tuple)
+            ) else []
+            return normalize_framework_result(
+                tool=tool,
+                origin=self.id,
+                blocks=blocks,
+                text=message.content if isinstance(message.content, str) else None,
+                is_error=status == "error",
+                raw=repr(message)[:2000],
+            )
 
         artifact = None
         if isinstance(returned, tuple) and len(returned) == 2:

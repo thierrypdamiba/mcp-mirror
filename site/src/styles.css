@@ -2351,6 +2351,34 @@ h6 {
   box-shadow: inset 0 0 0 1px var(--solar-base2);
 }
 
+.boundary-dependent-callout {
+  padding: 8px 10px;
+  border-left: 3px solid var(--solar-violet, #6c71c4);
+  background: var(--primary-bg-shade-1, transparent);
+}
+
+/* A cell whose answer changes with the result boundary that was measured. The
+   support code cannot carry "it depends where you look", so the cell says it. */
+.support-cell.is-boundary-dependent {
+  z-index: 2;
+  box-shadow: inset 0 0 0 2px var(--solar-violet, #6c71c4);
+}
+
+.support-cell .boundary-flag {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  padding: 0 2px;
+  border-radius: 2px;
+  background: var(--solar-violet, #6c71c4);
+  color: var(--solar-base3, #fdf6e3);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
 .grid-caption {
   margin: 0;
   color: var(--dim-fg);
@@ -3216,6 +3244,62 @@ h6 {
   color: var(--dim-fg);
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+
+/* Result boundaries are listed rather than summarised: a framework can answer
+   differently at each, so collapsing them to one line is what hid the problem. */
+.result-boundaries {
+  margin: 2px 0;
+}
+
+.result-boundaries-title {
+  margin: 0 0 4px;
+  color: var(--dim-fg);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.result-boundaries ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.result-boundaries li {
+  padding: 5px 7px;
+  border-left: 2px solid var(--primary-bg-shade-2);
+  background: var(--primary-bg-shade-1, transparent);
+  overflow-wrap: anywhere;
+}
+
+.result-boundaries li.is-agent-path {
+  border-left-color: var(--solar-violet, #6c71c4);
+}
+
+.result-boundary-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.result-boundaries code {
+  display: block;
+  margin-top: 2px;
+  color: var(--dim-fg);
+  font-size: 11px;
+}
+
+.result-boundaries small {
+  display: block;
+  color: var(--dim-fg);
+  font-size: 11px;
 }
 
 .framework-measurement-note {

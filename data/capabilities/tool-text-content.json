@@ -32,10 +32,11 @@
     "1": "CrewAI: the text arrives stringified inside a Python list repr, as \"['SENTINEL_TEXT_BLOCK']\" rather than the block's text.",
     "2": "Mastra: all content blocks are dropped, text included; only structuredContent reaches the agent."
   },
+  "boundary_dependent": [],
   "verdict": {
     "code": "a",
     "headline": "Unchanged at three boundaries, reshaped at one, dropped at one.",
-    "detail": "Plain text is the floor. Two of five do not clear it cleanly."
+    "detail": "Text is the one content kind every adapter attempts to carry. Two of five change it anyway: CrewAI returns the repr of the list that held the block, so the agent reads brackets and quotes as characters, and Mastra returns structuredContent in place of any content block."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,
@@ -48,9 +49,9 @@
   ],
   "known_issues": [],
   "why": "This is the one content type every framework is expected to handle, so it is the control row: the other content types can only be read as losses against a text block that survives.",
-  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "reproduce": "uv run python scripts/measure_result_boundaries.py",
   "measured": {
-    "run_date": "2026-09-14",
+    "run_date": "2026-09-18",
     "mcp_spec": "2025-11-25",
     "fixture": "fixtures/tricky_server.py"
   },

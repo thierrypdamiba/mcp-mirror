@@ -1,14 +1,25 @@
 """Publish the tool-result boundary at 2025-11-25 from the five-framework measurement.
 
-Every code here comes from ``talk/results-n5-2025-11-25.log``: two calls against
+Every code here comes from ``data/result-boundaries.json``: two calls against
 ``fixtures/tricky_server.py`` -- ``search_records``, which returns one of every content
-block plus structuredContent, and ``delete_account``, which returns ``isError``.
+block plus structuredContent, and ``delete_account``, which returns ``isError`` -- run
+against every result boundary each adapter declares, not just the first one.
+
+Asking at more than one boundary is the point. A tool definition has one obvious place
+to read it; a tool result does not. The value an adapter hands back when its tool object
+is invoked directly and the value the framework's own agent path produces can disagree,
+and publishing only the first is how a row ends up describing something no agent does.
+LangChain is where that bites: the same failed call reads as ordinary content blocks
+through a direct invocation and as a ``ToolMessage`` with ``status="error"`` through the
+invocation an agent makes.
 
 One measurement limit is recorded rather than papered over. LangChain raises on the
 audio block, so the whole ``search_records`` call fails and nothing reaches the agent.
-That is a determinate answer about audio, but it means the image, embedded-resource and
-resource-link blocks in the same result were never independently observed. Those cells
-stay 'u'; a single-block fixture would settle them.
+That is a determinate answer about audio, and it is determinate at both boundaries: the
+exception is not a ``ToolException``, so the tool's error handler never sees it. But it
+means the image, embedded-resource and resource-link blocks in the same result were
+never independently observed. Those cells stay 'u'; a single-block fixture would settle
+them.
 """
 
 from __future__ import annotations
@@ -20,9 +31,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from author_capability import write_capability  # noqa: E402
 
-RUN_DATE = "2026-09-14"
+RUN_DATE = "2026-09-18"
 SPEC = "2025-11-25"
-REPRODUCE = "uv run python scripts/measure_2025_results.py"
+REPRODUCE = "uv run python scripts/measure_result_boundaries.py"
 
 # LangChain never delivered these blocks, but the reason was a sibling audio block that
 # aborted the call, so the blocks themselves went unobserved.
@@ -35,25 +46,61 @@ CONFOUNDED = (
 CAPABILITIES = [
     {
         "feature_id": "tool-execution-errors",
-        "codes": {"crewai": "n", "langchain": "n", "openai-agents": "n", "pydantic-ai": "a", "mastra": "a"},
+        "codes": {"crewai": "n", "langchain": "a", "openai-agents": "n", "pydantic-ai": "a", "mastra": "a"},
+        "boundary_dependent": ["langchain"],
         "notes": {
-            "crewai": "CrewAI: the failed call returns its text like any other result. Nothing marks it as a failure.",
-            "langchain": "LangChain: the error text arrives as an ordinary text block with a generated lc_ id. The flag is gone.",
-            "openai-agents": "OpenAI Agents: the error text is returned as normal tool output, indistinguishable from success.",
-            "pydantic-ai": "Pydantic AI: converted into a raised ModelRetry rather than a flag on the result. The failure is reachable, but as control flow.",
-            "mastra": "Mastra: converted into a thrown error rather than a flag on the result.",
+            "crewai": (
+                "CrewAI: the adapter's tool reads only `result.content` and never "
+                "`result.isError`, so a failed call returns the same bare string a "
+                "successful one does. Identical at `BaseTool.run` and at "
+                "`CrewStructuredTool.invoke`, which is the path a crew run takes."
+            ),
+            "langchain": (
+                "LangChain: the answer depends on the boundary. `load_mcp_tools` builds the "
+                "tool with `handle_tool_error=_handle_mcp_tool_error`, so an `isError` result "
+                "raises an internal `ToolException` subclass that the handler turns back into "
+                "tool output. Invoked with a plain argument dict the call returns those content "
+                "blocks and nothing marks them as a failure. Invoked with a `ToolCall`, which is "
+                "what an agent and `ToolNode` send, the same call returns a `ToolMessage` with "
+                "`status=\"error\"`."
+            ),
+            "openai-agents": (
+                "OpenAI Agents: `invoke_mcp_tool` reads `isError` only to decide whether "
+                "`structuredContent` may be preferred, then emits the error text as an ordinary "
+                "text output item. Identical at `MCPUtil.invoke_mcp_tool` and at "
+                "`FunctionTool.on_invoke_tool`, which is what the agent loop calls."
+            ),
+            "pydantic-ai": (
+                "Pydantic AI: the toolset's `tool_error_behavior` defaults to `'retry'`, which "
+                "raises `ModelRetry` carrying the error text. Identical at `direct_call_tool` "
+                "and at `call_tool`, which delegates to it; an agent run records that raise as a "
+                "typed `RetryPromptPart` rather than as a tool return."
+            ),
+            "mastra": (
+                "Mastra: the per-server `onToolError` option defaults to `'throw'`, so the tool "
+                "action throws a `MastraError` carrying the error text. Set to `'return'` the "
+                "same action resolves with the server's `CallToolResult`, `isError: true` "
+                "included."
+            ),
         },
         "summary": (
-            "Not one of the five hands the agent the boolean the specification defines. Three "
-            "return the failure as ordinary text, so an agent reading the result cannot tell a "
-            "failed call from a successful one. Two convert it into an exception, which preserves "
-            "the fact of failure but moves it out of the result and into control flow."
+            "Measured at every result boundary each adapter exposes: the value a direct "
+            "invocation returns, and the value the framework's own agent path returns. No "
+            "adapter delivers the specification's boolean on its default path. Three make the "
+            "failure distinguishable, each through a different mechanism, and two return it as "
+            "ordinary output an agent cannot tell from success. LangChain is the one adapter "
+            "whose answer changes with the boundary, which is why its cell is marked as "
+            "boundary-dependent rather than dropped."
         ),
-        "verdict_code": "n",
-        "verdict_headline": "Delivered by none of the five; two convert it into an exception.",
+        "verdict_code": "a",
+        "verdict_headline": "Distinguishable at three adapters of five, through three different mechanisms.",
         "verdict_detail": (
-            "isError is how a tool says 'this did not work' without the agent having to read "
-            "prose. Three frameworks erase that distinction entirely."
+            "LangChain marks the tool message `status=\"error\"`, Pydantic AI raises "
+            "`ModelRetry`, and Mastra throws a `MastraError`; Mastra alone can be configured to "
+            "hand back the flag itself, through its `onToolError: 'return'` server option. "
+            "CrewAI and the OpenAI Agents SDK return the error text as ordinary output, so an "
+            "agent reading the result cannot tell the call failed. One flag, five mechanisms, "
+            "and the one an adapter gives you is not something the protocol lets you assume."
         ),
     },
     {
@@ -113,7 +160,12 @@ CAPABILITIES = [
         ),
         "verdict_code": "a",
         "verdict_headline": "Unchanged at three boundaries, reshaped at one, dropped at one.",
-        "verdict_detail": "Plain text is the floor. Two of five do not clear it cleanly.",
+        "verdict_detail": (
+            "Text is the one content kind every adapter attempts to carry. Two of five change "
+            "it anyway: CrewAI returns the repr of the list that held the block, so the agent "
+            "reads brackets and quotes as characters, and Mastra returns structuredContent in "
+            "place of any content block."
+        ),
     },
     {
         "feature_id": "tool-image-content",
@@ -138,18 +190,29 @@ CAPABILITIES = [
         "codes": {"crewai": "n", "langchain": "n", "openai-agents": "a", "pydantic-ai": "y", "mastra": "n"},
         "notes": {
             "crewai": "CrewAI: the audio block is dropped from the result.",
-            "langchain": "LangChain: raises NotImplementedError -- 'AudioContent conversion to LangChain content blocks is not yet supported' -- which aborts the whole call, so no part of the result reaches the agent.",
+            "langchain": (
+                "LangChain: `_convert_mcp_content_to_lc_block` raises NotImplementedError -- "
+                "'AudioContent conversion to LangChain content blocks is not yet supported' -- "
+                "while building the result, so the whole call aborts and no part of it reaches "
+                "the agent. Re-measured at both of LangChain's result boundaries and identical "
+                "at each: the exception is not a `ToolException`, so the tool's "
+                "`handle_tool_error` callback never sees it and the `ToolCall` invocation an "
+                "agent makes raises exactly as the direct one does."
+            ),
             "openai-agents": "OpenAI Agents: the block is serialized into a text block containing its JSON, base64 payload and all, so the audio reaches the agent only as characters.",
             "mastra": "Mastra: all content blocks are dropped, audio included.",
         },
         "summary": (
             "The least survivable content type measured. One adapter passes it through as audio. "
-            "One turns it into a JSON string. Two drop it. LangChain does something worse than "
-            "dropping it: it raises, and the exception takes the rest of the result with it, so a "
-            "server that returns audio alongside text returns nothing usable at all."
+            "One turns it into a JSON string. Two drop it. LangChain raises instead of "
+            "degrading, and the exception takes the rest of the result with it, so a server that "
+            "returns audio alongside text returns nothing usable at all. That one was checked at "
+            "both of LangChain's result boundaries in case it was an artifact of where the "
+            "measurement looked; it is not, and the reason is that the exception is not the type "
+            "the adapter's error handler is wired to catch."
         ),
         "verdict_code": "n",
-        "verdict_headline": "Delivered as audio by one of five; fatal at one.",
+        "verdict_headline": "Delivered as audio by one of five; aborts the call at one.",
         "verdict_detail": (
             "An unsupported content type that raises rather than degrades turns a partially "
             "supported result into a failed call."
@@ -208,7 +271,8 @@ CAPABILITIES = [
         "verdict_code": "y",
         "verdict_headline": "Supported by all five.",
         "verdict_detail": (
-            "Invocation is the part of the tool-result surface that every adapter gets right."
+            "Every adapter completes the call and returns a value to the agent. What that value "
+            "still contains is measured by the other rows in this category."
         ),
     },
 ]
@@ -227,6 +291,7 @@ if __name__ == "__main__":
             run_date=RUN_DATE,
             spec=SPEC,
             reproduce=REPRODUCE,
+            boundary_dependent=spec.get("boundary_dependent"),
         )
         print(f"  wrote {path.relative_to(Path(__file__).resolve().parent.parent)}")
     print(f"published {len(CAPABILITIES)} tool-result capabilities at {SPEC}")

@@ -32,6 +32,7 @@
     "1": "CrewAI: the image block is dropped from the result.",
     "2": "Mastra: all content blocks are dropped, images included."
   },
+  "boundary_dependent": [],
   "verdict": {
     "code": "a",
     "headline": "Delivered by two, dropped by two, unmeasured at one.",
@@ -48,9 +49,9 @@
   ],
   "known_issues": [],
   "why": "A dropped image block is a silent failure: the call succeeds, the result arrives, and the payload the tool existed to return is simply gone.",
-  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "reproduce": "uv run python scripts/measure_result_boundaries.py",
   "measured": {
-    "run_date": "2026-09-14",
+    "run_date": "2026-09-18",
     "mcp_spec": "2025-11-25",
     "fixture": "fixtures/tricky_server.py"
   },

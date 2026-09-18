@@ -7,6 +7,22 @@ export interface VersionEntry {
   era: number;
 }
 
+/**
+ * One place a framework can be asked what a tool call returned.
+ *
+ * A tool definition has one obvious capture point. A tool result often has more than
+ * one, and they can disagree, so each is named and exactly one is the path a real
+ * agent takes.
+ */
+export interface ResultBoundary {
+  id: string;
+  label: string;
+  capture_api: string;
+  capture_object: string;
+  agent_path: boolean;
+  limitation?: string;
+}
+
 export interface Agent {
   name: string;
   abbr: string;
@@ -15,6 +31,7 @@ export interface Agent {
   registry: "pypi" | "npm" | string;
   adapter: string;
   renderer: string;
+  /** Where the tool *definition* was read. */
   capture_boundary: {
     capture_api: string;
     capture_object: string;
@@ -26,6 +43,8 @@ export interface Agent {
     negotiated_mcp_spec_version: string | null;
     protocol_version_evidence: string;
   };
+  /** Where a tool *result* was read. Every boundary the renderer can be asked at. */
+  result_boundaries: ResultBoundary[];
   measurement_status?:
     | "measured"
     | "sdk_incompatible"
@@ -60,6 +79,11 @@ export interface Capability {
   stats: Record<string, Record<string, string>>;
   notes?: string;
   notes_by_num?: Record<string, string>;
+  /**
+   * Agent ids whose answer here changes with which result boundary you look at.
+   * Those cells are 'a', and their note has to say what each boundary yields.
+   */
+  boundary_dependent?: string[];
   verdict: {
     code: SupportCode;
     headline: string;

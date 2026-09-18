@@ -100,6 +100,8 @@ def unmeasured_capability(feature: dict, agents: dict, revision: str) -> dict:
         "notes_by_num": {
             numbering[agent_id]: note for agent_id, note in blocked.items()
         },
+        # Nothing has been measured here, so nothing can depend on a boundary yet.
+        "boundary_dependent": [],
         "verdict": {
             "code": "u",
             "headline": (

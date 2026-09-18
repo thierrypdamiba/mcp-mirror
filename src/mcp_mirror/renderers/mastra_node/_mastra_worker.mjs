@@ -44,6 +44,13 @@ async function main() {
   } else {
     serverConfig = { command: cfg.command, args: cfg.args || [] };
   }
+  // `onToolError` is a documented per-server option typed 'throw' | 'return', default
+  // 'throw'. It decides whether an `isError` result reaches the tool action as a
+  // thrown MastraError or as the CallToolResult envelope, so the caller selects it
+  // to capture the result boundary it asked for.
+  if (cfg.onToolError) {
+    serverConfig.onToolError = cfg.onToolError;
+  }
 
   const mcp = new MCPClient({
     id: `mcp-mirror-${Date.now()}-${Math.random().toString(36).slice(2)}`,

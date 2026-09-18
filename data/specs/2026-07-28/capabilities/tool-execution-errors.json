@@ -27,18 +27,18 @@
       "1.17.3": "x #5"
     }
   },
-  "notes": "Pydantic AI surfaces the failure through a different channel; the OpenAI Agents SDK loses it entirely. 3 cannot reach the revision.",
+  "notes": "Measured at both result boundaries each adapter exposes: the value the adapter's own invocation helper returns, and the value the agent path returns. Both reachable adapters answer identically at each, so neither cell here depends on where the measurement looked. Pydantic AI surfaces the failure through a different channel; the OpenAI Agents SDK loses it entirely. 3 cannot reach the revision.",
   "notes_by_num": {
     "1": "CrewAI 1.15.1 requires MCP Python SDK 1.26.x, so it cannot open a 2026-07-28 adapter session.",
     "2": "LangChain MCP Adapters 0.3.2 requires mcp<2.0.0, so it cannot open a 2026-07-28 adapter session.",
-    "3": "OpenAI Agents SDK 0.22.0: a result flagged `isError` is returned as an ordinary text output with no error signal. The agent cannot distinguish it from a successful call.",
-    "4": "Pydantic AI 2.40.0: the failure is raised as a `ModelRetry` carrying the error text. The agent learns the call failed, but through an exception that prompts a retry rather than through the result's error flag.",
+    "3": "OpenAI Agents SDK 0.22.0: a result flagged `isError` is returned as an ordinary text output with no error signal, because `invoke_mcp_tool` reads the flag only to decide whether `structuredContent` may be preferred. Identical at `MCPUtil.invoke_mcp_tool` and at `FunctionTool.on_invoke_tool`, which is what the agent loop calls. The agent cannot distinguish it from a successful call.",
+    "4": "Pydantic AI 2.40.0: the toolset's `tool_error_behavior` defaults to `'retry'`, so the failure is raised as a `ModelRetry` carrying the error text. Identical at `direct_call_tool` and at `call_tool`, which delegates to it. The agent learns the call failed, but through an exception that prompts a retry rather than through the result's error flag.",
     "5": "Mastra 1.17.3 negotiated MCP 2025-11-25. The scanner refused to compare that capture with a 2026-07-28 source."
   },
   "verdict": {
     "code": "a",
     "headline": "Visible in Pydantic AI through a changed channel, invisible in the OpenAI Agents SDK.",
-    "detail": "This is the most consequential split in the result boundary. On Pydantic AI 2.40.0 a failed tool call raises `ModelRetry`, so the agent reacts. On OpenAI Agents SDK 0.22.0 the same call returns the error text as a normal success, so an agent can act on a failure believing it worked. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
+    "detail": "This is the most consequential split in the result boundary. On Pydantic AI 2.40.0 a failed tool call raises `ModelRetry`, so the agent reacts. On OpenAI Agents SDK 0.22.0 the same call returns the error text as a normal success, so an agent can act on a failure believing it worked. Both were checked at the adapter helper and at the agent path and answered the same way at each. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,
@@ -60,5 +60,6 @@
   "shown": true,
   "spec_label": "MCP 2026-07-28",
   "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#error-handling",
-  "docs_label": "MCP Docs"
+  "docs_label": "MCP Docs",
+  "boundary_dependent": []
 }

@@ -35,6 +35,7 @@
     "3": "Pydantic AI: reduced to a bare text block containing the resource's text. The uri and mimeType that identify it are gone.",
     "4": "Mastra: all content blocks are dropped, embedded resources included."
   },
+  "boundary_dependent": [],
   "verdict": {
     "code": "n",
     "headline": "Delivered as a resource by none of the five.",
@@ -51,9 +52,9 @@
   ],
   "known_issues": [],
   "why": "The URI and MIME type are what let a caller cite, cache or re-read the content. Stripping them to the inner text leaves the agent holding data it cannot attribute to a source.",
-  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "reproduce": "uv run python scripts/measure_result_boundaries.py",
   "measured": {
-    "run_date": "2026-09-14",
+    "run_date": "2026-09-18",
     "mcp_spec": "2025-11-25",
     "fixture": "fixtures/tricky_server.py"
   },

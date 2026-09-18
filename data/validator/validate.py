@@ -158,6 +158,42 @@ def validate_capability(path: Path, agents: dict, statuses: dict, errors: list[s
             f"reading order (found {current_refs}, expected {expected_refs})",
         )
 
+    # A cell whose answer depends on where you look must say so on the cell, not only
+    # in prose. 'a' is the code for that: the capability is not present unchanged, and
+    # the note has to name the mechanism at each boundary.
+    boundary_dependent = cap.get("boundary_dependent") or []
+    if not isinstance(boundary_dependent, list):
+        _err(errors, where, "boundary_dependent must be a list of agent ids")
+    else:
+        for agent_id in boundary_dependent:
+            agent = agents.get(agent_id)
+            if agent is None:
+                _err(errors, where, f"boundary_dependent names unknown agent {agent_id!r}")
+                continue
+            if len(agent.get("result_boundaries") or []) < 2:
+                _err(
+                    errors,
+                    where,
+                    f"boundary_dependent names {agent_id!r}, which publishes fewer "
+                    "than two result boundaries to depend on",
+                )
+            current = agent.get("current_version")
+            code, refs = parse_code(str((stats.get(agent_id) or {}).get(current, "")))
+            if code != "a":
+                _err(
+                    errors,
+                    where,
+                    f"{agent_id} {current}: a boundary-dependent cell must be 'a' "
+                    f"(the value is not present unchanged), found {code!r}",
+                )
+            if not refs:
+                _err(
+                    errors,
+                    where,
+                    f"{agent_id} {current}: a boundary-dependent cell must cite a note "
+                    "naming what each boundary yields",
+                )
+
     verdict = cap.get("verdict") or {}
     if verdict.get("code") not in CODES:
         _err(errors, where, f"verdict.code {verdict.get('code')!r} not in {sorted(CODES)}")
@@ -339,6 +375,57 @@ def validate_all(data_dir: Path) -> tuple[dict, list[dict], list[str]]:
                     errors,
                     "frameworks.json",
                     f"{agent_id}: measured adapter MCP version must match root mcp_spec",
+                )
+        # capture_boundary is where a tool *definition* was read. A tool *result* can
+        # have more than one boundary, and publishing only one of them is how a cell
+        # ends up describing something no agent does, so every result boundary the
+        # renderer can be asked at is published and exactly one is the agent's.
+        result_boundaries = agent.get("result_boundaries")
+        required_result_keys = {
+            "id",
+            "label",
+            "capture_api",
+            "capture_object",
+            "agent_path",
+        }
+        if not isinstance(result_boundaries, list) or not result_boundaries:
+            _err(
+                errors,
+                "frameworks.json",
+                f"{agent_id}: result_boundaries must be a non-empty list",
+            )
+        else:
+            seen_ids: set[str] = set()
+            agent_paths = 0
+            for index, boundary in enumerate(result_boundaries):
+                label = f"{agent_id}: result_boundaries[{index}]"
+                if not isinstance(boundary, dict):
+                    _err(errors, "frameworks.json", f"{label} must be an object")
+                    continue
+                missing_result = required_result_keys - set(boundary)
+                if missing_result:
+                    _err(
+                        errors,
+                        "frameworks.json",
+                        f"{label} missing {sorted(missing_result)}",
+                    )
+                    continue
+                if boundary["id"] in seen_ids:
+                    _err(errors, "frameworks.json", f"{label}: duplicate id {boundary['id']!r}")
+                seen_ids.add(boundary["id"])
+                if not isinstance(boundary["agent_path"], bool):
+                    _err(errors, "frameworks.json", f"{label}: agent_path must be a boolean")
+                elif boundary["agent_path"]:
+                    agent_paths += 1
+                for key in ("label", "capture_api", "capture_object"):
+                    if not str(boundary.get(key, "")).strip():
+                        _err(errors, "frameworks.json", f"{label}: {key} must be non-empty")
+            if agent_paths != 1:
+                _err(
+                    errors,
+                    "frameworks.json",
+                    f"{agent_id}: exactly one result boundary must be the agent path "
+                    f"(found {agent_paths})",
                 )
         if 0 not in eras:
             _err(errors, "frameworks.json", f"{agent_id}: version_list needs one entry at era 0 (current)")

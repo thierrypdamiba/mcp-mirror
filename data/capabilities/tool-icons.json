@@ -37,7 +37,7 @@
   },
   "verdict": {
     "code": "n",
-    "headline": "Destroyed by all five frameworks.",
+    "headline": "Absent from the tool definition at all five capture boundaries.",
     "detail": "No adapter exposes an icon set to the agent, and none retains one out of band. Pydantic AI and Mastra model icons for resources but not for tools, so the omission is specific to the tool definition rather than a gap in their MCP typing."
   },
   "usage_perc_y": null,

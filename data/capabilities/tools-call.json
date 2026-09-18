@@ -29,10 +29,11 @@
   },
   "notes": "Every adapter can invoke a tool and return something to the agent. What arrives varies enormously, and the rest of this category is where that shows up: the call mechanism works everywhere, the result contract does not.",
   "notes_by_num": {},
+  "boundary_dependent": [],
   "verdict": {
     "code": "y",
     "headline": "Supported by all five.",
-    "detail": "Invocation is the part of the tool-result surface that every adapter gets right."
+    "detail": "Every adapter completes the call and returns a value to the agent. What that value still contains is measured by the other rows in this category."
   },
   "usage_perc_y": null,
   "usage_perc_a": null,
@@ -45,9 +46,9 @@
   ],
   "known_issues": [],
   "why": "Every tool-definition row in this table is inert if the adapter never reaches this call. This is the floor of MCP support: a framework that renders a tool definition but cannot invoke it has integrated a catalogue, not a protocol.",
-  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "reproduce": "uv run python scripts/measure_result_boundaries.py",
   "measured": {
-    "run_date": "2026-09-14",
+    "run_date": "2026-09-18",
     "mcp_spec": "2025-11-25",
     "fixture": "fixtures/tricky_server.py"
   },

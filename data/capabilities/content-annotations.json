@@ -35,6 +35,7 @@
     "3": "Pydantic AI: the text block survives; its annotations do not.",
     "4": "Mastra: every content block is dropped, annotations with them."
   },
+  "boundary_dependent": [],
   "verdict": {
     "code": "n",
     "headline": "Absent at every boundary where the block itself survived.",
@@ -51,9 +52,9 @@
   ],
   "known_issues": [],
   "why": "Annotations are how a server says who a piece of content is for and how much it matters. A client that drops them cannot filter assistant-only content out of a user view, cannot prioritise what to keep when context runs short, and cannot sort by recency.",
-  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "reproduce": "uv run python scripts/measure_result_boundaries.py",
   "measured": {
-    "run_date": "2026-09-14",
+    "run_date": "2026-09-18",
     "mcp_spec": "2025-11-25",
     "fixture": "fixtures/tricky_server.py"
   },

@@ -42,6 +42,41 @@ SPECS = {
 
 DEFAULT_SPEC = "2026-07-28"
 
+# Reproduce commands run from a source checkout. There is no published mcp-mirror
+# package, and even once there is, `uv run` is what pins the adapter versions a cell
+# was measured at: the managed runner reads runner-manifests.json, while a local
+# install resolves to whatever uv.lock happens to hold.
+MANAGED_FRAMEWORKS = {
+    "2025-11-25": "crewai,langchain,openai_agents,pydantic_ai",
+    "2026-07-28": "openai_agents,pydantic_ai",
+}
+
+# Each renderer spawns the fixture itself, so the server command decides which
+# revision gets negotiated. At 2026-07-28 the renderer environments already carry the
+# 2.x SDK, so the ambient interpreter is the right one. At 2025-11-25 that same
+# interpreter would negotiate 2026-07-28 and the scan would refuse the cross-version
+# diff, so the fixture is run in the project environment, whose SDK is 1.x.
+FIXTURE_COMMAND = {
+    "2025-11-25": "uv run python",
+    "2026-07-28": "python",
+}
+
+
+def reproduce_command(
+    spec: str,
+    job: str,
+    fixture: str = "fixtures/tricky_server.py",
+) -> str:
+    """The from-source scan that reproduces one snapshot's cells for one job."""
+
+    if spec not in MANAGED_FRAMEWORKS:
+        raise ValueError(f"unknown spec {spec!r}; expected one of {sorted(MANAGED_FRAMEWORKS)}")
+    return (
+        f'uv run mcp-mirror scan "{FIXTURE_COMMAND[spec]} {fixture}"'
+        f" --runner managed --frameworks {MANAGED_FRAMEWORKS[spec]}"
+        f" --spec-version {spec} --job {job}"
+    )
+
 
 def _spec_dir(spec: str) -> Path:
     if spec not in SPECS:
@@ -92,12 +127,17 @@ def write_capability(
     fixture: str = "fixtures/tricky_server.py",
     reproduce: str | None = None,
     known_issues: list | None = None,
+    boundary_dependent: list[str] | None = None,
 ) -> Path:
     """Write one capability file and return its path.
 
     ``codes`` and ``notes`` cover only the adapters that can reach ``spec``. A ``y``
     cell needs no note; anything else does, and a missing one is an error rather than a
     silent gap.
+
+    ``boundary_dependent`` names the adapters whose answer here changes with which
+    result boundary you look at. Those cells must be ``a``: the value is not present
+    unchanged, and the note has to say what each boundary yields.
     """
 
     spec_dir = _spec_dir(spec)
@@ -109,6 +149,15 @@ def write_capability(
             raise ValueError(f"{feature_id}: no code for {framework_id}")
         if codes[framework_id] in CODES_NEEDING_NOTE and not notes.get(framework_id):
             raise ValueError(f"{feature_id}: {framework_id} is {codes[framework_id]!r} with no note")
+
+    for framework_id in boundary_dependent or []:
+        if framework_id not in FRAMEWORK_ORDER:
+            raise ValueError(f"{feature_id}: unknown boundary_dependent framework {framework_id!r}")
+        if codes.get(framework_id) != "a":
+            raise ValueError(
+                f"{feature_id}: {framework_id} is boundary-dependent, so its cell must "
+                f"be 'a', not {codes.get(framework_id)!r}"
+            )
 
     versions = json.loads((spec_dir / "frameworks.json").read_text())["agents"]
     stats: dict[str, dict[str, str]] = {}
@@ -142,6 +191,7 @@ def write_capability(
         "stats": stats,
         "notes": summary,
         "notes_by_num": notes_by_num,
+        "boundary_dependent": list(boundary_dependent or []),
         "verdict": {
             "code": verdict_code,
             "headline": verdict_headline,
@@ -156,8 +206,7 @@ def write_capability(
         "links": [{"url": feature["docs_url"], "title": feature["docs_label"]}],
         "known_issues": known_issues or [],
         "why": feature["why"],
-        "reproduce": reproduce
-        or f'uvx mcp-mirror scan "python {fixture}" --job {job} --spec-version {spec}',
+        "reproduce": reproduce or reproduce_command(spec, job, fixture),
         "measured": {
             "run_date": run_date,
             "mcp_spec": spec,

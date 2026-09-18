@@ -27,16 +27,17 @@
       "1.17.3": "n #4"
     }
   },
-  "notes": "The least survivable content type measured. One adapter passes it through as audio. One turns it into a JSON string. Two drop it. LangChain does something worse than dropping it: it raises, and the exception takes the rest of the result with it, so a server that returns audio alongside text returns nothing usable at all.",
+  "notes": "The least survivable content type measured. One adapter passes it through as audio. One turns it into a JSON string. Two drop it. LangChain raises instead of degrading, and the exception takes the rest of the result with it, so a server that returns audio alongside text returns nothing usable at all. That one was checked at both of LangChain's result boundaries in case it was an artifact of where the measurement looked; it is not, and the reason is that the exception is not the type the adapter's error handler is wired to catch.",
   "notes_by_num": {
     "1": "CrewAI: the audio block is dropped from the result.",
-    "2": "LangChain: raises NotImplementedError -- 'AudioContent conversion to LangChain content blocks is not yet supported' -- which aborts the whole call, so no part of the result reaches the agent.",
+    "2": "LangChain: `_convert_mcp_content_to_lc_block` raises NotImplementedError -- 'AudioContent conversion to LangChain content blocks is not yet supported' -- while building the result, so the whole call aborts and no part of it reaches the agent. Re-measured at both of LangChain's result boundaries and identical at each: the exception is not a `ToolException`, so the tool's `handle_tool_error` callback never sees it and the `ToolCall` invocation an agent makes raises exactly as the direct one does.",
     "3": "OpenAI Agents: the block is serialized into a text block containing its JSON, base64 payload and all, so the audio reaches the agent only as characters.",
     "4": "Mastra: all content blocks are dropped, audio included."
   },
+  "boundary_dependent": [],
   "verdict": {
     "code": "n",
-    "headline": "Delivered as audio by one of five; fatal at one.",
+    "headline": "Delivered as audio by one of five; aborts the call at one.",
     "detail": "An unsupported content type that raises rather than degrades turns a partially supported result into a failed call."
   },
   "usage_perc_y": null,
@@ -50,9 +51,9 @@
   ],
   "known_issues": [],
   "why": "Audio is the least-implemented content type in the union, which makes it the sharpest test of whether a framework handles the content list generically or only the cases it happened to code for.",
-  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "reproduce": "uv run python scripts/measure_result_boundaries.py",
   "measured": {
-    "run_date": "2026-09-14",
+    "run_date": "2026-09-18",
     "mcp_spec": "2025-11-25",
     "fixture": "fixtures/tricky_server.py"
   },

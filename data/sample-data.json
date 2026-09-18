@@ -23,6 +23,23 @@
         "negotiated_mcp_spec_version": null,
         "protocol_version_evidence": "Dependency resolution rejects mcp 2.0.0 before the adapter can run."
       },
+      "result_boundaries": [
+        {
+          "id": "direct",
+          "label": "Direct tool invocation",
+          "capture_api": "crewai.tools.BaseTool.run",
+          "capture_object": "the tool return value",
+          "agent_path": false
+        },
+        {
+          "id": "agent",
+          "label": "Agent tool invocation",
+          "capture_api": "crewai.tools.structured_tool.CrewStructuredTool.invoke",
+          "capture_object": "the value ToolUsage hands back during a crew run",
+          "agent_path": true,
+          "limitation": "CrewStructuredTool.invoke is driven directly. No LLM was bound and no crew was kicked off."
+        }
+      ],
       "current_version": "1.15.1",
       "stable_version": "1.15.1",
       "dev_version": null,
@@ -53,6 +70,23 @@
         "negotiated_mcp_spec_version": null,
         "protocol_version_evidence": "Dependency resolution rejects mcp 2.0.0 before the adapter can run."
       },
+      "result_boundaries": [
+        {
+          "id": "direct",
+          "label": "Direct tool invocation",
+          "capture_api": "langchain_core.tools.StructuredTool.ainvoke(dict)",
+          "capture_object": "the tool return value, before any ToolMessage is built",
+          "agent_path": false
+        },
+        {
+          "id": "agent",
+          "label": "Agent tool invocation",
+          "capture_api": "langchain_core.tools.StructuredTool.ainvoke(ToolCall)",
+          "capture_object": "the ToolMessage an agent or ToolNode puts in the message list",
+          "agent_path": true,
+          "limitation": "The ToolMessage is built by langchain_core from the same call a ToolNode makes. No chat model was bound and no provider request was captured."
+        }
+      ],
       "current_version": "0.3.2",
       "stable_version": "0.3.2",
       "dev_version": null,
@@ -83,6 +117,23 @@
         "negotiated_mcp_spec_version": "2026-07-28",
         "protocol_version_evidence": "protocol version exposed by the MCPServer client session"
       },
+      "result_boundaries": [
+        {
+          "id": "direct",
+          "label": "Adapter invocation helper",
+          "capture_api": "agents.mcp.util.MCPUtil.invoke_mcp_tool",
+          "capture_object": "the Agents SDK ToolOutput",
+          "agent_path": false
+        },
+        {
+          "id": "agent",
+          "label": "Agent tool invocation",
+          "capture_api": "agents.tool.FunctionTool.on_invoke_tool",
+          "capture_object": "the ToolOutput the agent loop feeds back to the model",
+          "agent_path": true,
+          "limitation": "The FunctionTool callable is driven directly. No model implementation was bound and no provider request was captured."
+        }
+      ],
       "current_version": "0.22.0",
       "stable_version": "0.22.0",
       "dev_version": null,
@@ -113,6 +164,23 @@
         "negotiated_mcp_spec_version": "2026-07-28",
         "protocol_version_evidence": "protocol version exposed by MCPToolset.client"
       },
+      "result_boundaries": [
+        {
+          "id": "direct",
+          "label": "Direct toolset call",
+          "capture_api": "pydantic_ai.mcp.MCPToolset.direct_call_tool",
+          "capture_object": "the mapped toolset result, or the exception it raises",
+          "agent_path": false
+        },
+        {
+          "id": "agent",
+          "label": "Agent toolset call",
+          "capture_api": "pydantic_ai.mcp.MCPToolset.call_tool",
+          "capture_object": "the value the agent's tool executor receives",
+          "agent_path": true,
+          "limitation": "The toolset method is driven directly. The agent's own conversion of a raised ModelRetry into a RetryPromptPart happens above this boundary and is not captured here."
+        }
+      ],
       "current_version": "2.40.0",
       "stable_version": "2.40.0",
       "dev_version": null,
@@ -142,6 +210,24 @@
         "negotiated_mcp_spec_version": "2025-11-25",
         "protocol_version_evidence": "protocolVersion observed from the pinned @modelcontextprotocol/sdk client used by MCPClient.listTools"
       },
+      "result_boundaries": [
+        {
+          "id": "agent",
+          "label": "Agent tool invocation, onToolError: 'throw' (default)",
+          "capture_api": "@mastra/mcp tool action execute",
+          "capture_object": "the tool action return value, or the MastraError it throws",
+          "agent_path": true,
+          "limitation": "The tool action is executed directly. No AI SDK provider was bound and no provider request was captured."
+        },
+        {
+          "id": "agent_on_tool_error_return",
+          "label": "Agent tool invocation, onToolError: 'return'",
+          "capture_api": "@mastra/mcp tool action execute, server configured onToolError: 'return'",
+          "capture_object": "the CallToolResult envelope the action resolves with",
+          "agent_path": false,
+          "limitation": "This is a documented non-default server option, not the behaviour a caller gets without configuring it."
+        }
+      ],
       "current_version": "1.17.3",
       "stable_version": "1.17.3",
       "dev_version": null,

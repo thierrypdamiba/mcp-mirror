@@ -14,7 +14,7 @@ from typing import Any
 
 import anyio
 
-from ..models import RendererEvidence, ResultRep, ToolRep
+from ..models import RendererEvidence, ResultBoundary, ResultRep, ToolRep
 from ..normalize import normalize_framework_result, normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
@@ -93,25 +93,65 @@ class OpenAIAgentsRenderer:
                 reps.append(self._to_rep(function_tool))
             return reps
 
-    # Result capture boundary: `invoke_mcp_tool` returns the SDK's `ToolOutput`, which
-    # is exactly what the agent loop feeds back to the model.
-    result_capture_api = "agents.mcp.util.MCPUtil.invoke_mcp_tool"
-    result_capture_object = "the Agents SDK ToolOutput handed back to the model"
+    # `to_function_tool` wires `invoke_mcp_tool` in as the FunctionTool's
+    # `on_invoke_tool`, so the agent loop and the adapter helper run the same code.
+    # Both are published so the equality is a stated measurement rather than an
+    # assumption. `invoke_mcp_tool` does not raise on `isError`: it reads the flag
+    # only to decide whether structuredContent may be preferred, and the error text
+    # is emitted as an ordinary text output item.
+    DEFAULT_RESULT_BOUNDARY = "direct"
+
+    def result_boundaries(self) -> list[ResultBoundary]:
+        return [
+            ResultBoundary(
+                id="direct",
+                label="Adapter invocation helper",
+                capture_api="agents.mcp.util.MCPUtil.invoke_mcp_tool",
+                capture_object="the Agents SDK ToolOutput",
+                agent_path=False,
+            ),
+            ResultBoundary(
+                id="agent",
+                label="Agent tool invocation",
+                capture_api="agents.tool.FunctionTool.on_invoke_tool",
+                capture_object="the ToolOutput the agent loop feeds back to the model",
+                agent_path=True,
+                limitation=(
+                    "The FunctionTool callable is driven directly. No model "
+                    "implementation was bound and no provider request was captured."
+                ),
+            ),
+        ]
 
     def render_result(
-        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+        self,
+        server: ServerHandle,
+        tool: str,
+        arguments: dict[str, Any],
+        boundary: str | None = None,
     ) -> ResultRep:
         """Invoke one tool through the adapter and capture what the agent receives."""
 
-        return anyio.run(self._render_result_async, server, tool, arguments)
+        return anyio.run(
+            self._render_result_async,
+            server,
+            tool,
+            arguments,
+            boundary or self.DEFAULT_RESULT_BOUNDARY,
+        )
 
     async def _render_result_async(
-        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+        self, server: ServerHandle, tool: str, arguments: dict[str, Any], boundary: str
     ) -> ResultRep:
         import json as _json
 
         from agents.mcp.util import MCPUtil
         from agents.run_context import RunContextWrapper
+
+        if boundary not in {"direct", "agent"}:
+            raise RenderError(
+                f"openai_agents renderer has no result boundary {boundary!r}"
+            )
 
         mcp_server = self._build_server(server)
         async with mcp_server:
@@ -120,13 +160,21 @@ class OpenAIAgentsRenderer:
             )
             if mcp_tool is None:
                 raise RenderError(f"openai_agents renderer could not find tool {tool!r}")
+            context = RunContextWrapper(context=None)
             try:
-                output = await MCPUtil.invoke_mcp_tool(
-                    mcp_server, mcp_tool, RunContextWrapper(context=None), _json.dumps(arguments)
-                )
+                if boundary == "direct":
+                    output = await MCPUtil.invoke_mcp_tool(
+                        mcp_server, mcp_tool, context, _json.dumps(arguments)
+                    )
+                else:
+                    function_tool = MCPUtil.to_function_tool(mcp_tool, mcp_server, False)
+                    output = await function_tool.on_invoke_tool(
+                        context, _json.dumps(arguments)
+                    )
             except Exception as exc:  # noqa: BLE001 - the failure mode is the observation
-                # The SDK raises on a tool that reported `isError`, so the agent learns
-                # of the failure through an exception rather than a flag on a result.
+                # A transport or protocol failure surfaces here as an exception. An
+                # `isError` result does not: it returns as ordinary tool output, which
+                # is the finding this capture exists to record.
                 return normalize_framework_result(
                     tool=tool,
                     origin=self.id,

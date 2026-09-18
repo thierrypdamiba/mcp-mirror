@@ -20,7 +20,7 @@ from pathlib import Path
 
 from typing import Any
 
-from ..models import RendererEvidence, ResultRep, ToolRep
+from ..models import RendererEvidence, ResultBoundary, ResultRep, ToolRep
 from ..normalize import normalize_framework_result, normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
@@ -96,18 +96,57 @@ class MastraRenderer:
             reps.append(normalize_function_tool(tool_payload, origin=self.id))
         return reps
 
-    # Result capture boundary: direct tool-action execution before the surrounding
-    # agent serializes the result into a message.
-    result_capture_api = "@mastra/mcp tool action execute"
-    result_capture_object = "tool action return before agent-message serialization"
+    # `MCPClient.listTools` is what @mastra/mcp documents passing to `new Agent({tools})`,
+    # so a tool action's `execute` is the agent boundary; there is no separate direct
+    # path to compare it against. What does change the answer is the per-server
+    # `onToolError` option, typed `'throw' | 'return'` and defaulting to `'throw'`.
+    # Both settings are published because the default decides whether the agent sees a
+    # thrown MastraError or the server's CallToolResult with `isError` intact.
+    DEFAULT_RESULT_BOUNDARY = "agent"
+
+    def result_boundaries(self) -> list[ResultBoundary]:
+        return [
+            ResultBoundary(
+                id="agent",
+                label="Agent tool invocation, onToolError: 'throw' (default)",
+                capture_api="@mastra/mcp tool action execute",
+                capture_object="the tool action return value, or the MastraError it throws",
+                agent_path=True,
+                limitation=(
+                    "The tool action is executed directly. No AI SDK provider was "
+                    "bound and no provider request was captured."
+                ),
+            ),
+            ResultBoundary(
+                id="agent_on_tool_error_return",
+                label="Agent tool invocation, onToolError: 'return'",
+                capture_api="@mastra/mcp tool action execute, server configured onToolError: 'return'",
+                capture_object="the CallToolResult envelope the action resolves with",
+                agent_path=False,
+                limitation=(
+                    "This is a documented non-default server option, not the "
+                    "behaviour a caller gets without configuring it."
+                ),
+            ),
+        ]
 
     def render_result(
-        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+        self,
+        server: ServerHandle,
+        tool: str,
+        arguments: dict[str, Any],
+        boundary: str | None = None,
     ) -> ResultRep:
-        """Invoke one tool and capture the declared framework-result boundary."""
+        """Invoke one tool and capture one declared framework-result boundary."""
+
+        boundary = boundary or self.DEFAULT_RESULT_BOUNDARY
+        if boundary not in {"agent", "agent_on_tool_error_return"}:
+            raise RenderError(f"mastra renderer has no result boundary {boundary!r}")
 
         config = self._config(server)
         config["calls"] = [{"tool": tool, "arguments": arguments}]
+        if boundary == "agent_on_tool_error_return":
+            config["onToolError"] = "return"
         payload = self._run_worker(config)
 
         entry = next(

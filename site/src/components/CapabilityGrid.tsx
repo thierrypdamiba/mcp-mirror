@@ -146,20 +146,35 @@ export function CapabilityGrid({
                 const notes = support.noteRefs.length
                   ? `, notes ${support.noteRefs.join(", ")}`
                   : "";
+                // A cell whose answer changes with the result boundary says so on
+                // the cell, because the code alone cannot carry "it depends where
+                // you look" and a reader should not have to find that in prose.
+                const boundaryDependent =
+                  version.era === 0 &&
+                  Boolean(capability.boundary_dependent?.includes(agentId));
+                const boundaryNote = boundaryDependent
+                  ? ", depends on which result boundary is measured"
+                  : "";
 
                 return (
                   <div
                     className={`support-cell support-${support.code}${
                       version.era === 0 ? " is-current" : ""
-                    }`}
+                    }${boundaryDependent ? " is-boundary-dependent" : ""}`}
                     key={version.version}
                     data-agent-id={agentId}
                     data-current={version.era === 0 || undefined}
+                    data-boundary-dependent={boundaryDependent || undefined}
                     data-row-index={rowIndex}
                     data-version={version.version}
-                    title={`${agent.name} ${version.version}: ${SUPPORT_META[support.code].label}${notes}`}
-                    aria-label={`${agent.name} ${version.version}, ${SUPPORT_META[support.code].label}${notes}`}
+                    title={`${agent.name} ${version.version}: ${SUPPORT_META[support.code].label}${notes}${boundaryNote}`}
+                    aria-label={`${agent.name} ${version.version}, ${SUPPORT_META[support.code].label}${notes}${boundaryNote}`}
                   >
+                    {boundaryDependent ? (
+                      <span className="boundary-flag" aria-hidden="true">
+                        boundary
+                      </span>
+                    ) : null}
                     {support.noteRefs.length ? (
                       <sup className="support-note-refs">
                         {support.noteRefs.map((noteRef) => (

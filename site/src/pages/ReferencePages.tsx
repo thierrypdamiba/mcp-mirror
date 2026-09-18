@@ -7,8 +7,50 @@ import {
   shortDate,
   titleCaseRule,
 } from "../lib/data";
-import type {Capability, MirrorDatabase, SupportCode} from "../types";
+import type {
+  Capability,
+  MirrorDatabase,
+  ResultBoundary,
+  SupportCode,
+} from "../types";
 import {ArrowUpRightIcon, ChevronRightIcon} from "../components/Icons";
+
+/**
+ * Every result boundary a framework was asked at, with the agent's one marked.
+ *
+ * A framework can answer differently depending on whether its tool object is
+ * invoked directly or through its own agent path, so publishing a single result
+ * boundary can describe something no agent does.
+ */
+function BoundaryList({boundaries}: {boundaries?: ResultBoundary[]}) {
+  if (!boundaries?.length) {
+    return null;
+  }
+  return (
+    <div className="result-boundaries">
+      <p className="result-boundaries-title">
+        Result capture{boundaries.length > 1 ? ` (${boundaries.length} boundaries)` : ""}
+      </p>
+      <ul>
+        {boundaries.map((boundary) => (
+          <li
+            className={boundary.agent_path ? "is-agent-path" : undefined}
+            key={boundary.id}
+          >
+            <span className="result-boundary-label">
+              {boundary.label}
+              {boundary.agent_path ? (
+                <Chip size="sm" variant="soft">agent path</Chip>
+              ) : null}
+            </span>
+            <code>{boundary.capture_api}</code>
+            <small>{boundary.capture_object}</small>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 function PageIntro({
   eyebrow,
@@ -152,9 +194,10 @@ export function FrameworkComparison({
               </div>
               <p className="adapter-name">{agent.adapter}</p>
               <p className="adapter-name">
-                Capture: {agent.capture_boundary.capture_api} →{" "}
+                Definition capture: {agent.capture_boundary.capture_api} →{" "}
                 {agent.capture_boundary.capture_object}
               </p>
+              <BoundaryList boundaries={agent.result_boundaries} />
               <p className="adapter-name">
                 Provider request:{" "}
                 {agent.capture_boundary.provider_request_captured

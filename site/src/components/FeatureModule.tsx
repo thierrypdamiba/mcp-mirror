@@ -178,6 +178,10 @@ export function FeatureModule({
     });
     return references;
   }, [capability, database.agents]);
+  // Cells the data marks as answering differently at different result boundaries.
+  const boundaryDependent = (capability.boundary_dependent ?? [])
+    .map((agentId) => [agentId, database.agents[agentId]] as const)
+    .filter(([, agent]) => Boolean(agent));
   const issues = capability.known_issues ?? [];
   const resources = capability.links ?? [];
   const issueUrl = useMemo(
@@ -375,6 +379,19 @@ export function FeatureModule({
           <Tabs.Panel id="notes">
             <div className="feature-panel-content">
               {capability.notes ? <p><InlineCode text={capability.notes} /></p> : null}
+              {boundaryDependent.length ? (
+                <p className="boundary-dependent-callout">
+                  <strong>Depends on the result boundary.</strong>{" "}
+                  {boundaryDependent
+                    .map(([, agent]) => agent.name)
+                    .join(", ")}{" "}
+                  {boundaryDependent.length === 1 ? "answers" : "answer"} this
+                  differently depending on whether the tool is invoked directly or
+                  through the framework&apos;s own agent path. Both boundaries are
+                  listed on the Frameworks page; the note below says what each one
+                  yields.
+                </p>
+              ) : null}
               {notes.length ? (
                 <ul className="numbered-notes">
                   {notes.map(([number, note]) => {

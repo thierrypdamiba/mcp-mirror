@@ -94,7 +94,9 @@ PUBLISHED_CODE_OVERRIDES = {
         "resource-link-content": "u",
         "content-annotations": "u",
         "structured-content": "n",
-        "tool-execution-errors": "n",
+        # Boundary-dependent: gone through a direct invocation, present as
+        # ToolMessage.status == "error" through the invocation an agent makes.
+        "tool-execution-errors": "a",
     },
     "openai-agents": {
         "tool-icons": "n",
@@ -281,6 +283,94 @@ def test_published_boundaries_match_installed_renderers():
             mode="json",
             exclude={"limitation"},
         )
+
+
+@pytest.mark.skipif(not RENDERERS, reason="no framework renderers installed")
+@pytest.mark.parametrize("renderer_id", sorted(RENDERERS))
+def test_published_result_boundaries_match_installed_renderers(renderer_id):
+    """The site's result boundaries are the renderer's, not a prose description.
+
+    The published capture boundary used to describe only where a tool *definition*
+    was read, so a result cell could be measured somewhere the site never named.
+    Pinning the published list to the renderer's own declaration is what stops that
+    from happening again silently.
+    """
+
+    published = json.loads(FRAMEWORK_DATA.read_text())["agents"]
+    renderer = RENDERERS[renderer_id]
+    declared = [
+        boundary.model_dump(mode="json", exclude_none=True)
+        for boundary in renderer.result_boundaries()
+    ]
+
+    assert published[PUBLISHED_IDS[renderer_id]]["result_boundaries"] == declared
+    assert sum(1 for boundary in declared if boundary["agent_path"]) == 1
+
+
+@pytest.mark.skipif(not RENDERERS, reason="no framework renderers installed")
+@pytest.mark.parametrize("renderer_id", sorted(RENDERERS))
+def test_every_declared_result_boundary_can_actually_be_captured(renderer_id):
+    """A declared boundary that cannot be driven is a claim, not a measurement."""
+
+    renderer = RENDERERS[renderer_id]
+    handle = _handle()
+    tool = "src_delete_account" if renderer_id == "mastra" else "delete_account"
+
+    for boundary in renderer.result_boundaries():
+        rep = renderer.render_result(
+            handle, tool.removeprefix("src_"), {"account_id": "a", "confirm": False}, boundary.id
+        )
+        assert rep.tool
+        assert rep.origin == renderer.id
+
+
+@pytest.mark.skipif(
+    "langchain" not in RENDERERS,
+    reason="langchain renderer not installed",
+)
+def test_langchain_result_boundaries_disagree_about_the_error_flag():
+    """The measurement this row was corrected for, pinned as a regression test.
+
+    ``langchain-mcp-adapters`` builds its tool with ``handle_tool_error``, so an
+    ``isError`` result reaches a direct caller as ordinary content blocks and reaches
+    an agent as a ``ToolMessage`` with ``status="error"``. Publishing only the first
+    reported the flag as dropped. Both are asserted here so a future change that
+    collapses them is visible rather than quietly re-breaking the cell.
+    """
+
+    renderer = RENDERERS["langchain"]
+    handle = _handle()
+    arguments = {"account_id": "a", "confirm": False}
+
+    direct = renderer.render_result(handle, "delete_account", arguments, "direct")
+    agent = renderer.render_result(handle, "delete_account", arguments, "agent")
+
+    assert direct.is_error is None, "direct invocation still carries no failure signal"
+    assert agent.is_error is True, "the agent boundary must expose the failure"
+    assert "SENTINEL_TOOL_ERROR" in (agent.text or "")
+    assert 'status=\'error\'' in str(agent.raw)
+
+
+@pytest.mark.skipif(not RENDERERS, reason="no framework renderers installed")
+def test_boundary_dependent_cells_name_an_agent_that_publishes_two_boundaries():
+    """Only a framework with more than one result boundary can depend on one."""
+
+    published = json.loads(FRAMEWORK_DATA.read_text())["agents"]
+    capability_dir = FRAMEWORK_DATA.parent / "capabilities"
+
+    for path in sorted(capability_dir.glob("*.json")):
+        capability = json.loads(path.read_text())
+        for framework_id in capability.get("boundary_dependent") or []:
+            agent = published[framework_id]
+            assert len(agent["result_boundaries"]) >= 2, (
+                f"{capability['id']} / {framework_id}: marked boundary-dependent but "
+                "only one result boundary is published"
+            )
+            cell = capability["stats"][framework_id][agent["current_version"]]
+            assert cell.split()[0] == "a", (
+                f"{capability['id']} / {framework_id}: a boundary-dependent cell must "
+                f"be 'a', found {cell!r}"
+            )
 
 
 def test_published_current_cells_match_fixture_goldens():

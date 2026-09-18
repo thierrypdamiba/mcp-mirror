@@ -34,6 +34,7 @@
     "3": "OpenAI Agents: structuredContent is dropped; only the text mirror reaches the agent.",
     "4": "Pydantic AI: structuredContent is dropped; only the text mirror reaches the agent."
   },
+  "boundary_dependent": [],
   "verdict": {
     "code": "n",
     "headline": "Reaches the agent at one boundary of five, and there by dropping all other content.",
@@ -50,9 +51,9 @@
   ],
   "known_issues": [],
   "why": "The spec asks servers to mirror structured results into a text block for backwards compatibility. That mirror makes a dropped `structuredContent` invisible: the call still looks successful, and typed data quietly becomes a string the model has to re-parse.",
-  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "reproduce": "uv run python scripts/measure_result_boundaries.py",
   "measured": {
-    "run_date": "2026-09-14",
+    "run_date": "2026-09-18",
     "mcp_spec": "2025-11-25",
     "fixture": "fixtures/tricky_server.py"
   },

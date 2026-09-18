@@ -35,6 +35,7 @@
     "3": "Pydantic AI: reduced to a bare text block containing only the uri. The link's name and description are gone.",
     "4": "Mastra: all content blocks are dropped, resource links included."
   },
+  "boundary_dependent": [],
   "verdict": {
     "code": "a",
     "headline": "Survives as text at two boundaries, dropped at two.",
@@ -51,9 +52,9 @@
   ],
   "known_issues": [],
   "why": "Resource links are how a large result stays out of the context window until something asks for it. A framework that flattens the link to text keeps the URI as prose and loses the ability to fetch what it points at.",
-  "reproduce": "uv run python scripts/measure_2025_results.py",
+  "reproduce": "uv run python scripts/measure_result_boundaries.py",
   "measured": {
-    "run_date": "2026-09-14",
+    "run_date": "2026-09-18",
     "mcp_spec": "2025-11-25",
     "fixture": "fixtures/tricky_server.py"
   },

@@ -10,7 +10,7 @@ from __future__ import annotations
 from importlib import util
 from typing import Any
 
-from ..models import RendererEvidence, ResultRep, ToolRep
+from ..models import RendererEvidence, ResultBoundary, ResultRep, ToolRep
 from ..normalize import normalize_framework_result, normalize_function_tool
 from ..source import ServerHandle
 from . import RenderError
@@ -111,20 +111,49 @@ class CrewAIRenderer:
         self._negotiated_mcp_spec_version = observed.pop()
         return reps
 
-    # Result capture boundary: direct BaseTool.run invocation. CrewAI may also
-    # emit execution events around this return, so this is not claimed as the
-    # complete agent-runtime boundary.
-    result_capture_api = "crewai.tools.BaseTool.run"
-    result_capture_object = (
-        "direct tool return before surrounding agent event/message handling"
-    )
+    # CrewAI's agent runtime reaches a tool through ToolUsage, which calls
+    # CrewStructuredTool.invoke rather than BaseTool.run. Both are published because
+    # they are genuinely different entry points, even though the adapter's own
+    # CrewAIMCPTool._run reads only `result.content` and never `result.isError`, so
+    # nothing downstream of it can reconstruct a signal it already discarded.
+    DEFAULT_RESULT_BOUNDARY = "direct"
+
+    def result_boundaries(self) -> list[ResultBoundary]:
+        return [
+            ResultBoundary(
+                id="direct",
+                label="Direct tool invocation",
+                capture_api="crewai.tools.BaseTool.run",
+                capture_object="the tool return value",
+                agent_path=False,
+            ),
+            ResultBoundary(
+                id="agent",
+                label="Agent tool invocation",
+                capture_api="crewai.tools.structured_tool.CrewStructuredTool.invoke",
+                capture_object="the value ToolUsage hands back during a crew run",
+                agent_path=True,
+                limitation=(
+                    "CrewStructuredTool.invoke is driven directly. No LLM was bound "
+                    "and no crew was kicked off."
+                ),
+            ),
+        ]
 
     def render_result(
-        self, server: ServerHandle, tool: str, arguments: dict[str, Any]
+        self,
+        server: ServerHandle,
+        tool: str,
+        arguments: dict[str, Any],
+        boundary: str | None = None,
     ) -> ResultRep:
-        """Invoke one tool and capture the declared framework-result boundary."""
+        """Invoke one tool and capture one declared framework-result boundary."""
 
         from crewai_tools import MCPServerAdapter
+
+        boundary = boundary or self.DEFAULT_RESULT_BOUNDARY
+        if boundary not in {"direct", "agent"}:
+            raise RenderError(f"crewai renderer has no result boundary {boundary!r}")
 
         params = self._build_params(server)
         with MCPServerAdapter(params) as tools:
@@ -135,7 +164,10 @@ class CrewAIRenderer:
                     f"crewai renderer found no tool named {tool!r} (has: {available})"
                 )
             try:
-                returned = target.run(**arguments)
+                if boundary == "direct":
+                    returned = target.run(**arguments)
+                else:
+                    returned = target.to_structured_tool().invoke(input=dict(arguments))
             except Exception as exc:  # noqa: BLE001 - the failure mode is the observation
                 # A tool that reported failure through `isError` may surface here as a
                 # raised exception instead. That is a different contract for the agent,

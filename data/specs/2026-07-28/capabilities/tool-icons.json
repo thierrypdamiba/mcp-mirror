@@ -37,7 +37,7 @@
   },
   "verdict": {
     "code": "n",
-    "headline": "Destroyed by both adapters that reach 2026-07-28.",
+    "headline": "Absent from the tool definition in both adapters that reach 2026-07-28.",
     "detail": "Pydantic AI models icons for resources but not for tools, so the omission is specific to the tool definition rather than a gap in its MCP typing. CrewAI, LangChain and Mastra cannot negotiate MCP 2026-07-28, so they reach none of it."
   },
   "usage_perc_y": null,
@@ -60,5 +60,6 @@
   "shown": true,
   "spec_label": "MCP 2026-07-28",
   "docs_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#tool",
-  "docs_label": "MCP Docs"
+  "docs_label": "MCP Docs",
+  "boundary_dependent": []
 }

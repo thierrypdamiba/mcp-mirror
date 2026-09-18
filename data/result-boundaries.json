@@ -1,0 +1,2655 @@
+{
+  "schema": "mcp-mirror/result-boundaries@1",
+  "captured_at": "2026-09-18T19:51:03Z",
+  "fixture": "fixtures/tricky_server.py",
+  "fixture_python": "/tmp/mcp-mirror-pub/.venv/bin/python",
+  "calls": [
+    {
+      "tool": "search_records",
+      "arguments": {
+        "query": "x",
+        "status": "active",
+        "owner_email": "a@b.com",
+        "created_after": "2026-01-01T00:00:00Z",
+        "limit": 5
+      }
+    },
+    {
+      "tool": "delete_account",
+      "arguments": {
+        "account_id": "a",
+        "confirm": false
+      }
+    }
+  ],
+  "frameworks": {
+    "crewai": {
+      "ok": true,
+      "versions": {
+        "framework": "1.15.1",
+        "adapter": "1.15.1"
+      },
+      "evidence": {
+        "capture_api": "crewai_tools.MCPServerAdapter",
+        "capture_object": "CrewAI BaseTool name, description, and args_schema",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion instrumented from ClientSession.initialize inside MCPServerAdapter",
+        "limitation": "No CrewAI LLM serializer or serialized provider request was captured."
+      },
+      "result_boundaries": [
+        {
+          "id": "direct",
+          "label": "Direct tool invocation",
+          "capture_api": "crewai.tools.BaseTool.run",
+          "capture_object": "the tool return value",
+          "agent_path": false,
+          "limitation": null
+        },
+        {
+          "id": "agent",
+          "label": "Agent tool invocation",
+          "capture_api": "crewai.tools.structured_tool.CrewStructuredTool.invoke",
+          "capture_object": "the value ToolUsage hands back during a crew run",
+          "agent_path": true,
+          "limitation": "CrewStructuredTool.invoke is driven directly. No LLM was bound and no crew was kicked off."
+        }
+      ],
+      "reps": [
+        {
+          "name": "search_records",
+          "description": "Tool Name: search_records\nTool Arguments: {'additionalProperties': False, 'properties': {'query': {'description': 'Full-text search query.', 'title': 'Query', 'type': 'string'}, 'status': {'anyOf': [{'enum': ['active', 'archived', 'pending', 'deleted'], 'type': 'string'}, {'type': 'null'}], 'default': None, 'description': 'Filter by record status.', 'title': 'Status'}, 'owner_email': {'anyOf': [{'format': 'email', 'type': 'string'}, {'type': 'null'}], 'default': None, 'description': 'Restrict to records owned by this email address.', 'title': 'Owner Email'}, 'created_after': {'anyOf': [{'format': 'date-time', 'type': 'string'}, {'type': 'null'}], 'default': None, 'description': 'Only records created at or after this RFC 3339 timestamp.', 'title': 'Created After'}, 'limit': {'anyOf': [{'maximum': 100, 'minimum': 1, 'type': 'integer'}, {'type': 'null'}], 'default': 20, 'description': 'Maximum number of records to return.', 'title': 'Limit'}}, 'required': ['query'], 'title': 'DynamicModel', 'type': 'object'}\nTool Description: Search records with optional filters. Read-only.",
+          "params": {
+            "additionalProperties": false,
+            "properties": {
+              "query": {
+                "description": "Full-text search query.",
+                "title": "Query",
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "active",
+                      "archived",
+                      "pending",
+                      "deleted"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Filter by record status.",
+                "title": "Status"
+              },
+              "owner_email": {
+                "anyOf": [
+                  {
+                    "format": "email",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Restrict to records owned by this email address.",
+                "title": "Owner Email"
+              },
+              "created_after": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Only records created at or after this RFC 3339 timestamp.",
+                "title": "Created After"
+              },
+              "limit": {
+                "anyOf": [
+                  {
+                    "maximum": 100,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": 20,
+                "description": "Maximum number of records to return.",
+                "title": "Limit"
+              }
+            },
+            "required": [
+              "query"
+            ],
+            "title": "DynamicModel",
+            "type": "object"
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {},
+          "origin": "crewai",
+          "raw": {
+            "name": "search_records",
+            "description": "Tool Name: search_records\nTool Arguments: {'additionalProperties': False, 'properties': {'query': {'description': 'Full-text search query.', 'title': 'Query', 'type': 'string'}, 'status': {'anyOf': [{'enum': ['active', 'archived', 'pending', 'deleted'], 'type': 'string'}, {'type': 'null'}], 'default': None, 'description': 'Filter by record status.', 'title': 'Status'}, 'owner_email': {'anyOf': [{'format': 'email', 'type': 'string'}, {'type': 'null'}], 'default': None, 'description': 'Restrict to records owned by this email address.', 'title': 'Owner Email'}, 'created_after': {'anyOf': [{'format': 'date-time', 'type': 'string'}, {'type': 'null'}], 'default': None, 'description': 'Only records created at or after this RFC 3339 timestamp.', 'title': 'Created After'}, 'limit': {'anyOf': [{'maximum': 100, 'minimum': 1, 'type': 'integer'}, {'type': 'null'}], 'default': 20, 'description': 'Maximum number of records to return.', 'title': 'Limit'}}, 'required': ['query'], 'title': 'DynamicModel', 'type': 'object'}\nTool Description: Search records with optional filters. Read-only.",
+            "parameters": {
+              "additionalProperties": false,
+              "properties": {
+                "query": {
+                  "description": "Full-text search query.",
+                  "title": "Query",
+                  "type": "string"
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "active",
+                        "archived",
+                        "pending",
+                        "deleted"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Filter by record status.",
+                  "title": "Status"
+                },
+                "owner_email": {
+                  "anyOf": [
+                    {
+                      "format": "email",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Restrict to records owned by this email address.",
+                  "title": "Owner Email"
+                },
+                "created_after": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Only records created at or after this RFC 3339 timestamp.",
+                  "title": "Created After"
+                },
+                "limit": {
+                  "anyOf": [
+                    {
+                      "maximum": 100,
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": 20,
+                  "description": "Maximum number of records to return.",
+                  "title": "Limit"
+                }
+              },
+              "required": [
+                "query"
+              ],
+              "title": "DynamicModel",
+              "type": "object"
+            }
+          }
+        },
+        {
+          "name": "create_report",
+          "description": "Tool Name: create_report\nTool Arguments: {'additionalProperties': False, 'properties': {'title': {'description': 'Report title.', 'title': 'Title', 'type': 'string'}, 'config': {'$ref': '#/$defs/Config', 'description': 'Rendering configuration.'}, 'sections': {'anyOf': [{'items': {'$ref': '#/$defs/Sections'}, 'type': 'array'}, {'type': 'null'}], 'default': None, 'description': 'Ordered report sections.', 'title': 'Sections'}}, 'required': ['title', 'config'], 'title': 'DynamicModel', 'type': 'object'}\nTool Description: Create a structured report from sections.",
+          "params": {
+            "$defs": {
+              "Config": {
+                "additionalProperties": false,
+                "properties": {
+                  "format": {
+                    "description": "Output format.",
+                    "enum": [
+                      "pdf",
+                      "html",
+                      "csv"
+                    ],
+                    "title": "Format",
+                    "type": "string"
+                  },
+                  "include_summary": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Whether to prepend an executive summary.",
+                    "title": "Include Summary"
+                  }
+                },
+                "required": [
+                  "format"
+                ],
+                "title": "Config",
+                "type": "object"
+              },
+              "Sections": {
+                "additionalProperties": false,
+                "properties": {
+                  "heading": {
+                    "description": "Section heading.",
+                    "title": "Heading",
+                    "type": "string"
+                  },
+                  "body": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Section body in markdown.",
+                    "title": "Body"
+                  }
+                },
+                "required": [
+                  "heading"
+                ],
+                "title": "Sections",
+                "type": "object"
+              }
+            },
+            "additionalProperties": false,
+            "properties": {
+              "title": {
+                "description": "Report title.",
+                "title": "Title",
+                "type": "string"
+              },
+              "config": {
+                "$ref": "#/$defs/Config",
+                "description": "Rendering configuration."
+              },
+              "sections": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "$ref": "#/$defs/Sections"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Ordered report sections.",
+                "title": "Sections"
+              }
+            },
+            "required": [
+              "title",
+              "config"
+            ],
+            "title": "DynamicModel",
+            "type": "object"
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {},
+          "origin": "crewai",
+          "raw": {
+            "name": "create_report",
+            "description": "Tool Name: create_report\nTool Arguments: {'additionalProperties': False, 'properties': {'title': {'description': 'Report title.', 'title': 'Title', 'type': 'string'}, 'config': {'$ref': '#/$defs/Config', 'description': 'Rendering configuration.'}, 'sections': {'anyOf': [{'items': {'$ref': '#/$defs/Sections'}, 'type': 'array'}, {'type': 'null'}], 'default': None, 'description': 'Ordered report sections.', 'title': 'Sections'}}, 'required': ['title', 'config'], 'title': 'DynamicModel', 'type': 'object'}\nTool Description: Create a structured report from sections.",
+            "parameters": {
+              "$defs": {
+                "Config": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "format": {
+                      "description": "Output format.",
+                      "enum": [
+                        "pdf",
+                        "html",
+                        "csv"
+                      ],
+                      "title": "Format",
+                      "type": "string"
+                    },
+                    "include_summary": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Whether to prepend an executive summary.",
+                      "title": "Include Summary"
+                    }
+                  },
+                  "required": [
+                    "format"
+                  ],
+                  "title": "Config",
+                  "type": "object"
+                },
+                "Sections": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "heading": {
+                      "description": "Section heading.",
+                      "title": "Heading",
+                      "type": "string"
+                    },
+                    "body": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Section body in markdown.",
+                      "title": "Body"
+                    }
+                  },
+                  "required": [
+                    "heading"
+                  ],
+                  "title": "Sections",
+                  "type": "object"
+                }
+              },
+              "additionalProperties": false,
+              "properties": {
+                "title": {
+                  "description": "Report title.",
+                  "title": "Title",
+                  "type": "string"
+                },
+                "config": {
+                  "$ref": "#/$defs/Config",
+                  "description": "Rendering configuration."
+                },
+                "sections": {
+                  "anyOf": [
+                    {
+                      "items": {
+                        "$ref": "#/$defs/Sections"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Ordered report sections.",
+                  "title": "Sections"
+                }
+              },
+              "required": [
+                "title",
+                "config"
+              ],
+              "title": "DynamicModel",
+              "type": "object"
+            }
+          }
+        },
+        {
+          "name": "deliver_payload",
+          "description": "Tool Name: deliver_payload\nTool Arguments: {'additionalProperties': False, 'properties': {'destination': {'anyOf': [{'type': 'string'}, {'$ref': '#/$defs/DestinationOption1'}], 'description': 'Where to deliver the payload.', 'title': 'Destination'}, 'mode': {'anyOf': [{'const': 'sync', 'type': 'string'}, {'const': 'async', 'type': 'string'}, {'type': 'null'}], 'default': None, 'description': 'Delivery mode.', 'title': 'Mode'}}, 'required': ['destination'], 'title': 'DynamicModel', 'type': 'object'}\nTool Description: Deliver a payload to a destination.",
+          "params": {
+            "$defs": {
+              "DestinationOption1": {
+                "additionalProperties": false,
+                "properties": {
+                  "bucket": {
+                    "title": "Bucket",
+                    "type": "string"
+                  },
+                  "key": {
+                    "title": "Key",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "bucket",
+                  "key"
+                ],
+                "title": "DestinationOption1",
+                "type": "object"
+              }
+            },
+            "additionalProperties": false,
+            "properties": {
+              "destination": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/DestinationOption1"
+                  }
+                ],
+                "description": "Where to deliver the payload.",
+                "title": "Destination"
+              },
+              "mode": {
+                "anyOf": [
+                  {
+                    "const": "sync",
+                    "type": "string"
+                  },
+                  {
+                    "const": "async",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Delivery mode.",
+                "title": "Mode"
+              }
+            },
+            "required": [
+              "destination"
+            ],
+            "title": "DynamicModel",
+            "type": "object"
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {},
+          "origin": "crewai",
+          "raw": {
+            "name": "deliver_payload",
+            "description": "Tool Name: deliver_payload\nTool Arguments: {'additionalProperties': False, 'properties': {'destination': {'anyOf': [{'type': 'string'}, {'$ref': '#/$defs/DestinationOption1'}], 'description': 'Where to deliver the payload.', 'title': 'Destination'}, 'mode': {'anyOf': [{'const': 'sync', 'type': 'string'}, {'const': 'async', 'type': 'string'}, {'type': 'null'}], 'default': None, 'description': 'Delivery mode.', 'title': 'Mode'}}, 'required': ['destination'], 'title': 'DynamicModel', 'type': 'object'}\nTool Description: Deliver a payload to a destination.",
+            "parameters": {
+              "$defs": {
+                "DestinationOption1": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "bucket": {
+                      "title": "Bucket",
+                      "type": "string"
+                    },
+                    "key": {
+                      "title": "Key",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "bucket",
+                    "key"
+                  ],
+                  "title": "DestinationOption1",
+                  "type": "object"
+                }
+              },
+              "additionalProperties": false,
+              "properties": {
+                "destination": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/$defs/DestinationOption1"
+                    }
+                  ],
+                  "description": "Where to deliver the payload.",
+                  "title": "Destination"
+                },
+                "mode": {
+                  "anyOf": [
+                    {
+                      "const": "sync",
+                      "type": "string"
+                    },
+                    {
+                      "const": "async",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Delivery mode.",
+                  "title": "Mode"
+                }
+              },
+              "required": [
+                "destination"
+              ],
+              "title": "DynamicModel",
+              "type": "object"
+            }
+          }
+        },
+        {
+          "name": "delete_account",
+          "description": "Tool Name: delete_account\nTool Arguments: {'additionalProperties': False, 'properties': {'account_id': {'description': 'The id of the account to delete.', 'title': 'Account Id', 'type': 'string'}, 'confirm': {'description': 'Must be true to proceed with the deletion.', 'title': 'Confirm', 'type': 'boolean'}}, 'required': ['account_id', 'confirm'], 'title': 'DynamicModel', 'type': 'object'}\nTool Description: Permanently deletes a user account and all of its associated data. This action is destructive and irreversible: it cannot be undone, and it requires elevated admin scope (accounts:delete). Use with extreme caution.",
+          "params": {
+            "additionalProperties": false,
+            "properties": {
+              "account_id": {
+                "description": "The id of the account to delete.",
+                "title": "Account Id",
+                "type": "string"
+              },
+              "confirm": {
+                "description": "Must be true to proceed with the deletion.",
+                "title": "Confirm",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "account_id",
+              "confirm"
+            ],
+            "title": "DynamicModel",
+            "type": "object"
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {},
+          "origin": "crewai",
+          "raw": {
+            "name": "delete_account",
+            "description": "Tool Name: delete_account\nTool Arguments: {'additionalProperties': False, 'properties': {'account_id': {'description': 'The id of the account to delete.', 'title': 'Account Id', 'type': 'string'}, 'confirm': {'description': 'Must be true to proceed with the deletion.', 'title': 'Confirm', 'type': 'boolean'}}, 'required': ['account_id', 'confirm'], 'title': 'DynamicModel', 'type': 'object'}\nTool Description: Permanently deletes a user account and all of its associated data. This action is destructive and irreversible: it cannot be undone, and it requires elevated admin scope (accounts:delete). Use with extreme caution.",
+            "parameters": {
+              "additionalProperties": false,
+              "properties": {
+                "account_id": {
+                  "description": "The id of the account to delete.",
+                  "title": "Account Id",
+                  "type": "string"
+                },
+                "confirm": {
+                  "description": "Must be true to proceed with the deletion.",
+                  "title": "Confirm",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "account_id",
+                "confirm"
+              ],
+              "title": "DynamicModel",
+              "type": "object"
+            }
+          }
+        },
+        {
+          "name": "explain_topic",
+          "description": "Tool Name: explain_topic\nTool Arguments: {'additionalProperties': False, 'properties': {'topic': {'description': 'The subject to explain (supports Unicode: caf\u00e9, na\u00efve, \u65e5\u672c\u8a9e).', 'title': 'Topic', 'type': 'string'}, 'max_words': {'anyOf': [{'minimum': 1, 'type': 'integer'}, {'type': 'null'}], 'default': None, 'description': 'Soft cap on the explanation length.', 'title': 'Max Words'}}, 'required': ['topic'], 'title': 'DynamicModel', 'type': 'object'}\nTool Description: Explain a topic in depth for a curious reader. This description is deliberately very long (over 1024 characters) so that adapters which truncate tool descriptions to fit a model's function-description limit can be detected by mcp-mirror. It also contains Unicode and special characters to verify they survive the round trip: accented words like caf\u00e9, na\u00efve, r\u00e9sum\u00e9, jalape\u00f1o, and Z\u00fcrich; non-Latin scripts such as \u65e5\u672c\u8a9e (Japanese), \u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac (Greek), and \u041a\u0438\u0440\u0438\u043b\u043b\u0438\u0446\u0430 (Cyrillic); mathematical symbols \u2211 \u222b \u2248 \u2260 \u221e \u2286 \u2295; currency signs \u20ac \u00a3 \u00a5 \u20bf; smart punctuation \u201ccurly quotes\u201d, \u2018single quotes\u2019, an em-dash, an en\u2013dash, and an ellipsis\u2026; plus a few emoji \ud83d\udd10 \ud83d\ude80 \u2705 for good measure. The reader should receive a structured, well-paced explanation that starts from first principles, introduces the key vocabulary, walks through one concrete worked example, names the most common misconceptions, and then points to where to learn more. Keep the tone precise and friendly. Prefer short sentences. Define every term of art the first time it appears, and never assume the reader has seen the topic before. End with a one-paragraph recap that a busy person could read on its own and still come away with the single most important idea. SENTINEL_END_OF_LONG_DESCRIPTION.",
+          "params": {
+            "additionalProperties": false,
+            "properties": {
+              "topic": {
+                "description": "The subject to explain (supports Unicode: caf\u00e9, na\u00efve, \u65e5\u672c\u8a9e).",
+                "title": "Topic",
+                "type": "string"
+              },
+              "max_words": {
+                "anyOf": [
+                  {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Soft cap on the explanation length.",
+                "title": "Max Words"
+              }
+            },
+            "required": [
+              "topic"
+            ],
+            "title": "DynamicModel",
+            "type": "object"
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {},
+          "origin": "crewai",
+          "raw": {
+            "name": "explain_topic",
+            "description": "Tool Name: explain_topic\nTool Arguments: {'additionalProperties': False, 'properties': {'topic': {'description': 'The subject to explain (supports Unicode: caf\u00e9, na\u00efve, \u65e5\u672c\u8a9e).', 'title': 'Topic', 'type': 'string'}, 'max_words': {'anyOf': [{'minimum': 1, 'type': 'integer'}, {'type': 'null'}], 'default': None, 'description': 'Soft cap on the explanation length.', 'title': 'Max Words'}}, 'required': ['topic'], 'title': 'DynamicModel', 'type': 'object'}\nTool Description: Explain a topic in depth for a curious reader. This description is deliberately very long (over 1024 characters) so that adapters which truncate tool descriptions to fit a model's function-description limit can be detected by mcp-mirror. It also contains Unicode and special characters to verify they survive the round trip: accented words like caf\u00e9, na\u00efve, r\u00e9sum\u00e9, jalape\u00f1o, and Z\u00fcrich; non-Latin scripts such as \u65e5\u672c\u8a9e (Japanese), \u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac (Greek), and \u041a\u0438\u0440\u0438\u043b\u043b\u0438\u0446\u0430 (Cyrillic); mathematical symbols \u2211 \u222b \u2248 \u2260 \u221e \u2286 \u2295; currency signs \u20ac \u00a3 \u00a5 \u20bf; smart punctuation \u201ccurly quotes\u201d, \u2018single quotes\u2019, an em-dash, an en\u2013dash, and an ellipsis\u2026; plus a few emoji \ud83d\udd10 \ud83d\ude80 \u2705 for good measure. The reader should receive a structured, well-paced explanation that starts from first principles, introduces the key vocabulary, walks through one concrete worked example, names the most common misconceptions, and then points to where to learn more. Keep the tone precise and friendly. Prefer short sentences. Define every term of art the first time it appears, and never assume the reader has seen the topic before. End with a one-paragraph recap that a busy person could read on its own and still come away with the single most important idea. SENTINEL_END_OF_LONG_DESCRIPTION.",
+            "parameters": {
+              "additionalProperties": false,
+              "properties": {
+                "topic": {
+                  "description": "The subject to explain (supports Unicode: caf\u00e9, na\u00efve, \u65e5\u672c\u8a9e).",
+                  "title": "Topic",
+                  "type": "string"
+                },
+                "max_words": {
+                  "anyOf": [
+                    {
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Soft cap on the explanation length.",
+                  "title": "Max Words"
+                }
+              },
+              "required": [
+                "topic"
+              ],
+              "title": "DynamicModel",
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "tool": "search_records",
+          "boundary": "direct",
+          "ok": true,
+          "rep": {
+            "tool": "search_records",
+            "blocks": [],
+            "block_kinds": [],
+            "structured_content": null,
+            "is_error": null,
+            "text": "['SENTINEL_TEXT_BLOCK']",
+            "origin": "crewai",
+            "raw": "['SENTINEL_TEXT_BLOCK']"
+          }
+        },
+        {
+          "tool": "search_records",
+          "boundary": "agent",
+          "ok": true,
+          "rep": {
+            "tool": "search_records",
+            "blocks": [],
+            "block_kinds": [],
+            "structured_content": null,
+            "is_error": null,
+            "text": "['SENTINEL_TEXT_BLOCK']",
+            "origin": "crewai",
+            "raw": "['SENTINEL_TEXT_BLOCK']"
+          }
+        },
+        {
+          "tool": "delete_account",
+          "boundary": "direct",
+          "ok": true,
+          "rep": {
+            "tool": "delete_account",
+            "blocks": [],
+            "block_kinds": [],
+            "structured_content": null,
+            "is_error": null,
+            "text": "SENTINEL_TOOL_ERROR: confirm was not set",
+            "origin": "crewai",
+            "raw": "SENTINEL_TOOL_ERROR: confirm was not set"
+          }
+        },
+        {
+          "tool": "delete_account",
+          "boundary": "agent",
+          "ok": true,
+          "rep": {
+            "tool": "delete_account",
+            "blocks": [],
+            "block_kinds": [],
+            "structured_content": null,
+            "is_error": null,
+            "text": "SENTINEL_TOOL_ERROR: confirm was not set",
+            "origin": "crewai",
+            "raw": "SENTINEL_TOOL_ERROR: confirm was not set"
+          }
+        }
+      ]
+    },
+    "langchain": {
+      "ok": true,
+      "versions": {
+        "framework": "0.3.2",
+        "adapter": "1.6.3"
+      },
+      "evidence": {
+        "capture_api": "langchain_core.utils.function_calling.convert_to_openai_tool",
+        "capture_object": "OpenAI-compatible function-tool dictionary",
+        "capture_stage": "provider_format",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion returned by ClientSession.initialize inside the langchain-mcp-adapters session",
+        "limitation": "No chat model was bound and no serialized provider request was captured."
+      },
+      "result_boundaries": [
+        {
+          "id": "direct",
+          "label": "Direct tool invocation",
+          "capture_api": "langchain_core.tools.StructuredTool.ainvoke(dict)",
+          "capture_object": "the tool return value, before any ToolMessage is built",
+          "agent_path": false,
+          "limitation": null
+        },
+        {
+          "id": "agent",
+          "label": "Agent tool invocation",
+          "capture_api": "langchain_core.tools.StructuredTool.ainvoke(ToolCall)",
+          "capture_object": "the ToolMessage an agent or ToolNode puts in the message list",
+          "agent_path": true,
+          "limitation": "The ToolMessage is built by langchain_core from the same call a ToolNode makes. No chat model was bound and no provider request was captured."
+        }
+      ],
+      "reps": [
+        {
+          "name": "search_records",
+          "description": "Search records with optional filters. Read-only.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "Full-text search query."
+              },
+              "status": {
+                "type": "string",
+                "description": "Filter by record status.",
+                "enum": [
+                  "active",
+                  "archived",
+                  "pending",
+                  "deleted"
+                ]
+              },
+              "owner_email": {
+                "type": "string",
+                "format": "email",
+                "description": "Restrict to records owned by this email address."
+              },
+              "created_after": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Only records created at or after this RFC 3339 timestamp."
+              },
+              "limit": {
+                "type": "integer",
+                "description": "Maximum number of records to return.",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            },
+            "required": [
+              "query"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Search records",
+              "readOnlyHint": true
+            }
+          },
+          "origin": "langchain",
+          "raw": {
+            "type": "function",
+            "function": {
+              "name": "search_records",
+              "description": "Search records with optional filters. Read-only.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Full-text search query."
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "Filter by record status.",
+                    "enum": [
+                      "active",
+                      "archived",
+                      "pending",
+                      "deleted"
+                    ]
+                  },
+                  "owner_email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Restrict to records owned by this email address."
+                  },
+                  "created_after": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Only records created at or after this RFC 3339 timestamp."
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Maximum number of records to return.",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 20
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "name": "create_report",
+          "description": "Create a structured report from sections.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Report title."
+              },
+              "config": {
+                "type": "object",
+                "description": "Rendering configuration.",
+                "properties": {
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "pdf",
+                      "html",
+                      "csv"
+                    ],
+                    "description": "Output format."
+                  },
+                  "include_summary": {
+                    "type": "boolean",
+                    "description": "Whether to prepend an executive summary."
+                  }
+                },
+                "required": [
+                  "format"
+                ]
+              },
+              "sections": {
+                "type": "array",
+                "description": "Ordered report sections.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "heading": {
+                      "type": "string",
+                      "description": "Section heading."
+                    },
+                    "body": {
+                      "type": "string",
+                      "description": "Section body in markdown."
+                    }
+                  },
+                  "required": [
+                    "heading"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "title",
+              "config"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Create report"
+            }
+          },
+          "origin": "langchain",
+          "raw": {
+            "type": "function",
+            "function": {
+              "name": "create_report",
+              "description": "Create a structured report from sections.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Report title."
+                  },
+                  "config": {
+                    "type": "object",
+                    "description": "Rendering configuration.",
+                    "properties": {
+                      "format": {
+                        "type": "string",
+                        "enum": [
+                          "pdf",
+                          "html",
+                          "csv"
+                        ],
+                        "description": "Output format."
+                      },
+                      "include_summary": {
+                        "type": "boolean",
+                        "description": "Whether to prepend an executive summary."
+                      }
+                    },
+                    "required": [
+                      "format"
+                    ]
+                  },
+                  "sections": {
+                    "type": "array",
+                    "description": "Ordered report sections.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "heading": {
+                          "type": "string",
+                          "description": "Section heading."
+                        },
+                        "body": {
+                          "type": "string",
+                          "description": "Section body in markdown."
+                        }
+                      },
+                      "required": [
+                        "heading"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "title",
+                  "config"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "name": "deliver_payload",
+          "description": "Deliver a payload to a destination.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "destination": {
+                "description": "Where to deliver the payload.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "A webhook URL."
+                  },
+                  {
+                    "type": "object",
+                    "description": "An object-store location.",
+                    "properties": {
+                      "bucket": {
+                        "type": "string"
+                      },
+                      "key": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "bucket",
+                      "key"
+                    ]
+                  }
+                ]
+              },
+              "mode": {
+                "description": "Delivery mode.",
+                "oneOf": [
+                  {
+                    "const": "sync"
+                  },
+                  {
+                    "const": "async"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "destination"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Deliver payload",
+              "idempotentHint": false
+            }
+          },
+          "origin": "langchain",
+          "raw": {
+            "type": "function",
+            "function": {
+              "name": "deliver_payload",
+              "description": "Deliver a payload to a destination.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "destination": {
+                    "description": "Where to deliver the payload.",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "A webhook URL."
+                      },
+                      {
+                        "type": "object",
+                        "description": "An object-store location.",
+                        "properties": {
+                          "bucket": {
+                            "type": "string"
+                          },
+                          "key": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "bucket",
+                          "key"
+                        ]
+                      }
+                    ]
+                  },
+                  "mode": {
+                    "description": "Delivery mode.",
+                    "oneOf": [
+                      {
+                        "const": "sync"
+                      },
+                      {
+                        "const": "async"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "destination"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "name": "delete_account",
+          "description": "Permanently deletes a user account and all of its associated data. This action is destructive and irreversible: it cannot be undone, and it requires elevated admin scope (accounts:delete). Use with extreme caution.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "account_id": {
+                "type": "string",
+                "description": "The id of the account to delete."
+              },
+              "confirm": {
+                "type": "boolean",
+                "description": "Must be true to proceed with the deletion."
+              }
+            },
+            "required": [
+              "account_id",
+              "confirm"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Delete account",
+              "readOnlyHint": false,
+              "destructiveHint": true,
+              "idempotentHint": false,
+              "openWorldHint": false
+            }
+          },
+          "origin": "langchain",
+          "raw": {
+            "type": "function",
+            "function": {
+              "name": "delete_account",
+              "description": "Permanently deletes a user account and all of its associated data. This action is destructive and irreversible: it cannot be undone, and it requires elevated admin scope (accounts:delete). Use with extreme caution.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "account_id": {
+                    "type": "string",
+                    "description": "The id of the account to delete."
+                  },
+                  "confirm": {
+                    "type": "boolean",
+                    "description": "Must be true to proceed with the deletion."
+                  }
+                },
+                "required": [
+                  "account_id",
+                  "confirm"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "name": "explain_topic",
+          "description": "Explain a topic in depth for a curious reader. This description is deliberately very long (over 1024 characters) so that adapters which truncate tool descriptions to fit a model's function-description limit can be detected by mcp-mirror. It also contains Unicode and special characters to verify they survive the round trip: accented words like caf\u00e9, na\u00efve, r\u00e9sum\u00e9, jalape\u00f1o, and Z\u00fcrich; non-Latin scripts such as \u65e5\u672c\u8a9e (Japanese), \u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac (Greek), and \u041a\u0438\u0440\u0438\u043b\u043b\u0438\u0446\u0430 (Cyrillic); mathematical symbols \u2211 \u222b \u2248 \u2260 \u221e \u2286 \u2295; currency signs \u20ac \u00a3 \u00a5 \u20bf; smart punctuation \u201ccurly quotes\u201d, \u2018single quotes\u2019, an em-dash, an en\u2013dash, and an ellipsis\u2026; plus a few emoji \ud83d\udd10 \ud83d\ude80 \u2705 for good measure. The reader should receive a structured, well-paced explanation that starts from first principles, introduces the key vocabulary, walks through one concrete worked example, names the most common misconceptions, and then points to where to learn more. Keep the tone precise and friendly. Prefer short sentences. Define every term of art the first time it appears, and never assume the reader has seen the topic before. End with a one-paragraph recap that a busy person could read on its own and still come away with the single most important idea. SENTINEL_END_OF_LONG_DESCRIPTION.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "topic": {
+                "type": "string",
+                "description": "The subject to explain (supports Unicode: caf\u00e9, na\u00efve, \u65e5\u672c\u8a9e)."
+              },
+              "max_words": {
+                "type": "integer",
+                "description": "Soft cap on the explanation length.",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "topic"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Explain topic",
+              "readOnlyHint": true
+            }
+          },
+          "origin": "langchain",
+          "raw": {
+            "type": "function",
+            "function": {
+              "name": "explain_topic",
+              "description": "Explain a topic in depth for a curious reader. This description is deliberately very long (over 1024 characters) so that adapters which truncate tool descriptions to fit a model's function-description limit can be detected by mcp-mirror. It also contains Unicode and special characters to verify they survive the round trip: accented words like caf\u00e9, na\u00efve, r\u00e9sum\u00e9, jalape\u00f1o, and Z\u00fcrich; non-Latin scripts such as \u65e5\u672c\u8a9e (Japanese), \u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac (Greek), and \u041a\u0438\u0440\u0438\u043b\u043b\u0438\u0446\u0430 (Cyrillic); mathematical symbols \u2211 \u222b \u2248 \u2260 \u221e \u2286 \u2295; currency signs \u20ac \u00a3 \u00a5 \u20bf; smart punctuation \u201ccurly quotes\u201d, \u2018single quotes\u2019, an em-dash, an en\u2013dash, and an ellipsis\u2026; plus a few emoji \ud83d\udd10 \ud83d\ude80 \u2705 for good measure. The reader should receive a structured, well-paced explanation that starts from first principles, introduces the key vocabulary, walks through one concrete worked example, names the most common misconceptions, and then points to where to learn more. Keep the tone precise and friendly. Prefer short sentences. Define every term of art the first time it appears, and never assume the reader has seen the topic before. End with a one-paragraph recap that a busy person could read on its own and still come away with the single most important idea. SENTINEL_END_OF_LONG_DESCRIPTION.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "topic": {
+                    "type": "string",
+                    "description": "The subject to explain (supports Unicode: caf\u00e9, na\u00efve, \u65e5\u672c\u8a9e)."
+                  },
+                  "max_words": {
+                    "type": "integer",
+                    "description": "Soft cap on the explanation length.",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "topic"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "tool": "search_records",
+          "boundary": "direct",
+          "ok": true,
+          "rep": {
+            "tool": "search_records",
+            "blocks": [],
+            "block_kinds": [],
+            "structured_content": null,
+            "is_error": true,
+            "text": "NotImplementedError: AudioContent conversion to LangChain content blocks is not yet supported. Received audio with mime type: audio/wav",
+            "origin": "langchain",
+            "raw": "NotImplementedError('AudioContent conversion to LangChain content blocks is not yet supported. Received audio with mime type: audio/wav')"
+          }
+        },
+        {
+          "tool": "search_records",
+          "boundary": "agent",
+          "ok": true,
+          "rep": {
+            "tool": "search_records",
+            "blocks": [],
+            "block_kinds": [],
+            "structured_content": null,
+            "is_error": true,
+            "text": "NotImplementedError: AudioContent conversion to LangChain content blocks is not yet supported. Received audio with mime type: audio/wav",
+            "origin": "langchain",
+            "raw": "NotImplementedError('AudioContent conversion to LangChain content blocks is not yet supported. Received audio with mime type: audio/wav')"
+          }
+        },
+        {
+          "tool": "delete_account",
+          "boundary": "direct",
+          "ok": true,
+          "rep": {
+            "tool": "delete_account",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "SENTINEL_TOOL_ERROR: confirm was not set",
+                "id": "lc_b09db9f3-d895-4c01-9b20-7baa179d6769"
+              }
+            ],
+            "block_kinds": [
+              "text"
+            ],
+            "structured_content": null,
+            "is_error": null,
+            "text": "SENTINEL_TOOL_ERROR: confirm was not set",
+            "origin": "langchain",
+            "raw": "([{'type': 'text', 'text': 'SENTINEL_TOOL_ERROR: confirm was not set', 'id': 'lc_b09db9f3-d895-4c01-9b20-7baa179d6769'}], None)"
+          }
+        },
+        {
+          "tool": "delete_account",
+          "boundary": "agent",
+          "ok": true,
+          "rep": {
+            "tool": "delete_account",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "SENTINEL_TOOL_ERROR: confirm was not set",
+                "id": "lc_5cf5cc71-9824-42e0-947e-02449a13e0a9"
+              }
+            ],
+            "block_kinds": [
+              "text"
+            ],
+            "structured_content": null,
+            "is_error": true,
+            "text": "SENTINEL_TOOL_ERROR: confirm was not set",
+            "origin": "langchain",
+            "raw": "ToolMessage(content=[{'type': 'text', 'text': 'SENTINEL_TOOL_ERROR: confirm was not set', 'id': 'lc_5cf5cc71-9824-42e0-947e-02449a13e0a9'}], name='delete_account', tool_call_id='mcp_mirror_result_capture', status='error')"
+          }
+        }
+      ]
+    },
+    "openai_agents": {
+      "ok": true,
+      "versions": {
+        "framework": "0.22.0",
+        "adapter": "0.22.0"
+      },
+      "evidence": {
+        "capture_api": "agents.mcp.util.MCPUtil.to_function_tool",
+        "capture_object": "agents.tool.FunctionTool",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion exposed by MCPServer.server_initialize_result",
+        "limitation": "No Agents SDK model implementation or serialized provider request was captured."
+      },
+      "result_boundaries": [
+        {
+          "id": "direct",
+          "label": "Adapter invocation helper",
+          "capture_api": "agents.mcp.util.MCPUtil.invoke_mcp_tool",
+          "capture_object": "the Agents SDK ToolOutput",
+          "agent_path": false,
+          "limitation": null
+        },
+        {
+          "id": "agent",
+          "label": "Agent tool invocation",
+          "capture_api": "agents.tool.FunctionTool.on_invoke_tool",
+          "capture_object": "the ToolOutput the agent loop feeds back to the model",
+          "agent_path": true,
+          "limitation": "The FunctionTool callable is driven directly. No model implementation was bound and no provider request was captured."
+        }
+      ],
+      "reps": [
+        {
+          "name": "search_records",
+          "description": "Search records with optional filters. Read-only.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "Full-text search query."
+              },
+              "status": {
+                "type": "string",
+                "description": "Filter by record status.",
+                "enum": [
+                  "active",
+                  "archived",
+                  "pending",
+                  "deleted"
+                ]
+              },
+              "owner_email": {
+                "type": "string",
+                "format": "email",
+                "description": "Restrict to records owned by this email address."
+              },
+              "created_after": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Only records created at or after this RFC 3339 timestamp."
+              },
+              "limit": {
+                "type": "integer",
+                "description": "Maximum number of records to return.",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            },
+            "required": [
+              "query"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Search records"
+            }
+          },
+          "origin": "openai_agents",
+          "raw": {
+            "name": "search_records",
+            "description": "Search records with optional filters. Read-only.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "description": "Full-text search query."
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Filter by record status.",
+                  "enum": [
+                    "active",
+                    "archived",
+                    "pending",
+                    "deleted"
+                  ]
+                },
+                "owner_email": {
+                  "type": "string",
+                  "format": "email",
+                  "description": "Restrict to records owned by this email address."
+                },
+                "created_after": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Only records created at or after this RFC 3339 timestamp."
+                },
+                "limit": {
+                  "type": "integer",
+                  "description": "Maximum number of records to return.",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 20
+                }
+              },
+              "required": [
+                "query"
+              ]
+            }
+          }
+        },
+        {
+          "name": "create_report",
+          "description": "Create a structured report from sections.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Report title."
+              },
+              "config": {
+                "type": "object",
+                "description": "Rendering configuration.",
+                "properties": {
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "pdf",
+                      "html",
+                      "csv"
+                    ],
+                    "description": "Output format."
+                  },
+                  "include_summary": {
+                    "type": "boolean",
+                    "description": "Whether to prepend an executive summary."
+                  }
+                },
+                "required": [
+                  "format"
+                ]
+              },
+              "sections": {
+                "type": "array",
+                "description": "Ordered report sections.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "heading": {
+                      "type": "string",
+                      "description": "Section heading."
+                    },
+                    "body": {
+                      "type": "string",
+                      "description": "Section body in markdown."
+                    }
+                  },
+                  "required": [
+                    "heading"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "title",
+              "config"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Create report"
+            }
+          },
+          "origin": "openai_agents",
+          "raw": {
+            "name": "create_report",
+            "description": "Create a structured report from sections.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Report title."
+                },
+                "config": {
+                  "type": "object",
+                  "description": "Rendering configuration.",
+                  "properties": {
+                    "format": {
+                      "type": "string",
+                      "enum": [
+                        "pdf",
+                        "html",
+                        "csv"
+                      ],
+                      "description": "Output format."
+                    },
+                    "include_summary": {
+                      "type": "boolean",
+                      "description": "Whether to prepend an executive summary."
+                    }
+                  },
+                  "required": [
+                    "format"
+                  ]
+                },
+                "sections": {
+                  "type": "array",
+                  "description": "Ordered report sections.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "heading": {
+                        "type": "string",
+                        "description": "Section heading."
+                      },
+                      "body": {
+                        "type": "string",
+                        "description": "Section body in markdown."
+                      }
+                    },
+                    "required": [
+                      "heading"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "title",
+                "config"
+              ]
+            }
+          }
+        },
+        {
+          "name": "deliver_payload",
+          "description": "Deliver a payload to a destination.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "destination": {
+                "description": "Where to deliver the payload.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "A webhook URL."
+                  },
+                  {
+                    "type": "object",
+                    "description": "An object-store location.",
+                    "properties": {
+                      "bucket": {
+                        "type": "string"
+                      },
+                      "key": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "bucket",
+                      "key"
+                    ]
+                  }
+                ]
+              },
+              "mode": {
+                "description": "Delivery mode.",
+                "oneOf": [
+                  {
+                    "const": "sync"
+                  },
+                  {
+                    "const": "async"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "destination"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Deliver payload"
+            }
+          },
+          "origin": "openai_agents",
+          "raw": {
+            "name": "deliver_payload",
+            "description": "Deliver a payload to a destination.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "destination": {
+                  "description": "Where to deliver the payload.",
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "A webhook URL."
+                    },
+                    {
+                      "type": "object",
+                      "description": "An object-store location.",
+                      "properties": {
+                        "bucket": {
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "bucket",
+                        "key"
+                      ]
+                    }
+                  ]
+                },
+                "mode": {
+                  "description": "Delivery mode.",
+                  "oneOf": [
+                    {
+                      "const": "sync"
+                    },
+                    {
+                      "const": "async"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "destination"
+              ]
+            }
+          }
+        },
+        {
+          "name": "delete_account",
+          "description": "Permanently deletes a user account and all of its associated data. This action is destructive and irreversible: it cannot be undone, and it requires elevated admin scope (accounts:delete). Use with extreme caution.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "account_id": {
+                "type": "string",
+                "description": "The id of the account to delete."
+              },
+              "confirm": {
+                "type": "boolean",
+                "description": "Must be true to proceed with the deletion."
+              }
+            },
+            "required": [
+              "account_id",
+              "confirm"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Delete account"
+            }
+          },
+          "origin": "openai_agents",
+          "raw": {
+            "name": "delete_account",
+            "description": "Permanently deletes a user account and all of its associated data. This action is destructive and irreversible: it cannot be undone, and it requires elevated admin scope (accounts:delete). Use with extreme caution.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "account_id": {
+                  "type": "string",
+                  "description": "The id of the account to delete."
+                },
+                "confirm": {
+                  "type": "boolean",
+                  "description": "Must be true to proceed with the deletion."
+                }
+              },
+              "required": [
+                "account_id",
+                "confirm"
+              ]
+            }
+          }
+        },
+        {
+          "name": "explain_topic",
+          "description": "Explain a topic in depth for a curious reader. This description is deliberately very long (over 1024 characters) so that adapters which truncate tool descriptions to fit a model's function-description limit can be detected by mcp-mirror. It also contains Unicode and special characters to verify they survive the round trip: accented words like caf\u00e9, na\u00efve, r\u00e9sum\u00e9, jalape\u00f1o, and Z\u00fcrich; non-Latin scripts such as \u65e5\u672c\u8a9e (Japanese), \u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac (Greek), and \u041a\u0438\u0440\u0438\u043b\u043b\u0438\u0446\u0430 (Cyrillic); mathematical symbols \u2211 \u222b \u2248 \u2260 \u221e \u2286 \u2295; currency signs \u20ac \u00a3 \u00a5 \u20bf; smart punctuation \u201ccurly quotes\u201d, \u2018single quotes\u2019, an em-dash, an en\u2013dash, and an ellipsis\u2026; plus a few emoji \ud83d\udd10 \ud83d\ude80 \u2705 for good measure. The reader should receive a structured, well-paced explanation that starts from first principles, introduces the key vocabulary, walks through one concrete worked example, names the most common misconceptions, and then points to where to learn more. Keep the tone precise and friendly. Prefer short sentences. Define every term of art the first time it appears, and never assume the reader has seen the topic before. End with a one-paragraph recap that a busy person could read on its own and still come away with the single most important idea. SENTINEL_END_OF_LONG_DESCRIPTION.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "topic": {
+                "type": "string",
+                "description": "The subject to explain (supports Unicode: caf\u00e9, na\u00efve, \u65e5\u672c\u8a9e)."
+              },
+              "max_words": {
+                "type": "integer",
+                "description": "Soft cap on the explanation length.",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "topic"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Explain topic"
+            }
+          },
+          "origin": "openai_agents",
+          "raw": {
+            "name": "explain_topic",
+            "description": "Explain a topic in depth for a curious reader. This description is deliberately very long (over 1024 characters) so that adapters which truncate tool descriptions to fit a model's function-description limit can be detected by mcp-mirror. It also contains Unicode and special characters to verify they survive the round trip: accented words like caf\u00e9, na\u00efve, r\u00e9sum\u00e9, jalape\u00f1o, and Z\u00fcrich; non-Latin scripts such as \u65e5\u672c\u8a9e (Japanese), \u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac (Greek), and \u041a\u0438\u0440\u0438\u043b\u043b\u0438\u0446\u0430 (Cyrillic); mathematical symbols \u2211 \u222b \u2248 \u2260 \u221e \u2286 \u2295; currency signs \u20ac \u00a3 \u00a5 \u20bf; smart punctuation \u201ccurly quotes\u201d, \u2018single quotes\u2019, an em-dash, an en\u2013dash, and an ellipsis\u2026; plus a few emoji \ud83d\udd10 \ud83d\ude80 \u2705 for good measure. The reader should receive a structured, well-paced explanation that starts from first principles, introduces the key vocabulary, walks through one concrete worked example, names the most common misconceptions, and then points to where to learn more. Keep the tone precise and friendly. Prefer short sentences. Define every term of art the first time it appears, and never assume the reader has seen the topic before. End with a one-paragraph recap that a busy person could read on its own and still come away with the single most important idea. SENTINEL_END_OF_LONG_DESCRIPTION.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "topic": {
+                  "type": "string",
+                  "description": "The subject to explain (supports Unicode: caf\u00e9, na\u00efve, \u65e5\u672c\u8a9e)."
+                },
+                "max_words": {
+                  "type": "integer",
+                  "description": "Soft cap on the explanation length.",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "topic"
+              ]
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "tool": "search_records",
+          "boundary": "direct",
+          "ok": true,
+          "rep": {
+            "tool": "search_records",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "SENTINEL_TEXT_BLOCK"
+              },
+              {
+                "type": "image"
+              },
+              {
+                "type": "text",
+                "text": "{\"type\":\"audio\",\"data\":\"UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=\",\"mime_type\":\"audio/wav\",\"annotations\":null,\"meta\":null}"
+              },
+              {
+                "type": "text",
+                "text": "{\"type\":\"resource\",\"resource\":{\"uri\":\"file:///fixtures/embedded.txt\",\"mime_type\":\"text/plain\",\"meta\":null,\"text\":\"SENTINEL_EMBEDDED_RESOURCE\"},\"annotations\":null,\"meta\":null}"
+              },
+              {
+                "type": "text",
+                "text": "{\"name\":\"linked.txt\",\"title\":null,\"uri\":\"file:///fixtures/linked.txt\",\"description\":\"SENTINEL_RESOURCE_LINK\",\"mime_type\":\"text/plain\",\"size\":null,\"icons\":null,\"annotations\":null,\"meta\":null,\"type\":\"resource_link\"}"
+              }
+            ],
+            "block_kinds": [
+              "text",
+              "image",
+              "text",
+              "text",
+              "text"
+            ],
+            "structured_content": null,
+            "is_error": null,
+            "text": "SENTINEL_TEXT_BLOCK\n{\"type\":\"audio\",\"data\":\"UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=\",\"mime_type\":\"audio/wav\",\"annotations\":null,\"meta\":null}\n{\"type\":\"resource\",\"resource\":{\"uri\":\"file:///fixtures/embedded.txt\",\"mime_type\":\"text/plain\",\"meta\":null,\"text\":\"SENTINEL_EMBEDDED_RESOURCE\"},\"annotations\":null,\"meta\":null}\n{\"name\":\"linked.txt\",\"title\":null,\"uri\":\"file:///fixtures/linked.txt\",\"description\":\"SENTINEL_RESOURCE_LINK\",\"mime_type\":\"text/plain\",\"size\":null,\"icons\":null,\"annotations\":null,\"meta\":null,\"type\":\"resource_link\"}",
+            "origin": "openai_agents",
+            "raw": "[{'type': 'text', 'text': 'SENTINEL_TEXT_BLOCK'}, {'type': 'image', 'image_url': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='}, {'type': 'text', 'text': '{\"type\":\"audio\",\"data\":\"UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=\",\"mime_type\":\"audio/wav\",\"annotations\":null,\"meta\":null}'}, {'type': 'text', 'text': '{\"type\":\"resource\",\"resource\":{\"uri\":\"file:///fixtures/embedded.txt\",\"mime_type\":\"text/plain\",\"meta\":null,\"text\":\"SENTINEL_EMBEDDED_RESOURCE\"},\"annotations\":null,\"meta\":null}'}, {'type': 'text', 'text': '{\"name\":\"linked.txt\",\"title\":null,\"uri\":\"file:///fixtures/linked.txt\",\"description\":\"SENTINEL_RESOURCE_LINK\",\"mime_type\":\"text/plain\",\"size\":null,\"icons\":null,\"annotations\":null,\"meta\":null,\"type\":\"resource_link\"}'}]"
+          }
+        },
+        {
+          "tool": "search_records",
+          "boundary": "agent",
+          "ok": true,
+          "rep": {
+            "tool": "search_records",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "SENTINEL_TEXT_BLOCK"
+              },
+              {
+                "type": "image"
+              },
+              {
+                "type": "text",
+                "text": "{\"type\":\"audio\",\"data\":\"UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=\",\"mime_type\":\"audio/wav\",\"annotations\":null,\"meta\":null}"
+              },
+              {
+                "type": "text",
+                "text": "{\"type\":\"resource\",\"resource\":{\"uri\":\"file:///fixtures/embedded.txt\",\"mime_type\":\"text/plain\",\"meta\":null,\"text\":\"SENTINEL_EMBEDDED_RESOURCE\"},\"annotations\":null,\"meta\":null}"
+              },
+              {
+                "type": "text",
+                "text": "{\"name\":\"linked.txt\",\"title\":null,\"uri\":\"file:///fixtures/linked.txt\",\"description\":\"SENTINEL_RESOURCE_LINK\",\"mime_type\":\"text/plain\",\"size\":null,\"icons\":null,\"annotations\":null,\"meta\":null,\"type\":\"resource_link\"}"
+              }
+            ],
+            "block_kinds": [
+              "text",
+              "image",
+              "text",
+              "text",
+              "text"
+            ],
+            "structured_content": null,
+            "is_error": null,
+            "text": "SENTINEL_TEXT_BLOCK\n{\"type\":\"audio\",\"data\":\"UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=\",\"mime_type\":\"audio/wav\",\"annotations\":null,\"meta\":null}\n{\"type\":\"resource\",\"resource\":{\"uri\":\"file:///fixtures/embedded.txt\",\"mime_type\":\"text/plain\",\"meta\":null,\"text\":\"SENTINEL_EMBEDDED_RESOURCE\"},\"annotations\":null,\"meta\":null}\n{\"name\":\"linked.txt\",\"title\":null,\"uri\":\"file:///fixtures/linked.txt\",\"description\":\"SENTINEL_RESOURCE_LINK\",\"mime_type\":\"text/plain\",\"size\":null,\"icons\":null,\"annotations\":null,\"meta\":null,\"type\":\"resource_link\"}",
+            "origin": "openai_agents",
+            "raw": "[{'type': 'text', 'text': 'SENTINEL_TEXT_BLOCK'}, {'type': 'image', 'image_url': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='}, {'type': 'text', 'text': '{\"type\":\"audio\",\"data\":\"UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=\",\"mime_type\":\"audio/wav\",\"annotations\":null,\"meta\":null}'}, {'type': 'text', 'text': '{\"type\":\"resource\",\"resource\":{\"uri\":\"file:///fixtures/embedded.txt\",\"mime_type\":\"text/plain\",\"meta\":null,\"text\":\"SENTINEL_EMBEDDED_RESOURCE\"},\"annotations\":null,\"meta\":null}'}, {'type': 'text', 'text': '{\"name\":\"linked.txt\",\"title\":null,\"uri\":\"file:///fixtures/linked.txt\",\"description\":\"SENTINEL_RESOURCE_LINK\",\"mime_type\":\"text/plain\",\"size\":null,\"icons\":null,\"annotations\":null,\"meta\":null,\"type\":\"resource_link\"}'}]"
+          }
+        },
+        {
+          "tool": "delete_account",
+          "boundary": "direct",
+          "ok": true,
+          "rep": {
+            "tool": "delete_account",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "SENTINEL_TOOL_ERROR: confirm was not set"
+              }
+            ],
+            "block_kinds": [
+              "text"
+            ],
+            "structured_content": null,
+            "is_error": null,
+            "text": "SENTINEL_TOOL_ERROR: confirm was not set",
+            "origin": "openai_agents",
+            "raw": "{'type': 'text', 'text': 'SENTINEL_TOOL_ERROR: confirm was not set'}"
+          }
+        },
+        {
+          "tool": "delete_account",
+          "boundary": "agent",
+          "ok": true,
+          "rep": {
+            "tool": "delete_account",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "SENTINEL_TOOL_ERROR: confirm was not set"
+              }
+            ],
+            "block_kinds": [
+              "text"
+            ],
+            "structured_content": null,
+            "is_error": null,
+            "text": "SENTINEL_TOOL_ERROR: confirm was not set",
+            "origin": "openai_agents",
+            "raw": "{'type': 'text', 'text': 'SENTINEL_TOOL_ERROR: confirm was not set'}"
+          }
+        }
+      ]
+    },
+    "pydantic_ai": {
+      "ok": true,
+      "versions": {
+        "framework": "2.40.0",
+        "adapter": "2.40.0"
+      },
+      "evidence": {
+        "capture_api": "pydantic_ai.mcp.MCPToolset.get_tools",
+        "capture_object": "pydantic_ai.tools.ToolDefinition",
+        "capture_stage": "framework_tool_definition",
+        "provider_request_captured": false,
+        "negotiated_mcp_spec_version": "2025-11-25",
+        "protocol_version_evidence": "protocolVersion exposed by MCPToolset.client.initialize_result",
+        "limitation": "No Pydantic AI model adapter or serialized provider request was captured."
+      },
+      "result_boundaries": [
+        {
+          "id": "direct",
+          "label": "Direct toolset call",
+          "capture_api": "pydantic_ai.mcp.MCPToolset.direct_call_tool",
+          "capture_object": "the mapped toolset result, or the exception it raises",
+          "agent_path": false,
+          "limitation": null
+        },
+        {
+          "id": "agent",
+          "label": "Agent toolset call",
+          "capture_api": "pydantic_ai.mcp.MCPToolset.call_tool",
+          "capture_object": "the value the agent's tool executor receives",
+          "agent_path": true,
+          "limitation": "The toolset method is driven directly. The agent's own conversion of a raised ModelRetry into a RetryPromptPart happens above this boundary and is not captured here."
+        }
+      ],
+      "reps": [
+        {
+          "name": "search_records",
+          "description": "Search records with optional filters. Read-only.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "Full-text search query."
+              },
+              "status": {
+                "type": "string",
+                "description": "Filter by record status.",
+                "enum": [
+                  "active",
+                  "archived",
+                  "pending",
+                  "deleted"
+                ]
+              },
+              "owner_email": {
+                "type": "string",
+                "format": "email",
+                "description": "Restrict to records owned by this email address."
+              },
+              "created_after": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Only records created at or after this RFC 3339 timestamp."
+              },
+              "limit": {
+                "type": "integer",
+                "description": "Maximum number of records to return.",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            },
+            "required": [
+              "query"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Search records",
+              "readOnlyHint": true
+            }
+          },
+          "origin": "pydantic_ai",
+          "raw": {
+            "name": "search_records",
+            "description": "Search records with optional filters. Read-only.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "description": "Full-text search query."
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Filter by record status.",
+                  "enum": [
+                    "active",
+                    "archived",
+                    "pending",
+                    "deleted"
+                  ]
+                },
+                "owner_email": {
+                  "type": "string",
+                  "format": "email",
+                  "description": "Restrict to records owned by this email address."
+                },
+                "created_after": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Only records created at or after this RFC 3339 timestamp."
+                },
+                "limit": {
+                  "type": "integer",
+                  "description": "Maximum number of records to return.",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 20
+                }
+              },
+              "required": [
+                "query"
+              ]
+            }
+          }
+        },
+        {
+          "name": "create_report",
+          "description": "Create a structured report from sections.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Report title."
+              },
+              "config": {
+                "type": "object",
+                "description": "Rendering configuration.",
+                "properties": {
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "pdf",
+                      "html",
+                      "csv"
+                    ],
+                    "description": "Output format."
+                  },
+                  "include_summary": {
+                    "type": "boolean",
+                    "description": "Whether to prepend an executive summary."
+                  }
+                },
+                "required": [
+                  "format"
+                ]
+              },
+              "sections": {
+                "type": "array",
+                "description": "Ordered report sections.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "heading": {
+                      "type": "string",
+                      "description": "Section heading."
+                    },
+                    "body": {
+                      "type": "string",
+                      "description": "Section body in markdown."
+                    }
+                  },
+                  "required": [
+                    "heading"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "title",
+              "config"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Create report"
+            }
+          },
+          "origin": "pydantic_ai",
+          "raw": {
+            "name": "create_report",
+            "description": "Create a structured report from sections.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Report title."
+                },
+                "config": {
+                  "type": "object",
+                  "description": "Rendering configuration.",
+                  "properties": {
+                    "format": {
+                      "type": "string",
+                      "enum": [
+                        "pdf",
+                        "html",
+                        "csv"
+                      ],
+                      "description": "Output format."
+                    },
+                    "include_summary": {
+                      "type": "boolean",
+                      "description": "Whether to prepend an executive summary."
+                    }
+                  },
+                  "required": [
+                    "format"
+                  ]
+                },
+                "sections": {
+                  "type": "array",
+                  "description": "Ordered report sections.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "heading": {
+                        "type": "string",
+                        "description": "Section heading."
+                      },
+                      "body": {
+                        "type": "string",
+                        "description": "Section body in markdown."
+                      }
+                    },
+                    "required": [
+                      "heading"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "title",
+                "config"
+              ]
+            }
+          }
+        },
+        {
+          "name": "deliver_payload",
+          "description": "Deliver a payload to a destination.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "destination": {
+                "description": "Where to deliver the payload.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "A webhook URL."
+                  },
+                  {
+                    "type": "object",
+                    "description": "An object-store location.",
+                    "properties": {
+                      "bucket": {
+                        "type": "string"
+                      },
+                      "key": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "bucket",
+                      "key"
+                    ]
+                  }
+                ]
+              },
+              "mode": {
+                "description": "Delivery mode.",
+                "oneOf": [
+                  {
+                    "const": "sync"
+                  },
+                  {
+                    "const": "async"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "destination"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Deliver payload",
+              "idempotentHint": false
+            }
+          },
+          "origin": "pydantic_ai",
+          "raw": {
+            "name": "deliver_payload",
+            "description": "Deliver a payload to a destination.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "destination": {
+                  "description": "Where to deliver the payload.",
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "A webhook URL."
+                    },
+                    {
+                      "type": "object",
+                      "description": "An object-store location.",
+                      "properties": {
+                        "bucket": {
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "bucket",
+                        "key"
+                      ]
+                    }
+                  ]
+                },
+                "mode": {
+                  "description": "Delivery mode.",
+                  "oneOf": [
+                    {
+                      "const": "sync"
+                    },
+                    {
+                      "const": "async"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "destination"
+              ]
+            }
+          }
+        },
+        {
+          "name": "delete_account",
+          "description": "Permanently deletes a user account and all of its associated data. This action is destructive and irreversible: it cannot be undone, and it requires elevated admin scope (accounts:delete). Use with extreme caution.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "account_id": {
+                "type": "string",
+                "description": "The id of the account to delete."
+              },
+              "confirm": {
+                "type": "boolean",
+                "description": "Must be true to proceed with the deletion."
+              }
+            },
+            "required": [
+              "account_id",
+              "confirm"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Delete account",
+              "readOnlyHint": false,
+              "destructiveHint": true,
+              "idempotentHint": false,
+              "openWorldHint": false
+            }
+          },
+          "origin": "pydantic_ai",
+          "raw": {
+            "name": "delete_account",
+            "description": "Permanently deletes a user account and all of its associated data. This action is destructive and irreversible: it cannot be undone, and it requires elevated admin scope (accounts:delete). Use with extreme caution.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "account_id": {
+                  "type": "string",
+                  "description": "The id of the account to delete."
+                },
+                "confirm": {
+                  "type": "boolean",
+                  "description": "Must be true to proceed with the deletion."
+                }
+              },
+              "required": [
+                "account_id",
+                "confirm"
+              ]
+            }
+          }
+        },
+        {
+          "name": "explain_topic",
+          "description": "Explain a topic in depth for a curious reader. This description is deliberately very long (over 1024 characters) so that adapters which truncate tool descriptions to fit a model's function-description limit can be detected by mcp-mirror. It also contains Unicode and special characters to verify they survive the round trip: accented words like caf\u00e9, na\u00efve, r\u00e9sum\u00e9, jalape\u00f1o, and Z\u00fcrich; non-Latin scripts such as \u65e5\u672c\u8a9e (Japanese), \u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac (Greek), and \u041a\u0438\u0440\u0438\u043b\u043b\u0438\u0446\u0430 (Cyrillic); mathematical symbols \u2211 \u222b \u2248 \u2260 \u221e \u2286 \u2295; currency signs \u20ac \u00a3 \u00a5 \u20bf; smart punctuation \u201ccurly quotes\u201d, \u2018single quotes\u2019, an em-dash, an en\u2013dash, and an ellipsis\u2026; plus a few emoji \ud83d\udd10 \ud83d\ude80 \u2705 for good measure. The reader should receive a structured, well-paced explanation that starts from first principles, introduces the key vocabulary, walks through one concrete worked example, names the most common misconceptions, and then points to where to learn more. Keep the tone precise and friendly. Prefer short sentences. Define every term of art the first time it appears, and never assume the reader has seen the topic before. End with a one-paragraph recap that a busy person could read on its own and still come away with the single most important idea. SENTINEL_END_OF_LONG_DESCRIPTION.",
+          "params": {
+            "type": "object",
+            "properties": {
+              "topic": {
+                "type": "string",
+                "description": "The subject to explain (supports Unicode: caf\u00e9, na\u00efve, \u65e5\u672c\u8a9e)."
+              },
+              "max_words": {
+                "type": "integer",
+                "description": "Soft cap on the explanation length.",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "topic"
+            ]
+          },
+          "annotations": {},
+          "icons": [],
+          "framework_metadata": {
+            "annotations": {
+              "title": "Explain topic",
+              "readOnlyHint": true
+            }
+          },
+          "origin": "pydantic_ai",
+          "raw": {
+            "name": "explain_topic",
+            "description": "Explain a topic in depth for a curious reader. This description is deliberately very long (over 1024 characters) so that adapters which truncate tool descriptions to fit a model's function-description limit can be detected by mcp-mirror. It also contains Unicode and special characters to verify they survive the round trip: accented words like caf\u00e9, na\u00efve, r\u00e9sum\u00e9, jalape\u00f1o, and Z\u00fcrich; non-Latin scripts such as \u65e5\u672c\u8a9e (Japanese), \u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac (Greek), and \u041a\u0438\u0440\u0438\u043b\u043b\u0438\u0446\u0430 (Cyrillic); mathematical symbols \u2211 \u222b \u2248 \u2260 \u221e \u2286 \u2295; currency signs \u20ac \u00a3 \u00a5 \u20bf; smart punctuation \u201ccurly quotes\u201d, \u2018single quotes\u2019, an em-dash, an en\u2013dash, and an ellipsis\u2026; plus a few emoji \ud83d\udd10 \ud83d\ude80 \u2705 for good measure. The reader should receive a structured, well-paced explanation that starts from first principles, introduces the key vocabulary, walks through one concrete worked example, names the most common misconceptions, and then points to where to learn more. Keep the tone precise and friendly. Prefer short sentences. Define every term of art the first time it appears, and never assume the reader has seen the topic before. End with a one-paragraph recap that a busy person could read on its own and still come away with the single most important idea. SENTINEL_END_OF_LONG_DESCRIPTION.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "topic": {
+                  "type": "string",
+                  "description": "The subject to explain (supports Unicode: caf\u00e9, na\u00efve, \u65e5\u672c\u8a9e)."
+                },
+                "max_words": {
+                  "type": "integer",
+                  "description": "Soft cap on the explanation length.",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "topic"
+              ]
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "tool": "search_records",
+          "boundary": "direct",
+          "ok": true,
+          "rep": {
+            "tool": "search_records",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "SENTINEL_TEXT_BLOCK"
+              },
+              {
+                "type": "image",
+                "mimeType": "image/png"
+              },
+              {
+                "type": "audio",
+                "mimeType": "audio/wav"
+              },
+              {
+                "type": "text",
+                "text": "SENTINEL_EMBEDDED_RESOURCE"
+              },
+              {
+                "type": "text",
+                "text": "file:///fixtures/linked.txt"
+              }
+            ],
+            "block_kinds": [
+              "text",
+              "image",
+              "audio",
+              "text",
+              "text"
+            ],
+            "structured_content": null,
+            "is_error": null,
+            "text": "SENTINEL_TEXT_BLOCK\nSENTINEL_EMBEDDED_RESOURCE\nfile:///fixtures/linked.txt",
+            "origin": "pydantic_ai",
+            "raw": "['SENTINEL_TEXT_BLOCK', BinaryImage(data=b'\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x01\\x08\\x06\\x00\\x00\\x00\\x1f\\x15\\xc4\\x89\\x00\\x00\\x00\\rIDATx\\xdac\\xfc\\xcf\\xc0P\\x0f\\x00\\x04\\x85\\x01\\x80\\x84\\xa9\\x8c!\\x00\\x00\\x00\\x00IEND\\xaeB`\\x82', media_type='image/png'), BinaryContent(data=b'RIFF$\\x00\\x00\\x00WAVEfmt \\x10\\x00\\x00\\x00\\x01\\x00\\x01\\x00D\\xac\\x00\\x00\\x88X\\x01\\x00\\x02\\x00\\x10\\x00data\\x00\\x00\\x00\\x00', media_type='audio/wav'), 'SENTINEL_EMBEDDED_RESOURCE', 'file:///fixtures/linked.txt']"
+          }
+        },
+        {
+          "tool": "search_records",
+          "boundary": "agent",
+          "ok": true,
+          "rep": {
+            "tool": "search_records",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "SENTINEL_TEXT_BLOCK"
+              },
+              {
+                "type": "image",
+                "mimeType": "image/png"
+              },
+              {
+                "type": "audio",
+                "mimeType": "audio/wav"
+              },
+              {
+                "type": "text",
+                "text": "SENTINEL_EMBEDDED_RESOURCE"
+              },
+              {
+                "type": "text",
+                "text": "file:///fixtures/linked.txt"
+              }
+            ],
+            "block_kinds": [
+              "text",
+              "image",
+              "audio",
+              "text",
+              "text"
+            ],
+            "structured_content": null,
+            "is_error": null,
+            "text": "SENTINEL_TEXT_BLOCK\nSENTINEL_EMBEDDED_RESOURCE\nfile:///fixtures/linked.txt",
+            "origin": "pydantic_ai",
+            "raw": "['SENTINEL_TEXT_BLOCK', BinaryImage(data=b'\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x01\\x08\\x06\\x00\\x00\\x00\\x1f\\x15\\xc4\\x89\\x00\\x00\\x00\\rIDATx\\xdac\\xfc\\xcf\\xc0P\\x0f\\x00\\x04\\x85\\x01\\x80\\x84\\xa9\\x8c!\\x00\\x00\\x00\\x00IEND\\xaeB`\\x82', media_type='image/png'), BinaryContent(data=b'RIFF$\\x00\\x00\\x00WAVEfmt \\x10\\x00\\x00\\x00\\x01\\x00\\x01\\x00D\\xac\\x00\\x00\\x88X\\x01\\x00\\x02\\x00\\x10\\x00data\\x00\\x00\\x00\\x00', media_type='audio/wav'), 'SENTINEL_EMBEDDED_RESOURCE', 'file:///fixtures/linked.txt']"
+          }
+        },
+        {
+          "tool": "delete_account",
+          "boundary": "direct",
+          "ok": true,
+          "rep": {
+            "tool": "delete_account",
+            "blocks": [],
+            "block_kinds": [],
+            "structured_content": null,
+            "is_error": true,
+            "text": "ModelRetry: SENTINEL_TOOL_ERROR: confirm was not set",
+            "origin": "pydantic_ai",
+            "raw": "ModelRetry('SENTINEL_TOOL_ERROR: confirm was not set')"
+          }
+        },
+        {
+          "tool": "delete_account",
+          "boundary": "agent",
+          "ok": true,
+          "rep": {
+            "tool": "delete_account",
+            "blocks": [],
+            "block_kinds": [],
+            "structured_content": null,
+            "is_error": true,
+            "text": "ModelRetry: SENTINEL_TOOL_ERROR: confirm was not set",
+            "origin": "pydantic_ai",
+            "raw": "ModelRetry('SENTINEL_TOOL_ERROR: confirm was not set')"
+          }
+        }
+      ]
+    },
+    "mastra": {
+      "ok": true,
+      "versions": {
+        "framework": "1.17.3",
+        "adapter": "node v26.8.1"
+      },
+      "result_boundaries": [
+        {
+          "id": "agent",
+          "label": "Agent tool invocation, onToolError: 'throw' (default)",
+          "capture_api": "@mastra/mcp tool action execute",
+          "capture_object": "the tool action return value, or the MastraError it throws",
+          "agent_path": true,
+          "limitation": "The tool action is executed directly. No AI SDK provider was bound and no provider request was captured."
+        },
+        {
+          "id": "agent_on_tool_error_return",
+          "label": "Agent tool invocation, onToolError: 'return'",
+          "capture_api": "@mastra/mcp tool action execute, server configured onToolError: 'return'",
+          "capture_object": "the CallToolResult envelope the action resolves with",
+          "agent_path": false,
+          "limitation": "This is a documented non-default server option, not the behaviour a caller gets without configuring it."
+        }
+      ],
+      "results": [
+        {
+          "tool": "search_records",
+          "boundary": "agent",
+          "ok": true,
+          "rep": {
+            "tool": "search_records",
+            "blocks": [],
+            "block_kinds": [],
+            "structured_content": {
+              "count": 2,
+              "records": [
+                {
+                  "id": "rec_1",
+                  "status": "active"
+                },
+                {
+                  "id": "rec_2",
+                  "status": "archived"
+                }
+              ],
+              "note": "SENTINEL_STRUCTURED_CONTENT"
+            },
+            "is_error": null,
+            "text": null,
+            "origin": "mastra",
+            "raw": {
+              "count": 2,
+              "records": [
+                {
+                  "id": "rec_1",
+                  "status": "active"
+                },
+                {
+                  "id": "rec_2",
+                  "status": "archived"
+                }
+              ],
+              "note": "SENTINEL_STRUCTURED_CONTENT"
+            }
+          }
+        },
+        {
+          "tool": "delete_account",
+          "boundary": "agent",
+          "ok": true,
+          "rep": {
+            "tool": "delete_account",
+            "blocks": [],
+            "block_kinds": [],
+            "structured_content": null,
+            "is_error": true,
+            "text": "SENTINEL_TOOL_ERROR: confirm was not set",
+            "origin": "mastra",
+            "raw": {
+              "tool": "delete_account",
+              "ok": false,
+              "threw": true,
+              "error": "SENTINEL_TOOL_ERROR: confirm was not set"
+            }
+          }
+        },
+        {
+          "tool": "search_records",
+          "boundary": "agent_on_tool_error_return",
+          "ok": true,
+          "rep": {
+            "tool": "search_records",
+            "blocks": [],
+            "block_kinds": [],
+            "structured_content": {
+              "count": 2,
+              "records": [
+                {
+                  "id": "rec_1",
+                  "status": "active"
+                },
+                {
+                  "id": "rec_2",
+                  "status": "archived"
+                }
+              ],
+              "note": "SENTINEL_STRUCTURED_CONTENT"
+            },
+            "is_error": null,
+            "text": null,
+            "origin": "mastra",
+            "raw": {
+              "count": 2,
+              "records": [
+                {
+                  "id": "rec_1",
+                  "status": "active"
+                },
+                {
+                  "id": "rec_2",
+                  "status": "archived"
+                }
+              ],
+              "note": "SENTINEL_STRUCTURED_CONTENT"
+            }
+          }
+        },
+        {
+          "tool": "delete_account",
+          "boundary": "agent_on_tool_error_return",
+          "ok": true,
+          "rep": {
+            "tool": "delete_account",
+            "blocks": [
+              {
+                "type": "text",
+                "text": "SENTINEL_TOOL_ERROR: confirm was not set"
+              }
+            ],
+            "block_kinds": [
+              "text"
+            ],
+            "structured_content": null,
+            "is_error": true,
+            "text": "SENTINEL_TOOL_ERROR: confirm was not set",
+            "origin": "mastra",
+            "raw": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "SENTINEL_TOOL_ERROR: confirm was not set"
+                }
+              ],
+              "isError": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}

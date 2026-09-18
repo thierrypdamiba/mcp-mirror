@@ -178,6 +178,28 @@ class RendererEvidence(BaseModel):
     limitation: str | None = None
 
 
+class ResultBoundary(BaseModel):
+    """One place a framework can be asked what a tool call returned.
+
+    A tool definition has one obvious capture point, but a tool *result* often has
+    more than one: the value an adapter hands back when the tool object is invoked
+    directly, and the value the framework's own agent runtime puts in front of the
+    model. Those can differ, so publishing only one of them can misreport a
+    capability. Each boundary is therefore named, and exactly one is marked
+    ``agent_path`` so a reader can tell which answer describes a real agent.
+
+    ``agent_path`` and the direct boundary coincide in several adapters. That is a
+    finding worth publishing too, not a reason to omit the declaration.
+    """
+
+    id: str
+    label: str
+    capture_api: str
+    capture_object: str
+    agent_path: bool
+    limitation: str | None = None
+
+
 class CaptureObservation(BaseModel):
     """One inspectable artifact at one stage of the MCP-to-provider pipeline.
 
